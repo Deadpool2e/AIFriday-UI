@@ -1,0 +1,12 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@platform/theme/tokens.css";
+
+/* Same reasoning as apps/host/src/index.css — Tailwind only scans this
+   app's own directory by default, so every sibling workspace package
+   whose source uses Tailwind classes needs its own @source line. */
+@source "../../../packages/ui/src";
+@source "../../../packages/theme/src";
+@source "../../../packages/auth/src";
+
+@custom-variant dark (&:is(.dark *));

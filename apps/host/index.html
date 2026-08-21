@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enterprise AI Platform</title>
+    <script>
+      // Runs before first paint, ahead of React/ThemeProvider, so the
+      // correct theme/contrast/text-size/motion is applied immediately —
+      // without this, the page would render in the default theme for one
+      // frame and then visibly flip to the saved preference.
+      (function () {
+        try {
+          var stored = JSON.parse(
+            localStorage.getItem('platform:accessibility-settings') || '{}',
+          )
+          var mode = stored.colorMode || 'system'
+          var isDark =
+            mode === 'dark' ||
+            (mode === 'system' &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches)
+          var root = document.documentElement
+          root.classList.toggle('dark', isDark)
+          root.dataset.contrast = stored.contrast || 'standard'
+          root.dataset.textSize = stored.textSize || 'normal'
+          root.dataset.motion =
+            stored.motion ||
+            (window.matchMedia('(prefers-reduced-motion: reduce)').matches
+              ? 'reduced'
+              : 'normal')
+          root.dataset.focusStyle = stored.focusStyle || 'standard'
+          root.dataset.keyboardNav = stored.keyboardNav || 'standard'
+        } catch {
+          /* localStorage unavailable (private mode, etc.) — fall back to defaults */
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

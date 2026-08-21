@@ -1,0 +1,25 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@platform/theme/tokens.css";
+
+/* Tailwind v4 only scans this app's own directory tree for class names by
+   default. @platform/ui and @platform/theme live outside it (sibling
+   workspace packages), so without these @source directives every Tailwind
+   class used only inside their source would be silently missing from the
+   generated CSS. */
+@source "../../../packages/ui/src";
+@source "../../../packages/theme/src";
+@source "../../../packages/auth/src";
+
+/* Federated remotes render their DOM *inside Host's page* — one document,
+   one stylesheet — but their component source lives in a separate Vite
+   project Host's own Tailwind build never sees. Without these, any class
+   used only by a remote's own page-specific markup (not already present
+   somewhere in packages/ui) compiles to nothing: the element renders with
+   no error, just zero effective styling. This is why Dashboard (unique
+   grid/height classes) broke while Requests (mostly reuses packages/ui's
+   own class vocabulary) looked fine. */
+@source "../../../apps/main-app/src";
+@source "../../../apps/ai-control-tower/src";
+
+@custom-variant dark (&:is(.dark *));

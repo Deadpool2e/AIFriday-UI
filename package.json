@@ -1,0 +1,19 @@
+{
+  "name": "enterprise-ai-platform",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@11.22.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "dev:host": "pnpm --filter host dev",
+    "dev:main-app": "pnpm --filter main-app dev",
+    "dev:control-tower": "pnpm --filter ai-control-tower dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test"
+  }
+}

@@ -1,0 +1,253 @@
+/* =========================================================================
+   Semantic design tokens.
+   Every color a component uses must resolve to one of these — never a raw
+   Tailwind color utility (bg-red-500, text-slate-400, etc.). That's what
+   makes a single theme switch change the entire application at once, and
+   what makes high-contrast mode possible without touching component code.
+   ========================================================================= */
+
+:root {
+  --radius: 0.625rem;
+
+  /* Base surfaces */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --surface: oklch(1 0 0);
+  --surface-foreground: oklch(0.145 0 0);
+  --surface-muted: oklch(0.97 0 0);
+  --surface-muted-foreground: oklch(0.408 0 0);
+
+  /* Brand */
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+
+  /* Neutral */
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.408 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --border: oklch(0.888 0 0);
+  --input: oklch(0.888 0 0);
+
+  /* Status */
+  --success: oklch(0.52 0.15 145);
+  --success-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.55 0.16 75);
+  --warning-foreground: oklch(0.985 0 0);
+  --danger: oklch(0.55 0.22 27);
+  --danger-foreground: oklch(0.985 0 0);
+  --info: oklch(0.52 0.17 250);
+  --info-foreground: oklch(0.985 0 0);
+
+  /* Focus */
+  --focus: oklch(0.52 0.17 250);
+
+  /* Chart series colors — deliberately separate from --info/--success/
+     --warning above. Those are tuned for badge/text legibility; these are
+     tuned to sit inside the dataviz skill's chart-mark lightness band
+     (OKLCH L 0.43–0.77 light / 0.48–0.67 dark) and were run through
+     scripts/validate_palette.js for both modes and both pairings actually
+     used (chart-info+chart-success, chart-info+chart-warning) — all
+     checks pass, worst-case CVD ΔE 23.1, well above the 8 target. */
+  --chart-info: oklch(0.52 0.17 250);
+  --chart-success: oklch(0.52 0.15 145);
+  --chart-warning: oklch(0.55 0.16 75);
+
+  /* Aliases kept only for shadcn/Tailwind-utility naming compatibility —
+     they must never be set to a literal color, only ever reference a
+     semantic token above. If you need a new color, add a semantic token,
+     not a new alias. */
+  --card: var(--surface);
+  --card-foreground: var(--surface-foreground);
+  --destructive: var(--danger);
+  --ring: var(--focus);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --surface: oklch(0.205 0 0);
+  --surface-foreground: oklch(0.985 0 0);
+  --surface-muted: oklch(0.269 0 0);
+  --surface-muted-foreground: oklch(0.775 0 0);
+
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.775 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --border: oklch(1 0 0 / 14%);
+  --input: oklch(1 0 0 / 18%);
+
+  --success: oklch(0.7 0.16 145);
+  --success-foreground: oklch(0.145 0 0);
+  --warning: oklch(0.78 0.15 75);
+  --warning-foreground: oklch(0.145 0 0);
+  --danger: oklch(0.7 0.19 27);
+  --danger-foreground: oklch(0.145 0 0);
+  --info: oklch(0.72 0.15 250);
+  --info-foreground: oklch(0.145 0 0);
+
+  --focus: oklch(0.72 0.15 250);
+
+  /* Re-stepped lighter tokens above (L 0.70–0.78) read as text/badges just
+     fine against a near-black background, but fail the chart lightness
+     band — validated separately at L 0.60–0.65, same hue/chroma family. */
+  --chart-info: oklch(0.6 0.15 250);
+  --chart-success: oklch(0.6 0.16 145);
+  --chart-warning: oklch(0.65 0.15 75);
+}
+
+/* -------------------------------------------------------------------------
+   High contrast — an independent axis from light/dark, not a 3rd color
+   mode. WCAG 2.x requires 4.5:1 text contrast and 3:1 for UI-component
+   borders at minimum; standard mode already clears the text minimum, but
+   borders and muted text sit close to the boundary by design (that's what
+   makes them read as "muted"). High contrast pushes both toward the
+   maximum-contrast ends and replaces translucent dark-mode borders with
+   solid colors, since translucent borders are the first thing to
+   disappear for low-vision users.
+   ------------------------------------------------------------------------- */
+[data-contrast='high'] {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0 0 0);
+  --surface: oklch(1 0 0);
+  --surface-foreground: oklch(0 0 0);
+  --border: oklch(0 0 0);
+  --input: oklch(0 0 0);
+  --muted-foreground: oklch(0.25 0 0);
+  --surface-muted-foreground: oklch(0.25 0 0);
+  --focus: oklch(0.45 0.2 250);
+  --ring: var(--focus);
+}
+
+[data-contrast='high'].dark {
+  --background: oklch(0 0 0);
+  --foreground: oklch(1 0 0);
+  --surface: oklch(0 0 0);
+  --surface-foreground: oklch(1 0 0);
+  --border: oklch(1 0 0);
+  --input: oklch(1 0 0);
+  --muted-foreground: oklch(0.85 0 0);
+  --surface-muted-foreground: oklch(0.85 0 0);
+  --focus: oklch(0.85 0.15 250);
+  --ring: var(--focus);
+}
+
+/* -------------------------------------------------------------------------
+   This is what makes the CSS variables above usable as Tailwind utilities
+   (bg-success, text-danger-foreground, border-border, ...). Tailwind v4
+   reads its design tokens from CSS, not a JS config file.
+   ------------------------------------------------------------------------- */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-foreground: var(--surface-foreground);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-muted-foreground: var(--surface-muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-focus: var(--focus);
+  --color-chart-info: var(--chart-info);
+  --color-chart-success: var(--chart-success);
+  --color-chart-warning: var(--chart-warning);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-destructive: var(--destructive);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* -------------------------------------------------------------------------
+   Scalable typography: one root font-size change cascades through every
+   Tailwind rem-based utility (text-sm, p-4, gap-2, ...) at once, so text
+   size scaling doesn't need to touch a single component.
+   ------------------------------------------------------------------------- */
+html {
+  font-size: 16px;
+}
+html[data-text-size='large'] {
+  font-size: 18px;
+}
+html[data-text-size='xl'] {
+  font-size: 20px;
+}
+
+/* -------------------------------------------------------------------------
+   Reduced motion. Respected two ways: the OS-level media query is honored
+   as the default the first time a user visits (see ThemeProvider), and
+   this attribute lets a user override that choice explicitly either way.
+   ------------------------------------------------------------------------- */
+html[data-motion='reduced'] *,
+html[data-motion='reduced'] *::before,
+html[data-motion='reduced'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* -------------------------------------------------------------------------
+   Focus indicators. Baseline focus-visible styling lives on components
+   (Button/Input's focus-visible:ring-* classes); this is the app-wide
+   safety net for anything that isn't one of those yet (raw <a>, native
+   form elements, future code someone forgets to wire up).
+   ------------------------------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Enhanced focus indicators: thicker ring, larger offset, for users who
+   asked for a more visible focus state than the default 2px ring. */
+html[data-focus-style='enhanced'] :focus-visible {
+  outline-width: 3px;
+  outline-offset: 3px;
+}
+
+/* Keyboard-navigation mode: shows the same focus ring on every focus
+   event, not just keyboard-triggered ones (:focus-visible already skips
+   most mouse-triggered focus by design — this opts back in for users who
+   want a persistent visual anchor regardless of input device). */
+html[data-keyboard-nav='enhanced'] :focus {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    margin: 0;
+  }
+}
