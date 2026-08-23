@@ -1,6 +1,7 @@
 import { Outlet, Route, Routes } from 'react-router'
 import { ProtectedRoute } from '@platform/auth'
 
+import { ControlTowerHero } from './control-tower-hero'
 import { ControlTowerNav } from './control-tower-nav'
 import { OverviewPage } from './pages/overview-page'
 import { AgentsPage } from './pages/agents-page'
@@ -21,6 +22,7 @@ import { NotFoundPage } from './pages/not-found-page'
 function ControlTowerLayout() {
   return (
     <div className="space-y-6">
+      <ControlTowerHero />
       <ControlTowerNav />
       <Outlet />
     </div>

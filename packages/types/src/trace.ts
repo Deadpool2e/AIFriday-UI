@@ -20,6 +20,15 @@ export type TraceEvent =
       outputSummary: string
     })
   | (TraceEventBase & { type: 'agent.failed'; agent: string; durationMs: number; error: string })
+  | (TraceEventBase & { type: 'tool.invoked'; agent: string; tool: string })
+  | (TraceEventBase & {
+      type: 'tool.completed'
+      agent: string
+      tool: string
+      status: ToolCallStatus
+      durationMs: number
+    })
+  | (TraceEventBase & { type: 'agent.message'; sender: string; receiver: string; summary: string })
   | (TraceEventBase & {
       type: 'guardrail.blocked'
       rule: string
@@ -53,4 +62,55 @@ export interface AgentTrace {
   requestId: string
   events: TraceEvent[]
   steps: TraceStep[]
+  toolCalls: ToolCall[]
+  messages: AgentMessage[]
+}
+
+// A single deterministic-tool invocation underneath one agent step — e.g.
+// RAG Agent calling its vector-search tool. Folded from tool.invoked/
+// tool.completed event pairs the same way TraceStep is folded from
+// agent.started/agent.completed, but kept as its own list since one agent
+// step can involve multiple tool calls.
+export type ToolCallStatus = 'running' | 'success' | 'failed'
+
+export interface ToolCall {
+  id: string
+  agent: string
+  tool: string
+  status: ToolCallStatus
+  timestamp: string
+  durationMs?: number
+}
+
+// One agent-to-agent handoff, folded from agent.message events — distinct
+// from a TraceStep's own input/output summary, this is what one agent
+// explicitly passed to the next.
+export interface AgentMessage {
+  id: string
+  sender: string
+  receiver: string
+  summary: string
+  timestamp: string
+}
+
+// The static pipeline topology behind an execution — which agents exist
+// and how they hand off to one another. Node/edge *state* (status,
+// whether an edge actually fired) is derived at render time from an
+// execution's TraceStep[], since the same topology is shared by every
+// execution but which conditional branch fires varies per run.
+export interface AgentGraphNode {
+  id: string
+  label: string
+}
+
+export interface AgentGraphEdge {
+  id: string
+  source: string
+  target: string
+  conditional?: boolean
+}
+
+export interface AgentGraph {
+  nodes: AgentGraphNode[]
+  edges: AgentGraphEdge[]
 }

@@ -1,7 +1,7 @@
 import {
+  Area,
+  AreaChart,
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -38,12 +38,14 @@ import {
   CardHeader,
   CardTitle,
   KPIWidget,
+  LiveIndicator,
   Skeleton,
   SystemHealth,
   useDocumentTitle,
 } from '@platform/ui'
 
 import {
+  ChartAreaGradient,
   chartAxisLine,
   chartAxisTick,
   chartGridStroke,
@@ -83,58 +85,94 @@ export function OverviewPage() {
   }))
   const maxStatusCount = Math.max(1, ...statusCounts.map((s) => s.count))
 
+  const successRateSeries = trend.data?.map((point) => point.successRate)
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">AI Control Tower</h1>
-        <p className="text-muted-foreground text-sm">
-          Live view of every agent, system component, and AI execution across the platform.
-        </p>
-      </div>
-
-      {/* KPI row */}
+      {/* KPI row — Active Agents and Success Rate lead as featured bento
+          cards; the rest carry a semantic tone instead of uniform white. */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {metrics.isLoading ? (
           Array.from({ length: 9 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
         ) : metrics.data ? (
           <>
-            <KPIWidget label="Active Agents" value={metrics.data.activeAgents} icon={<BotIcon />} />
             <KPIWidget
+              className="animate-card-in col-span-2 sm:col-span-3 lg:col-span-2"
+              style={{ animationDelay: '0ms' }}
+              size="featured"
+              tone="ai"
+              label="Active Agents"
+              value={metrics.data.activeAgents}
+              icon={<BotIcon />}
+            />
+            <KPIWidget
+              className="animate-card-in"
+              style={{ animationDelay: '40ms' }}
               label="Requests"
               value={metrics.data.totalRequests}
               icon={<FileTextIcon />}
             />
             <KPIWidget
+              className="animate-card-in col-span-2 sm:col-span-3 lg:col-span-2"
+              style={{ animationDelay: '80ms' }}
+              size="featured"
+              tone="success"
               label="Success Rate"
               value={`${metrics.data.successRate}%`}
               icon={<CheckCircle2Icon />}
+              sparklineData={successRateSeries}
+              delta={
+                successRateSeries && successRateSeries.length > 1
+                  ? {
+                      value: `${Math.abs(successRateSeries[successRateSeries.length - 1] - successRateSeries[0]).toFixed(1)}pt`,
+                      tone: successRateSeries[successRateSeries.length - 1] >= successRateSeries[0] ? 'positive' : 'negative',
+                      direction: successRateSeries[successRateSeries.length - 1] >= successRateSeries[0] ? 'up' : 'down',
+                    }
+                  : undefined
+              }
+              comparisonLabel="over 14 days"
             />
             <KPIWidget
+              className="animate-card-in"
+              style={{ animationDelay: '120ms' }}
               label="Avg Latency"
               value={`${metrics.data.avgLatencyMs}ms`}
               icon={<ClockIcon />}
             />
             <KPIWidget
+              className="animate-card-in"
+              style={{ animationDelay: '160ms' }}
               label="P95 Latency"
               value={`${metrics.data.p95LatencyMs}ms`}
               icon={<TrendingUpIcon />}
             />
             <KPIWidget
+              className="animate-card-in"
+              style={{ animationDelay: '200ms' }}
+              tone="info"
               label="Tokens Used"
               value={metrics.data.tokensUsed.toLocaleString('en-US')}
               icon={<ZapIcon />}
             />
             <KPIWidget
+              className="animate-card-in"
+              style={{ animationDelay: '240ms' }}
               label="Estimated Cost"
               value={`$${metrics.data.estimatedCostUsd.toFixed(2)}`}
               icon={<DollarSignIcon />}
             />
             <KPIWidget
+              className="animate-card-in"
+              style={{ animationDelay: '280ms' }}
+              tone="warning"
               label="Guardrail Blocks"
               value={metrics.data.guardrailBlocks}
               icon={<ShieldAlertIcon />}
             />
             <KPIWidget
+              className="animate-card-in"
+              style={{ animationDelay: '320ms' }}
+              tone="warning"
               label="Human Escalations"
               value={metrics.data.humanEscalations}
               icon={<UserCheckIcon />}
@@ -155,7 +193,8 @@ export function OverviewPage() {
               <Skeleton className="h-64 w-full" />
             ) : (
               <ResponsiveContainer width="100%" height={260}>
-                <LineChart data={trend.data} margin={{ left: -16, right: 8 }}>
+                <AreaChart data={trend.data} margin={{ left: 0, right: 8 }}>
+                  <ChartAreaGradient id="agent-success-rate" colorVar="var(--color-chart-success)" />
                   <CartesianGrid stroke={chartGridStroke} vertical={false} />
                   <XAxis
                     dataKey="date"
@@ -167,7 +206,7 @@ export function OverviewPage() {
                     tick={chartAxisTick}
                     axisLine={false}
                     tickLine={false}
-                    width={40}
+                    width={48}
                     domain={[70, 100]}
                     tickFormatter={(v: number) => `${v}%`}
                   />
@@ -175,11 +214,12 @@ export function OverviewPage() {
                     {...chartTooltipStyle}
                     formatter={(value) => [`${value}%`, 'Success rate']}
                   />
-                  <Line
+                  <Area
                     type="monotone"
                     dataKey="successRate"
                     stroke="var(--color-chart-success)"
                     strokeWidth={2}
+                    fill="url(#agent-success-rate)"
                     dot={{
                       r: 4,
                       fill: 'var(--color-chart-success)',
@@ -187,7 +227,7 @@ export function OverviewPage() {
                       strokeWidth: 2,
                     }}
                   />
-                </LineChart>
+                </AreaChart>
               </ResponsiveContainer>
             )}
           </CardContent>
@@ -267,15 +307,19 @@ export function OverviewPage() {
                     <div className="flex items-center justify-between gap-3">
                       <Link
                         to={`/control-tower/executions/${execution.id}`}
-                        className="text-primary flex items-center gap-2 font-medium hover:underline"
+                        className="text-primary flex items-center gap-2 font-mono text-xs font-medium hover:underline"
                       >
                         {EXECUTION_STATUS_ICON[execution.status]}
                         {execution.requestId}
                       </Link>
-                      <span className="text-muted-foreground flex items-center gap-3 text-xs tabular-nums">
-                        <span>{execution.durationMs}ms</span>
-                        <span>{execution.timestamp}</span>
-                      </span>
+                      {execution.status === 'running' ? (
+                        <LiveIndicator tone="info" label="Running" />
+                      ) : (
+                        <span className="text-muted-foreground flex items-center gap-3 font-mono text-xs tabular-nums">
+                          <span>{execution.durationMs}ms</span>
+                          <span>{execution.timestamp}</span>
+                        </span>
+                      )}
                     </div>
                     {execution.error && (
                       <p className="text-danger mt-0.5 pl-6 text-xs">{execution.error}</p>

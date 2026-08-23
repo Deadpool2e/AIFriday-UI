@@ -1,7 +1,7 @@
 import {
+  Area,
+  AreaChart,
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -25,6 +25,7 @@ import {
 } from '@platform/ui'
 
 import {
+  ChartAreaGradient,
   chartAxisLine,
   chartAxisTick,
   chartGridStroke,
@@ -93,7 +94,11 @@ export function AgentDetailPage() {
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <KPIWidget label="Requests" value={agent.requestsHandled} />
-        <KPIWidget label="Success Rate" value={`${agent.successRate}%`} />
+        <KPIWidget
+          label="Success Rate"
+          value={`${agent.successRate}%`}
+          sparklineData={trend.data?.map((p) => p.successRate)}
+        />
         <KPIWidget label="Avg Latency" value={`${agent.avgLatencyMs}ms`} />
         <KPIWidget label="Tokens Used" value={agent.tokensUsed.toLocaleString('en-US')} />
       </div>
@@ -108,23 +113,25 @@ export function AgentDetailPage() {
             <Skeleton className="h-56 w-full" />
           ) : (
             <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={trend.data} margin={{ left: -16, right: 8 }}>
+              <AreaChart data={trend.data} margin={{ left: 0, right: 8 }}>
+                <ChartAreaGradient id="agent-perf-trend" colorVar="var(--color-chart-info)" />
                 <CartesianGrid stroke={chartGridStroke} vertical={false} />
                 <XAxis dataKey="date" tick={chartAxisTick} axisLine={chartAxisLine} tickLine={false} />
                 <YAxis
                   tick={chartAxisTick}
                   axisLine={false}
                   tickLine={false}
-                  width={40}
+                  width={48}
                   domain={[40, 100]}
                   tickFormatter={(v: number) => `${v}%`}
                 />
                 <Tooltip {...chartTooltipStyle} formatter={(value) => [`${value}%`, 'Success rate']} />
-                <Line
+                <Area
                   type="monotone"
                   dataKey="successRate"
                   stroke="var(--color-chart-info)"
                   strokeWidth={2}
+                  fill="url(#agent-perf-trend)"
                   dot={{
                     r: 4,
                     fill: 'var(--color-chart-info)',
@@ -132,7 +139,7 @@ export function AgentDetailPage() {
                     strokeWidth: 2,
                   }}
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           )}
         </CardContent>
@@ -158,12 +165,12 @@ export function AgentDetailPage() {
                   <div className="flex items-center justify-between gap-3">
                     <Link
                       to={`/control-tower/executions/${execution.id}`}
-                      className="text-primary flex items-center gap-2 font-medium hover:underline"
+                      className="text-primary flex items-center gap-2 font-mono text-xs font-medium hover:underline"
                     >
                       {EXECUTION_STATUS_ICON[execution.status]}
                       {execution.requestId}
                     </Link>
-                    <span className="text-muted-foreground flex items-center gap-3 text-xs tabular-nums">
+                    <span className="text-muted-foreground flex items-center gap-3 font-mono text-xs tabular-nums">
                       <span>{execution.durationMs}ms</span>
                       <span>{execution.timestamp}</span>
                     </span>

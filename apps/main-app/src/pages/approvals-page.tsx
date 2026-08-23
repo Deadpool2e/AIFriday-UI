@@ -1,7 +1,7 @@
-import { CheckCircle2Icon } from 'lucide-react'
 import { Link } from 'react-router'
 import { usePendingApprovals } from '@platform/api-client'
 import {
+  AllCaughtUpIllustration,
   ApprovalCard,
   Button,
   EmptyState,
@@ -17,8 +17,9 @@ export function ApprovalsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Approvals</h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">Intelligence</p>
+        <h1 className="text-3xl font-semibold tracking-tight">Approvals</h1>
+        <p className="text-muted-foreground mt-1 text-sm">
           {pending.data
             ? `${pending.data.length} request${pending.data.length === 1 ? '' : 's'} need your review`
             : 'Loading…'}
@@ -39,7 +40,7 @@ export function ApprovalsPage() {
         />
       ) : !pending.data || pending.data.length === 0 ? (
         <EmptyState
-          icon={<CheckCircle2Icon />}
+          icon={<AllCaughtUpIllustration />}
           title="No pending approvals"
           description="You're all caught up — nothing needs your review right now."
         />

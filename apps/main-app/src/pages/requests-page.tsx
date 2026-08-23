@@ -158,8 +158,9 @@ export function RequestsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Requests</h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">Workspace</p>
+        <h1 className="text-3xl font-semibold tracking-tight">Requests</h1>
+        <p className="text-muted-foreground mt-1 text-sm">
           {requests.data ? `${requests.data.length} total requests` : 'Loading requests…'}
         </p>
       </div>

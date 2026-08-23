@@ -26,7 +26,7 @@ function EmptyState({
       )}
       {...props}
     >
-      {icon && <div className="text-muted-foreground [&_svg]:size-8">{icon}</div>}
+      {icon && <div className="text-muted-foreground [&_svg]:size-14">{icon}</div>}
       <div className="space-y-1">
         <p className="text-sm font-medium">{title}</p>
         {description && (

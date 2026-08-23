@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Link } from 'react-router'
+import { ActivityIcon, AlertTriangleIcon, BotIcon, CircleDashedIcon } from 'lucide-react'
 import { useAgents } from '@platform/api-client'
 import type { Agent, AgentStatus } from '@platform/types'
 import {
@@ -8,6 +9,8 @@ import {
   type DataTableColumn,
   EmptyState,
   ErrorState,
+  KPIWidget,
+  Skeleton,
   useDocumentTitle,
 } from '@platform/ui'
 
@@ -117,6 +120,31 @@ export function AgentsPage() {
         <p className="text-muted-foreground text-sm">
           {agents.data ? `${agents.data.length} agents registered` : 'Loading…'}
         </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {agents.isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
+        ) : agents.data ? (
+          <>
+            <KPIWidget label="Total Agents" value={agents.data.length} icon={<BotIcon />} />
+            <KPIWidget
+              label="Running"
+              value={agents.data.filter((a) => a.status === 'running').length}
+              icon={<CircleDashedIcon />}
+            />
+            <KPIWidget
+              label="Idle"
+              value={agents.data.filter((a) => a.status === 'idle').length}
+              icon={<ActivityIcon />}
+            />
+            <KPIWidget
+              label="Degraded / Failed"
+              value={agents.data.filter((a) => a.status === 'degraded' || a.status === 'failed').length}
+              icon={<AlertTriangleIcon />}
+            />
+          </>
+        ) : null}
       </div>
 
       {agents.isError ? (

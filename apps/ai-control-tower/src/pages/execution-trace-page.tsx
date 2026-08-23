@@ -1,6 +1,9 @@
+import * as React from 'react'
 import { useParams } from 'react-router'
-import { useLiveAgentTrace } from '@platform/api-client'
+import { buildAgentGraphTopology, describeTraceEvent, useLiveAgentTrace } from '@platform/api-client'
 import {
+  AgentCommunication,
+  AgentGraphDiagram,
   AgentTrace,
   Card,
   CardContent,
@@ -8,7 +11,10 @@ import {
   CardHeader,
   CardTitle,
   EmptyState,
+  ExecutionTimeline,
+  LiveIndicator,
   Skeleton,
+  ToolMonitor,
   useDocumentTitle,
 } from '@platform/ui'
 
@@ -39,49 +45,134 @@ export function ExecutionTracePage() {
 }
 
 function ExecutionTraceView({ executionId }: { executionId: string }) {
-  const { steps, isComplete, requestId } = useLiveAgentTrace(executionId)
+  const { events, steps, toolCalls, messages, isComplete, requestId } = useLiveAgentTrace(executionId)
   useDocumentTitle(`${executionId} — AI Control Tower`)
 
+  // The pipeline's shape never changes across executions — only which
+  // agents have actually been reached (and which conditional branch fired)
+  // does, so the topology is a plain constant and only node/edge *state*
+  // is derived from this execution's own steps.
+  const topology = React.useMemo(() => buildAgentGraphTopology(), [])
+  const stepByAgent = React.useMemo(() => new Map(steps.map((step) => [step.agent, step])), [steps])
+  const graphNodes = React.useMemo(
+    () =>
+      topology.nodes.map((node) => ({
+        ...node,
+        status: stepByAgent.get(node.id)?.status ?? 'pending',
+      })),
+    [topology, stepByAgent],
+  )
+  const graphEdges = React.useMemo(
+    () => topology.edges.map((edge) => ({ ...edge, active: stepByAgent.has(edge.target) })),
+    [topology, stepByAgent],
+  )
+
+  const timelineEvents = React.useMemo(
+    () =>
+      events.map((event, index) => ({
+        id: `${executionId}-event-${index}`,
+        timestamp: event.timestamp,
+        ...describeTraceEvent(event),
+      })),
+    [executionId, events],
+  )
+
   return (
-    <div className="max-w-3xl space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">{executionId}</h1>
-        <p className="text-muted-foreground text-sm">
-          Request {requestId} · {steps.length} stage{steps.length === 1 ? '' : 's'}
-          {isComplete ? '' : ' so far'}
-        </p>
+    <div className="max-w-6xl space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="space-y-1">
+          <h1 className="font-mono text-2xl font-semibold tracking-tight">{executionId}</h1>
+          <p className="text-muted-foreground text-sm">
+            Request <span className="font-mono">{requestId}</span> · {steps.length} stage
+            {steps.length === 1 ? '' : 's'}
+            {isComplete ? '' : ' so far'}
+          </p>
+        </div>
+        {!isComplete && <LiveIndicator tone="info" label="Streaming live" />}
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            Execution trace
-            {!isComplete && (
-              <span className="text-info inline-flex items-center gap-1.5 text-xs font-normal">
-                <span
-                  className="bg-info size-1.5 animate-pulse rounded-full"
-                  aria-hidden="true"
-                />
-                Streaming live
-              </span>
-            )}
-          </CardTitle>
+          <CardTitle>Agent graph</CardTitle>
           <CardDescription>
-            Every agent this execution touched, in order, with input/output and cost.
+            The pipeline this execution runs through — colored by each agent's live status, with
+            the conditional Guardrails branch this run actually took highlighted.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {steps.length === 0 ? (
-            <div className="space-y-6">
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-            </div>
-          ) : (
-            <AgentTrace steps={steps} />
-          )}
+          <AgentGraphDiagram nodes={graphNodes} edges={graphEdges} />
         </CardContent>
       </Card>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Execution trace</CardTitle>
+            <CardDescription>
+              Every agent this execution touched, in order, with input/output and cost.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {steps.length === 0 ? (
+              <div className="space-y-6">
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+              </div>
+            ) : (
+              <AgentTrace steps={steps} />
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Execution timeline</CardTitle>
+            <CardDescription>Every raw event, as it happened, newest first.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {timelineEvents.length === 0 ? (
+              <div className="space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-4 w-full" />
+                ))}
+              </div>
+            ) : (
+              <ExecutionTimeline events={timelineEvents} />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Tool monitor</CardTitle>
+            <CardDescription>Deterministic tool calls each agent made, before any LLM call.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {toolCalls.length === 0 ? (
+              <p className="text-muted-foreground text-sm">No tool calls yet.</p>
+            ) : (
+              <ToolMonitor calls={toolCalls} />
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Agent communication</CardTitle>
+            <CardDescription>Handoff messages passed from one agent to the next.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {messages.length === 0 ? (
+              <p className="text-muted-foreground text-sm">No agent-to-agent messages yet.</p>
+            ) : (
+              <AgentCommunication messages={messages} />
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

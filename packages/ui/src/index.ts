@@ -117,3 +117,35 @@ export {
   type AgentTraceStep,
   type AgentTraceStepStatus,
 } from './components/agent-trace'
+export {
+  ExecutionTimeline,
+  type ExecutionTimelineEvent,
+  type ExecutionTimelineEventTone,
+} from './components/execution-timeline'
+export {
+  ToolMonitor,
+  type ToolMonitorCall,
+  type ToolMonitorCallStatus,
+} from './components/tool-monitor'
+export {
+  AgentCommunication,
+  type AgentCommunicationMessage,
+} from './components/agent-communication'
+export {
+  AgentGraphDiagram,
+  type AgentGraphDiagramNode,
+  type AgentGraphDiagramEdge,
+  type AgentGraphNodeStatus,
+} from './components/agent-graph'
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './components/tabs'
+export { Sparkline } from './components/sparkline'
+export { AnimatedNumber } from './components/animated-number'
+export {
+  AllCaughtUpIllustration,
+  NotBuiltIllustration,
+  AssistantEmptyIllustration,
+  ShieldClearIllustration,
+} from './components/illustrations'
+export { LiveIndicator } from './components/live-indicator'
+export { AttentionRequired, type AttentionItem } from './components/attention-required'
+export { AIInsight } from './components/ai-insight'

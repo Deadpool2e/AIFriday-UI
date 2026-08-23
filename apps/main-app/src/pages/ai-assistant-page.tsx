@@ -4,6 +4,7 @@ import { useAIAssistant } from '@platform/api-client'
 import type { ChatMessage } from '@platform/types'
 import {
   AIRecommendationCard,
+  AssistantEmptyIllustration,
   Button,
   ChatPanel,
   type ChatPanelMessage,
@@ -12,6 +13,13 @@ import {
   useDocumentTitle,
   WorkflowStepper,
 } from '@platform/ui'
+
+const SUGGESTED_PROMPTS = [
+  'Review this high-risk transaction for compliance',
+  'Check the refund policy for this customer',
+  'Summarize AI activity from the last 24 hours',
+  'Find requests with low confidence scores',
+]
 
 function AssistantMessageExtra({ message }: { message: ChatMessage }) {
   if (!message.execution) return null
@@ -67,15 +75,44 @@ export function AiAssistantPage() {
     createdAt: m.createdAt,
   }))
 
+  const hasConversation = messages.length > 0
+
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col">
-      <div className="mb-4">
-        <h1 className="text-2xl font-semibold tracking-tight">AI Assistant</h1>
-        <p className="text-muted-foreground text-sm">
-          Ask about a request, policy, or risk decision. Every response shows its
-          reasoning — sources, confidence, and risk — not just an answer.
-        </p>
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
+            <SparklesIcon className="text-ai-accent size-5" aria-hidden="true" />
+            AI Assistant
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Ask about a request, policy, or risk decision. Every response shows its
+            reasoning — sources, confidence, and risk — not just an answer.
+          </p>
+        </div>
+        <span className="text-muted-foreground flex shrink-0 items-center gap-1.5 text-xs font-medium">
+          <span
+            className={`size-1.5 rounded-full ${isStreaming ? 'bg-info' : 'bg-success'}`}
+            aria-hidden="true"
+          />
+          {isStreaming ? 'Working' : 'Ready'}
+        </span>
       </div>
+
+      {!hasConversation && !isStreaming && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          {SUGGESTED_PROMPTS.map((prompt) => (
+            <button
+              key={prompt}
+              type="button"
+              onClick={() => sendMessage(prompt)}
+              className="bg-surface hover:bg-accent rounded-full border px-3 py-1.5 text-xs font-medium transition-colors"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="min-h-0 flex-1 rounded-lg border">
         <ChatPanel
@@ -86,9 +123,9 @@ export function AiAssistantPage() {
           placeholder="Ask about a request, policy, or risk..."
           emptyState={
             <EmptyState
-              icon={<SparklesIcon />}
+              icon={<AssistantEmptyIllustration />}
               title="Ask the AI Assistant anything"
-              description='Try: "Review this high-risk transaction for compliance" or "Check the refund policy for this customer."'
+              description="Try one of the suggestions above, or type your own question below."
             />
           }
           renderAfterMessage={(message) => {

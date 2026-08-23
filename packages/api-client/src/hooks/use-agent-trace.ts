@@ -2,7 +2,13 @@ import { useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import type { TraceEvent } from '@platform/types'
 
-import { deriveRequestId, foldTraceEvents, traceService } from '../trace-service'
+import {
+  deriveRequestId,
+  foldAgentMessages,
+  foldToolCalls,
+  foldTraceEvents,
+  traceService,
+} from '../trace-service'
 
 // REST-style snapshot — mirrors GET /api/ai/executions/{id}. Not currently
 // called by any page (the trace page below streams instead, for the demo
@@ -45,9 +51,23 @@ export function useLiveAgentTrace(executionId: string | undefined) {
     () => (executionId ? foldTraceEvents(executionId, events) : []),
     [executionId, events],
   )
+  // Same accumulated event log the steps above fold from — Agent Graph,
+  // Tool Monitor, and Agent Communication all render live off it too, one
+  // fold each, rather than opening three more streams for the same data.
+  const toolCalls = useMemo(
+    () => (executionId ? foldToolCalls(executionId, events) : []),
+    [executionId, events],
+  )
+  const messages = useMemo(
+    () => (executionId ? foldAgentMessages(executionId, events) : []),
+    [executionId, events],
+  )
 
   return {
+    events,
     steps,
+    toolCalls,
+    messages,
     isComplete,
     requestId: executionId ? deriveRequestId(executionId) : undefined,
   }

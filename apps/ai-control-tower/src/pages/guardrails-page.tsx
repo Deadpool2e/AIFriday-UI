@@ -14,6 +14,7 @@ import {
   type DataTableColumn,
   EmptyState,
   KPIWidget,
+  ShieldClearIllustration,
   Skeleton,
   useDocumentTitle,
 } from '@platform/ui'
@@ -182,7 +183,11 @@ export function GuardrailsPage() {
               ))}
             </div>
           ) : events.data.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No guardrail activity recorded yet.</p>
+            <EmptyState
+              icon={<ShieldClearIllustration />}
+              title="No guardrail activity yet"
+              description="Every execution has passed cleanly so far — blocks and flags will show up here."
+            />
           ) : (
             <ul className="space-y-3">
               {events.data.map((event) => (
@@ -200,7 +205,7 @@ export function GuardrailsPage() {
                         {event.action === 'blocked' ? 'blocked' : 'flagged'} by {event.agent}
                       </span>
                     </span>
-                    <span className="text-muted-foreground text-xs tabular-nums">
+                    <span className="text-muted-foreground font-mono text-xs tabular-nums">
                       {event.requestId} · {event.timestamp}
                     </span>
                   </div>

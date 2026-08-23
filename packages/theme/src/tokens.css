@@ -9,11 +9,16 @@
 :root {
   --radius: 0.625rem;
 
-  /* Base surfaces */
-  --background: oklch(1 0 0);
+  /* Base surfaces — a real elevation ladder, not just one flat white.
+     background sits a hair below pure white so surface (cards) and
+     surface-elevated (dropdowns/dialogs/floating panels) visibly separate
+     from the page without relying on shadow alone. */
+  --background: oklch(0.984 0.002 247);
   --foreground: oklch(0.145 0 0);
   --surface: oklch(1 0 0);
   --surface-foreground: oklch(0.145 0 0);
+  --surface-elevated: oklch(1 0 0);
+  --surface-raised: oklch(0.973 0.002 247);
   --surface-muted: oklch(0.97 0 0);
   --surface-muted-foreground: oklch(0.408 0 0);
 
@@ -29,6 +34,7 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --border: oklch(0.888 0 0);
+  --border-strong: oklch(0.75 0 0);
   --input: oklch(0.888 0 0);
 
   /* Status */
@@ -41,8 +47,57 @@
   --info: oklch(0.52 0.17 250);
   --info-foreground: oklch(0.985 0 0);
 
+  /* AI accent — a single deliberate, restrained hue reserved for AI-native
+     surfaces (the assistant launcher, its panel header, AI Insight cards).
+     Never used for ordinary interactive elements — that's what --primary
+     is for — so the product doesn't read as "purple gradient everywhere". */
+  --ai-accent: oklch(0.5 0.16 296);
+  --ai-accent-foreground: oklch(0.985 0 0);
+
   /* Focus */
   --focus: oklch(0.52 0.17 250);
+
+  /* Typography */
+  --font-sans:
+    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:
+    'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  /* Elevation. Light-mode shadows stay soft (borders still do most of the
+     separation work) but are strong enough now to actually register as
+     layering, not just a hairline; dark-mode shadows go darker/denser since
+     a black shadow barely reads against an already-dark page otherwise. */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+  --shadow-md: 0 4px 10px -2px rgb(0 0 0 / 0.09), 0 2px 6px -2px rgb(0 0 0 / 0.07);
+  --shadow-lg: 0 12px 28px -6px rgb(0 0 0 / 0.14), 0 4px 10px -4px rgb(0 0 0 / 0.08);
+  --shadow-xl: 0 24px 52px -12px rgb(0 0 0 / 0.2);
+
+  /* Ambient gradients — reserved for hero backgrounds and the AI-native
+     floating surfaces (command palette, AI launcher panel). Soft radial
+     washes in the two identity hues (primary = neutral brand, ai-accent =
+     AI-native), never a hard-edged or saturated gradient. */
+  --gradient-primary-radial: radial-gradient(
+    120% 120% at 100% 0%,
+    oklch(0.205 0 0 / 0.05),
+    transparent 60%
+  );
+  --gradient-ai-radial: radial-gradient(
+    140% 140% at 0% 0%,
+    oklch(0.5 0.16 296 / 0.12),
+    transparent 55%
+  );
+
+  /* z-index layers — a fixed vocabulary so stacking order is decided once,
+     here, instead of ad hoc per component. Referenced via arbitrary
+     values, e.g. z-[var(--z-command-palette)]. */
+  --z-sticky: 20;
+  --z-dropdown: 30;
+  --z-overlay: 40;
+  --z-floating-action: 45;
+  --z-dialog: 50;
+  --z-command-palette: 60;
+  --z-toast: 70;
 
   /* Chart series colors — deliberately separate from --info/--success/
      --warning above. Those are tuned for badge/text legibility; these are
@@ -70,6 +125,8 @@
   --foreground: oklch(0.985 0 0);
   --surface: oklch(0.205 0 0);
   --surface-foreground: oklch(0.985 0 0);
+  --surface-elevated: oklch(0.242 0 0);
+  --surface-raised: oklch(0.226 0 0);
   --surface-muted: oklch(0.269 0 0);
   --surface-muted-foreground: oklch(0.775 0 0);
 
@@ -83,6 +140,7 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 14%);
+  --border-strong: oklch(1 0 0 / 28%);
   --input: oklch(1 0 0 / 18%);
 
   --success: oklch(0.7 0.16 145);
@@ -94,7 +152,30 @@
   --info: oklch(0.72 0.15 250);
   --info-foreground: oklch(0.145 0 0);
 
+  --ai-accent: oklch(0.72 0.15 296);
+  --ai-accent-foreground: oklch(0.145 0 0);
+
   --focus: oklch(0.72 0.15 250);
+
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.28);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.36), 0 1px 2px -1px rgb(0 0 0 / 0.32);
+  --shadow-md: 0 4px 10px -2px rgb(0 0 0 / 0.4), 0 2px 6px -2px rgb(0 0 0 / 0.32);
+  --shadow-lg: 0 12px 28px -6px rgb(0 0 0 / 0.5), 0 4px 10px -4px rgb(0 0 0 / 0.36);
+  --shadow-xl: 0 24px 52px -12px rgb(0 0 0 / 0.6);
+
+  /* Dark mode needs a lighter-based primary wash (black-based reads as
+     invisible against an already-dark page) — the AI wash keeps the same
+     hue/chroma family, just re-stepped brighter to stay visible. */
+  --gradient-primary-radial: radial-gradient(
+    120% 120% at 100% 0%,
+    oklch(1 0 0 / 0.06),
+    transparent 60%
+  );
+  --gradient-ai-radial: radial-gradient(
+    140% 140% at 0% 0%,
+    oklch(0.72 0.15 296 / 0.16),
+    transparent 55%
+  );
 
   /* Re-stepped lighter tokens above (L 0.70–0.78) read as text/badges just
      fine against a near-black background, but fail the chart lightness
@@ -120,6 +201,7 @@
   --surface: oklch(1 0 0);
   --surface-foreground: oklch(0 0 0);
   --border: oklch(0 0 0);
+  --border-strong: oklch(0 0 0);
   --input: oklch(0 0 0);
   --muted-foreground: oklch(0.25 0 0);
   --surface-muted-foreground: oklch(0.25 0 0);
@@ -133,6 +215,7 @@
   --surface: oklch(0 0 0);
   --surface-foreground: oklch(1 0 0);
   --border: oklch(1 0 0);
+  --border-strong: oklch(1 0 0);
   --input: oklch(1 0 0);
   --muted-foreground: oklch(0.85 0 0);
   --surface-muted-foreground: oklch(0.85 0 0);
@@ -150,6 +233,8 @@
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
   --color-surface-foreground: var(--surface-foreground);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-raised: var(--surface-raised);
   --color-surface-muted: var(--surface-muted);
   --color-surface-muted-foreground: var(--surface-muted-foreground);
   --color-primary: var(--primary);
@@ -161,6 +246,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
@@ -174,6 +260,8 @@
   --color-chart-info: var(--chart-info);
   --color-chart-success: var(--chart-success);
   --color-chart-warning: var(--chart-warning);
+  --color-ai-accent: var(--ai-accent);
+  --color-ai-accent-foreground: var(--ai-accent-foreground);
 
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -184,6 +272,15 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
 }
 
 /* -------------------------------------------------------------------------
@@ -249,5 +346,41 @@ html[data-keyboard-nav='enhanced'] :focus {
   body {
     @apply bg-background text-foreground;
     margin: 0;
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv11', 'ss01';
+    /* Inter's optical-sizing axis (loaded via the opsz range in the Google
+       Fonts <link>) — lets large text (hero KPI numbers, big headings)
+       render a slightly more "display" cut than small UI text, for free,
+       with no second font file. */
+    font-optical-sizing: auto;
   }
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Staggered card entrance. Applied via `.animate-card-in` + an inline
+   `--card-in-delay` custom property set per index by the caller
+   (`style={{ animationDelay: `${i * 40}ms` }}`) — kept as a CSS keyframe
+   rather than a JS animation library since it's a one-shot mount effect,
+   and `[data-motion='reduced'] *` above already zeroes every animation
+   duration app-wide, so this automatically respects that setting with zero
+   extra guard code anywhere it's used.
+   ------------------------------------------------------------------------- */
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-card-in {
+  animation: card-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }

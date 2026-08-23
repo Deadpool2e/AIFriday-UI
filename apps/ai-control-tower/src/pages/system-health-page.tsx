@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
   KPIWidget,
+  LiveIndicator,
   Skeleton,
   SystemHealth,
   useDocumentTitle,
@@ -52,11 +53,14 @@ export function SystemHealthPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">System Health</h1>
-        <p className="text-muted-foreground text-sm">
-          Every infrastructure component the platform depends on, and its recent incident history.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">System Health</h1>
+          <p className="text-muted-foreground text-sm">
+            Every infrastructure component the platform depends on, and its recent incident history.
+          </p>
+        </div>
+        <LiveIndicator tone="info" label="Monitoring live" />
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

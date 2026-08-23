@@ -13,11 +13,24 @@ import { navItems, settingsNavItem } from './nav-items'
 
 const allNavItems = [...navItems, settingsNavItem]
 
+// Control Tower's own section labels (RAG Monitoring, LLM Usage, ...) live
+// in apps/ai-control-tower/src/control-tower-nav.tsx — a separate remote,
+// not something Host's nav-items.ts can import across the Module
+// Federation boundary. Title-casing alone would render "Rag" / "Llm
+// Usage", so known acronyms get a small explicit override instead.
+const ACRONYM_WORDS: Record<string, string> = {
+  rag: 'RAG',
+  llm: 'LLM',
+  ai: 'AI',
+}
+
 function prettify(segment: string): string {
   // A segment like "REQ-92831" should stay as-is; a route param that
   // happens to look like a slug ("some-thing") gets title-cased.
   if (/^[A-Z]/.test(segment)) return segment
-  return segment.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  return segment
+    .replace(/-/g, ' ')
+    .replace(/\b\w+\b/g, (word) => ACRONYM_WORDS[word.toLowerCase()] ?? word[0].toUpperCase() + word.slice(1))
 }
 
 interface Crumb {
@@ -48,10 +61,10 @@ export function Breadcrumbs() {
       <BreadcrumbList className="flex-nowrap">
         <BreadcrumbItem>
           {isHome ? (
-            <BreadcrumbPage>Dashboard</BreadcrumbPage>
+            <BreadcrumbPage>Overview</BreadcrumbPage>
           ) : (
             <BreadcrumbLink asChild>
-              <Link to="/">Dashboard</Link>
+              <Link to="/">Overview</Link>
             </BreadcrumbLink>
           )}
         </BreadcrumbItem>

@@ -19,6 +19,7 @@ import {
 } from '@platform/ui'
 
 import {
+  ChartAreaGradient,
   chartAxisLine,
   chartAxisTick,
   chartGridStroke,
@@ -112,6 +113,7 @@ export function LlmUsagePage() {
               label="Total Tokens"
               value={summary.data.totalTokens.toLocaleString('en-US')}
               icon={<ZapIcon />}
+              sparklineData={trend.data?.map((p) => p.tokens)}
             />
             <KPIWidget
               label="Estimated Cost"
@@ -142,7 +144,8 @@ export function LlmUsagePage() {
             <Skeleton className="h-64 w-full" />
           ) : (
             <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={trend.data} margin={{ left: -16, right: 8 }}>
+              <BarChart data={trend.data} margin={{ left: 0, right: 8 }}>
+                <ChartAreaGradient id="llm-tokens" colorVar="var(--color-chart-warning)" />
                 <CartesianGrid stroke={chartGridStroke} vertical={false} />
                 <XAxis
                   dataKey="date"
@@ -154,14 +157,14 @@ export function LlmUsagePage() {
                   tick={chartAxisTick}
                   axisLine={false}
                   tickLine={false}
-                  width={48}
+                  width={56}
                   tickFormatter={(v: number) => v.toLocaleString('en-US')}
                 />
                 <Tooltip
                   {...chartTooltipStyle}
                   formatter={(value) => [`${Number(value).toLocaleString('en-US')} tokens`, 'Usage']}
                 />
-                <Bar dataKey="tokens" fill="var(--color-chart-warning)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="tokens" fill="url(#llm-tokens)" stroke="var(--color-chart-warning)" strokeWidth={1} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}

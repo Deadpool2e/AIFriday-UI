@@ -37,7 +37,10 @@ function AIRecommendationCard({
   return (
     <div
       data-slot="ai-recommendation-card"
-      className={cn('bg-surface space-y-3 rounded-lg border p-4', className)}
+      className={cn(
+        'bg-surface border-ai-accent/20 border-t-ai-accent space-y-3 rounded-lg border-x border-t-2 border-b p-4',
+        className,
+      )}
       {...props}
     >
       <div className="flex items-center justify-between gap-2">

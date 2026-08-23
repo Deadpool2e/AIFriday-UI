@@ -1,8 +1,8 @@
 import * as React from 'react'
 import {
+  Area,
+  AreaChart,
   CartesianGrid,
-  Line,
-  LineChart,
   Legend,
   ResponsiveContainer,
   Tooltip,
@@ -33,6 +33,7 @@ import {
 } from '@platform/ui'
 
 import {
+  ChartAreaGradient,
   chartAxisLine,
   chartAxisTick,
   chartGridStroke,
@@ -107,9 +108,19 @@ export function LatencyPage() {
           Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
         ) : summary.data ? (
           <>
-            <KPIWidget label="Avg Latency" value={`${summary.data.avgLatencyMs}ms`} icon={<ZapIcon />} />
+            <KPIWidget
+              label="Avg Latency"
+              value={`${summary.data.avgLatencyMs}ms`}
+              icon={<ZapIcon />}
+              sparklineData={trend.data?.map((p) => p.avgLatencyMs)}
+            />
             <KPIWidget label="P50" value={`${summary.data.p50LatencyMs}ms`} icon={<GaugeIcon />} />
-            <KPIWidget label="P95" value={`${summary.data.p95LatencyMs}ms`} icon={<ClockIcon />} />
+            <KPIWidget
+              label="P95"
+              value={`${summary.data.p95LatencyMs}ms`}
+              icon={<ClockIcon />}
+              sparklineData={trend.data?.map((p) => p.p95LatencyMs)}
+            />
             <KPIWidget label="P99" value={`${summary.data.p99LatencyMs}ms`} icon={<TimerIcon />} />
           </>
         ) : null}
@@ -125,7 +136,9 @@ export function LatencyPage() {
             <Skeleton className="h-64 w-full" />
           ) : (
             <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={trend.data} margin={{ left: -16, right: 8, top: 8 }}>
+              <AreaChart data={trend.data} margin={{ left: 0, right: 8, top: 8 }}>
+                <ChartAreaGradient id="latency-avg" colorVar="var(--color-chart-success)" />
+                <ChartAreaGradient id="latency-p95" colorVar="var(--color-chart-warning)" />
                 <CartesianGrid stroke={chartGridStroke} vertical={false} />
                 <XAxis
                   dataKey="date"
@@ -137,28 +150,30 @@ export function LatencyPage() {
                   tick={chartAxisTick}
                   axisLine={false}
                   tickLine={false}
-                  width={48}
+                  width={56}
                   tickFormatter={(v: number) => `${v}ms`}
                 />
                 <Tooltip {...chartTooltipStyle} formatter={(value, name) => [`${value}ms`, name]} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Line
+                <Area
                   type="monotone"
                   dataKey="avgLatencyMs"
                   name="Average"
                   stroke="var(--color-chart-success)"
                   strokeWidth={2}
+                  fill="url(#latency-avg)"
                   dot={false}
                 />
-                <Line
+                <Area
                   type="monotone"
                   dataKey="p95LatencyMs"
                   name="P95"
                   stroke="var(--color-chart-warning)"
                   strokeWidth={2}
+                  fill="url(#latency-p95)"
                   dot={false}
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           )}
         </CardContent>
@@ -202,13 +217,13 @@ export function LatencyPage() {
                   <span className="flex items-center gap-2">
                     <Link
                       to={`/control-tower/executions/${execution.executionId}`}
-                      className="text-primary font-medium hover:underline"
+                      className="text-primary font-mono text-xs font-medium hover:underline"
                     >
                       {execution.requestId}
                     </Link>
                     <span className="text-muted-foreground">{execution.agent}</span>
                   </span>
-                  <span className="text-muted-foreground flex items-center gap-3 text-xs tabular-nums">
+                  <span className="text-muted-foreground flex items-center gap-3 font-mono text-xs tabular-nums">
                     <span className="text-warning font-medium">{execution.durationMs}ms</span>
                     <span>{execution.timestamp}</span>
                   </span>

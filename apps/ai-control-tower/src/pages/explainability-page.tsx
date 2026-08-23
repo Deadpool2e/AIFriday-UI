@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { Cell, Pie, PieChart, Tooltip } from 'recharts'
 import { GaugeIcon, ListChecksIcon, TrendingDownIcon, UserCheckIcon } from 'lucide-react'
 import {
   useConfidenceBands,
@@ -20,6 +21,8 @@ import {
   useDocumentTitle,
 } from '@platform/ui'
 
+import { chartTooltipStyle } from '../lib/chart-theme'
+
 const CONFIDENCE_BAND_TONE: Record<string, string> = {
   high: 'bg-success',
   medium: 'bg-warning',
@@ -37,6 +40,12 @@ const DECISION_TONE: Record<ExplainabilityDecision, string> = {
   review: 'bg-warning',
   escalate: 'bg-danger',
   reject: 'bg-danger',
+}
+const DECISION_COLOR_VAR: Record<ExplainabilityDecision, string> = {
+  approve: 'var(--color-chart-success)',
+  review: 'var(--color-chart-warning)',
+  escalate: 'var(--color-danger)',
+  reject: 'var(--color-danger)',
 }
 
 // Small local primitive — a labeled proportional bar, reused three times
@@ -161,7 +170,7 @@ export function ExplainabilityPage() {
             <CardTitle>Decision breakdown</CardTitle>
             <CardDescription>What the AI ultimately recommended, across every request.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent>
             {summary.isLoading || !summary.data ? (
               <div className="space-y-3">
                 {Array.from({ length: 4 }).map((_, i) => (
@@ -169,18 +178,44 @@ export function ExplainabilityPage() {
                 ))}
               </div>
             ) : (
-              (Object.entries(summary.data.decisionCounts) as [ExplainabilityDecision, number][]).map(
-                ([decision, count]) => (
-                  <ProportionBar
-                    key={decision}
-                    label={DECISION_LABEL[decision]}
-                    value={count}
-                    max={maxDecisionCount}
-                    toneClassName={DECISION_TONE[decision]}
-                    valueLabel={String(count)}
-                  />
-                ),
-              )
+              <div className="flex flex-col items-center gap-4 sm:flex-row">
+                <PieChart width={128} height={128} className="shrink-0">
+                  <Tooltip {...chartTooltipStyle} />
+                  <Pie
+                    data={(Object.entries(summary.data.decisionCounts) as [ExplainabilityDecision, number][]).map(
+                      ([decision, count]) => ({ name: DECISION_LABEL[decision], value: count, decision }),
+                    )}
+                    dataKey="value"
+                    nameKey="name"
+                    cx={64}
+                    cy={64}
+                    innerRadius={34}
+                    outerRadius={54}
+                    paddingAngle={2}
+                    strokeWidth={0}
+                    isAnimationActive
+                    animationDuration={600}
+                  >
+                    {(Object.keys(summary.data.decisionCounts) as ExplainabilityDecision[]).map((decision) => (
+                      <Cell key={decision} fill={DECISION_COLOR_VAR[decision]} />
+                    ))}
+                  </Pie>
+                </PieChart>
+                <div className="w-full space-y-3">
+                  {(Object.entries(summary.data.decisionCounts) as [ExplainabilityDecision, number][]).map(
+                    ([decision, count]) => (
+                      <ProportionBar
+                        key={decision}
+                        label={DECISION_LABEL[decision]}
+                        value={count}
+                        max={maxDecisionCount}
+                        toneClassName={DECISION_TONE[decision]}
+                        valueLabel={String(count)}
+                      />
+                    ),
+                  )}
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -242,7 +277,7 @@ export function ExplainabilityPage() {
                     to={`/requests/${decision.requestId}`}
                     className="text-primary text-sm font-medium hover:underline"
                   >
-                    {decision.title} ({decision.requestId})
+                    {decision.title} <span className="font-mono text-xs">({decision.requestId})</span>
                   </Link>
                   <AIRecommendationCard
                     decision={decision.decision}

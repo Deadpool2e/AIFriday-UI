@@ -1,8 +1,8 @@
 import * as React from 'react'
 import {
+  Area,
+  AreaChart,
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -32,6 +32,7 @@ import {
 } from '@platform/ui'
 
 import {
+  ChartAreaGradient,
   chartAxisLine,
   chartAxisTick,
   chartGridStroke,
@@ -134,6 +135,7 @@ export function RagMonitoringPage() {
               label="Avg Relevance"
               value={`${summary.data.avgRelevanceScore}%`}
               icon={<TargetIcon />}
+              sparklineData={trend.data?.map((p) => p.avgRelevance)}
             />
           </>
         ) : null}
@@ -149,7 +151,8 @@ export function RagMonitoringPage() {
             <Skeleton className="h-64 w-full" />
           ) : (
             <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={trend.data} margin={{ left: -16, right: 8 }}>
+              <AreaChart data={trend.data} margin={{ left: 0, right: 8 }}>
+                <ChartAreaGradient id="rag-relevance" colorVar="var(--color-chart-info)" />
                 <CartesianGrid stroke={chartGridStroke} vertical={false} />
                 <XAxis
                   dataKey="date"
@@ -161,7 +164,7 @@ export function RagMonitoringPage() {
                   tick={chartAxisTick}
                   axisLine={false}
                   tickLine={false}
-                  width={40}
+                  width={48}
                   domain={[50, 100]}
                   tickFormatter={(v: number) => `${v}%`}
                 />
@@ -169,11 +172,12 @@ export function RagMonitoringPage() {
                   {...chartTooltipStyle}
                   formatter={(value) => [`${value}%`, 'Avg relevance']}
                 />
-                <Line
+                <Area
                   type="monotone"
                   dataKey="avgRelevance"
                   stroke="var(--color-chart-info)"
                   strokeWidth={2}
+                  fill="url(#rag-relevance)"
                   dot={{
                     r: 4,
                     fill: 'var(--color-chart-info)',
@@ -181,7 +185,7 @@ export function RagMonitoringPage() {
                     strokeWidth: 2,
                   }}
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           )}
         </CardContent>

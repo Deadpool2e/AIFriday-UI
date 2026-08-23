@@ -1,5 +1,4 @@
-import { ConstructionIcon } from 'lucide-react'
-import { EmptyState, useDocumentTitle } from '@platform/ui'
+import { EmptyState, NotBuiltIllustration, useDocumentTitle } from '@platform/ui'
 
 export function PlaceholderPage({
   title,
@@ -13,7 +12,7 @@ export function PlaceholderPage({
     <div className="space-y-2">
       <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
       <EmptyState
-        icon={<ConstructionIcon />}
+        icon={<NotBuiltIllustration />}
         title={`${title} isn't built yet`}
         description={`This screen arrives in ${phase}. The navigation, routing, and layout around it are already real.`}
         className="mt-6"

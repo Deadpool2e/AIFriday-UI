@@ -3,6 +3,15 @@ import * as React from 'react'
 import { cn } from '../lib/cn'
 import { AIRecommendationCard, type AIDecision } from './ai-recommendation-card'
 import { Button } from './button'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './dialog'
 import { Label } from './label'
 import type { RiskLevel } from './risk-indicator'
 import { Textarea } from './textarea'
@@ -62,6 +71,7 @@ function HumanApprovalPanel({
   className,
 }: HumanApprovalPanelProps) {
   const [comment, setComment] = React.useState('')
+  const [confirmRejectOpen, setConfirmRejectOpen] = React.useState(false)
 
   // Approve is the only action that doesn't need a paper trail — reject,
   // send-back, and request-info all leave someone else needing to know
@@ -160,14 +170,45 @@ function HumanApprovalPanel({
         </Button>
         <Button
           variant="destructive"
-          onClick={() => handleAction('reject')}
+          onClick={() => setConfirmRejectOpen(true)}
           disabled={isSubmitting || commentRequired}
         >
           Reject
         </Button>
       </div>
+
+      <Dialog open={confirmRejectOpen} onOpenChange={setConfirmRejectOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject this request?</DialogTitle>
+            <DialogDescription>
+              This overrides the AI&apos;s {decisionConfigLabel(decision)} recommendation and cannot be
+              undone from here. Your comment will be recorded with the decision.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                setConfirmRejectOpen(false)
+                handleAction('reject')
+              }}
+              disabled={isSubmitting}
+            >
+              Confirm reject
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
+}
+
+function decisionConfigLabel(decision: AIDecision): string {
+  return decision === 'approve' ? 'Approve' : decision === 'escalate' ? 'Escalate' : decision === 'reject' ? 'Reject' : 'Needs review'
 }
 
 export { HumanApprovalPanel }

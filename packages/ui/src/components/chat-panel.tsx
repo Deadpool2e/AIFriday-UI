@@ -1,9 +1,15 @@
 import * as React from 'react'
-import { SendIcon } from 'lucide-react'
+import { SendIcon, SparklesIcon, UserIcon } from 'lucide-react'
 
 import { cn } from '../lib/cn'
 import { Button } from './button'
 import { Input } from './input'
+
+function formatTime(iso: string) {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+}
 
 export interface ChatPanelMessage {
   id: string
@@ -67,26 +73,38 @@ function ChatPanel({
         {messages.length === 0 && emptyState && !streamingIndicator ? (
           <div className="flex h-full items-center justify-center">{emptyState}</div>
         ) : null}
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={cn('flex', message.role === 'user' ? 'justify-end' : 'justify-start')}
-          >
-            <div className="max-w-[85%] space-y-2">
+        {messages.map((message) => {
+          const isUser = message.role === 'user'
+          return (
+            <div key={message.id} className={cn('flex gap-2.5', isUser ? 'flex-row-reverse' : 'flex-row')}>
               <div
                 className={cn(
-                  'rounded-lg px-3 py-2 text-sm',
-                  message.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-surface-muted text-surface-muted-foreground',
+                  'mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full',
+                  isUser ? 'bg-muted text-muted-foreground' : 'bg-ai-accent/10 text-ai-accent',
                 )}
+                aria-hidden="true"
               >
-                {message.content}
+                {isUser ? <UserIcon className="size-3.5" /> : <SparklesIcon className="size-3.5" />}
               </div>
-              {renderAfterMessage?.(message)}
+              <div className={cn('max-w-[85%] space-y-1.5', isUser && 'flex flex-col items-end')}>
+                <div
+                  className={cn(
+                    'rounded-lg px-3 py-2 text-sm',
+                    isUser
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-surface-muted text-surface-muted-foreground',
+                  )}
+                >
+                  {message.content}
+                </div>
+                <span className="text-muted-foreground/70 px-0.5 text-[11px] tabular-nums">
+                  {formatTime(message.createdAt)}
+                </span>
+                {renderAfterMessage?.(message)}
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
         {streamingIndicator && <div className="flex justify-start">{streamingIndicator}</div>}
       </div>
       <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t p-3">

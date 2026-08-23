@@ -39,8 +39,13 @@ export {
   useRecentExecutions,
 } from './hooks/use-control-tower'
 
-export type { TraceService } from './trace-service'
-export { mockTraceService, traceService } from './trace-service'
+export type { TraceService, TraceEventTone } from './trace-service'
+export {
+  mockTraceService,
+  traceService,
+  describeTraceEvent,
+  buildAgentGraphTopology,
+} from './trace-service'
 export { useAgentTrace, useLiveAgentTrace } from './hooks/use-agent-trace'
 
 export type { EventStreamHandle, EventStreamSource } from './lib/event-stream'

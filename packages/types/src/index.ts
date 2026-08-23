@@ -44,7 +44,18 @@ export type {
   ControlTowerMetrics,
 } from './agent'
 
-export type { TraceEvent, TraceStep, TraceStepStatus, AgentTrace } from './trace'
+export type {
+  TraceEvent,
+  TraceStep,
+  TraceStepStatus,
+  AgentTrace,
+  ToolCall,
+  ToolCallStatus,
+  AgentMessage,
+  AgentGraph,
+  AgentGraphNode,
+  AgentGraphEdge,
+} from './trace'
 
 export type {
   GuardrailCategory,

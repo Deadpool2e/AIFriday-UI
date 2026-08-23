@@ -88,12 +88,12 @@ const columns: DataTableColumn<AuditLogEntry>[] = [
       e.executionId ? (
         <Link
           to={`/control-tower/executions/${e.executionId}`}
-          className="text-primary hover:underline"
+          className="text-primary font-mono text-xs hover:underline"
         >
           {e.executionId}
         </Link>
       ) : e.requestId ? (
-        <span className="text-muted-foreground">{e.requestId}</span>
+        <span className="text-muted-foreground font-mono text-xs">{e.requestId}</span>
       ) : (
         <span className="text-muted-foreground">—</span>
       ),
@@ -103,7 +103,7 @@ const columns: DataTableColumn<AuditLogEntry>[] = [
     header: 'When',
     sortable: true,
     sortValue: (e) => e.timestamp,
-    cellClassName: 'text-muted-foreground text-xs whitespace-nowrap',
+    cellClassName: 'text-muted-foreground font-mono text-xs whitespace-nowrap',
     cell: (e) => e.timestamp,
   },
 ]

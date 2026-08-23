@@ -1,4 +1,11 @@
-import type { AgentTrace, TraceEvent, TraceStep } from '@platform/types'
+import type {
+  AgentGraph,
+  AgentMessage,
+  AgentTrace,
+  ToolCall,
+  TraceEvent,
+  TraceStep,
+} from '@platform/types'
 
 import { API_BASE_URL, resolveService } from './lib/env'
 import { createMockEventSource, createSSESource, type EventStreamSource } from './lib/event-stream'
@@ -69,6 +76,29 @@ const STAGE_TEMPLATES: AgentStageTemplate[] = [
   },
 ]
 
+// The deterministic tool each stage's agent calls before it ever needs an
+// LLM — mirrors Gyros' "deterministic layer first" agent design. Purely
+// presentational for this mock (Tool Monitor), one tool per stage.
+const STAGE_TOOLS: Record<string, string> = {
+  Orchestrator: 'routing-engine',
+  'RAG Agent': 'vector-search',
+  'Risk Agent': 'risk-scoring-model',
+  'Compliance Agent': 'policy-lookup',
+  'Decision Agent': 'recommendation-engine',
+  Guardrails: 'policy-scanner',
+}
+
+// The handoff message one stage passes to the next — what populates the
+// Agent Communication feed. Keyed by the receiving agent, since that's who
+// the message arrives "at" in the schedule below.
+const HANDOFF_MESSAGES: Record<string, string> = {
+  'RAG Agent': 'Forwarding request context and retrieval scope.',
+  'Risk Agent': 'Sharing retrieved policy and compliance context.',
+  'Compliance Agent': 'Sharing composite risk score for policy cross-check.',
+  'Decision Agent': 'Confirming no policy violations; clear to recommend.',
+  Guardrails: 'Submitting final recommendation for safety review.',
+}
+
 // executionId hashes to the same requestId whether you fetch a snapshot or
 // stream it live — both transports describe the same underlying execution.
 export function deriveRequestId(executionId: string): string {
@@ -88,6 +118,23 @@ function buildTraceEventSchedule(executionId: string): { event: TraceEvent; dela
   let cursor = Date.parse('2026-08-20T13:40:00Z') - (hash % 600) * 1000
 
   STAGE_TEMPLATES.forEach((template, index) => {
+    // The handoff from whichever stage just finished — Orchestrator (index
+    // 0) has no upstream sender, every other stage does.
+    if (index > 0) {
+      const previous = STAGE_TEMPLATES[index - 1]
+      schedule.push({
+        event: {
+          type: 'agent.message',
+          executionId,
+          timestamp: new Date(cursor).toISOString(),
+          sender: previous.agent,
+          receiver: template.agent,
+          summary: HANDOFF_MESSAGES[template.agent],
+        },
+        delayMs: 80,
+      })
+    }
+
     schedule.push({
       event: {
         type: 'agent.started',
@@ -96,9 +143,39 @@ function buildTraceEventSchedule(executionId: string): { event: TraceEvent; dela
         agent: template.agent,
         inputSummary: template.inputSummary,
       },
-      delayMs: index === 0 ? 200 : 150,
+      delayMs: index === 0 ? 200 : 120,
     })
-    cursor += template.durationMs
+
+    // Every agent calls its deterministic tool before it would ever reach
+    // for an LLM — a slice of the stage's own duration, not extra time.
+    const tool = STAGE_TOOLS[template.agent]
+    schedule.push({
+      event: {
+        type: 'tool.invoked',
+        executionId,
+        timestamp: new Date(cursor).toISOString(),
+        agent: template.agent,
+        tool,
+      },
+      delayMs: 60,
+    })
+
+    const toolDurationMs = Math.max(20, Math.round(template.durationMs * 0.3))
+    cursor += toolDurationMs
+    schedule.push({
+      event: {
+        type: 'tool.completed',
+        executionId,
+        timestamp: new Date(cursor).toISOString(),
+        agent: template.agent,
+        tool,
+        status: 'success',
+        durationMs: toolDurationMs,
+      },
+      delayMs: template.durationMs - toolDurationMs,
+    })
+
+    cursor += template.durationMs - toolDurationMs
     schedule.push({
       event: {
         type: 'agent.completed',
@@ -109,12 +186,52 @@ function buildTraceEventSchedule(executionId: string): { event: TraceEvent; dela
         tokens: template.tokens,
         outputSummary: template.outputSummary,
       },
-      delayMs: template.durationMs,
+      delayMs: 90,
     })
   })
 
-  // Guardrails — rule-based, no LLM tokens, no separate "started" event.
-  cursor += 95
+  // Guardrails — rule-based, no LLM tokens, no separate "started" event —
+  // but it's still handed off to from Decision Agent and still calls its
+  // own deterministic tool, same as every other stage above.
+  const lastStageAgent = STAGE_TEMPLATES[STAGE_TEMPLATES.length - 1].agent
+  schedule.push({
+    event: {
+      type: 'agent.message',
+      executionId,
+      timestamp: new Date(cursor).toISOString(),
+      sender: lastStageAgent,
+      receiver: 'Guardrails',
+      summary: HANDOFF_MESSAGES.Guardrails,
+    },
+    delayMs: 80,
+  })
+
+  const guardrailTool = STAGE_TOOLS.Guardrails
+  schedule.push({
+    event: {
+      type: 'tool.invoked',
+      executionId,
+      timestamp: new Date(cursor).toISOString(),
+      agent: 'Guardrails',
+      tool: guardrailTool,
+    },
+    delayMs: 60,
+  })
+  cursor += 70
+  schedule.push({
+    event: {
+      type: 'tool.completed',
+      executionId,
+      timestamp: new Date(cursor).toISOString(),
+      agent: 'Guardrails',
+      tool: guardrailTool,
+      status: 'success',
+      durationMs: 70,
+    },
+    delayMs: 90,
+  })
+
+  cursor += 25
   schedule.push({
     event: { type: 'guardrail.passed', executionId, timestamp: new Date(cursor).toISOString() },
     delayMs: 150,
@@ -239,6 +356,119 @@ export function foldTraceEvents(executionId: string, events: TraceEvent[]): Trac
   return steps
 }
 
+// The Tool Monitor's data source — folds tool.invoked/tool.completed pairs
+// into one ToolCall per invocation, same fold-as-events-arrive shape as
+// foldTraceEvents above so live streaming and snapshot replay build it
+// identically.
+export function foldToolCalls(executionId: string, events: TraceEvent[]): ToolCall[] {
+  const calls: ToolCall[] = []
+  const indexByKey = new Map<string, number>()
+
+  for (const event of events) {
+    if (event.type === 'tool.invoked') {
+      indexByKey.set(`${event.agent}:${event.tool}`, calls.length)
+      calls.push({
+        id: `${executionId}-tool-${calls.length}`,
+        agent: event.agent,
+        tool: event.tool,
+        status: 'running',
+        timestamp: event.timestamp,
+      })
+    } else if (event.type === 'tool.completed') {
+      const index = indexByKey.get(`${event.agent}:${event.tool}`)
+      if (index !== undefined) {
+        calls[index] = { ...calls[index], status: event.status, durationMs: event.durationMs }
+      }
+    }
+  }
+
+  return calls
+}
+
+// The Agent Communication feed's data source — one entry per agent.message
+// event, in the order they occurred.
+export function foldAgentMessages(executionId: string, events: TraceEvent[]): AgentMessage[] {
+  return events
+    .filter((event): event is Extract<TraceEvent, { type: 'agent.message' }> =>
+      event.type === 'agent.message',
+    )
+    .map((event, index) => ({
+      id: `${executionId}-message-${index}`,
+      sender: event.sender,
+      receiver: event.receiver,
+      summary: event.summary,
+      timestamp: event.timestamp,
+    }))
+}
+
+export type TraceEventTone = 'default' | 'success' | 'danger' | 'warning' | 'info'
+
+// The Execution Timeline's data source — a human-readable label and a
+// color tone for any raw TraceEvent, so the timeline stays a thin renderer
+// over whatever the event vocabulary grows to instead of duplicating this
+// switch itself.
+export function describeTraceEvent(event: TraceEvent): { label: string; tone: TraceEventTone } {
+  switch (event.type) {
+    case 'agent.started':
+      return { label: `${event.agent} started`, tone: 'info' }
+    case 'agent.completed':
+      return { label: `${event.agent} completed (${event.durationMs}ms, ${event.tokens} tokens)`, tone: 'success' }
+    case 'agent.failed':
+      return { label: `${event.agent} failed — ${event.error}`, tone: 'danger' }
+    case 'tool.invoked':
+      return { label: `${event.agent} invoked ${event.tool}`, tone: 'default' }
+    case 'tool.completed':
+      return {
+        label: `${event.tool} ${event.status === 'success' ? 'succeeded' : 'failed'} (${event.durationMs}ms)`,
+        tone: event.status === 'success' ? 'success' : 'danger',
+      }
+    case 'agent.message':
+      return { label: `${event.sender} → ${event.receiver}: ${event.summary}`, tone: 'default' }
+    case 'guardrail.blocked':
+      return { label: `Guardrails blocked — ${event.rule} (${event.severity} severity)`, tone: 'danger' }
+    case 'guardrail.passed':
+      return { label: 'Guardrails passed', tone: 'success' }
+    case 'human.approval.required':
+      return { label: `Human approval required (${event.approvalId})`, tone: 'warning' }
+    case 'workflow.completed':
+      return { label: 'Workflow completed', tone: 'success' }
+  }
+}
+
+// The static agent pipeline topology (Section 21's flow, same one
+// STAGE_TEMPLATES/HANDOFF_MESSAGES above encode) — identical for every
+// execution. A viewer derives each node's live status and each edge's
+// "did this actually fire" state from that execution's own TraceStep[];
+// this function only ever describes the shape, never the state.
+export function buildAgentGraphTopology(): AgentGraph {
+  return {
+    nodes: [
+      { id: 'Orchestrator', label: 'Orchestrator' },
+      { id: 'RAG Agent', label: 'RAG Agent' },
+      { id: 'Risk Agent', label: 'Risk Agent' },
+      { id: 'Compliance Agent', label: 'Compliance Agent' },
+      { id: 'Decision Agent', label: 'Decision Agent' },
+      { id: 'Guardrails', label: 'Guardrails' },
+      { id: 'Human Approval', label: 'Human Approval' },
+      { id: 'Workflow', label: 'Workflow Complete' },
+    ],
+    edges: [
+      { id: 'e-orchestrator-rag', source: 'Orchestrator', target: 'RAG Agent' },
+      { id: 'e-rag-risk', source: 'RAG Agent', target: 'Risk Agent' },
+      { id: 'e-risk-compliance', source: 'Risk Agent', target: 'Compliance Agent' },
+      { id: 'e-compliance-decision', source: 'Compliance Agent', target: 'Decision Agent' },
+      { id: 'e-decision-guardrails', source: 'Decision Agent', target: 'Guardrails' },
+      {
+        id: 'e-guardrails-approval',
+        source: 'Guardrails',
+        target: 'Human Approval',
+        conditional: true,
+      },
+      { id: 'e-guardrails-workflow', source: 'Guardrails', target: 'Workflow', conditional: true },
+    ],
+  }
+}
+
 function buildTrace(executionId: string): AgentTrace {
   const events = buildTraceEventSchedule(executionId).map((entry) => entry.event)
   return {
@@ -246,6 +476,8 @@ function buildTrace(executionId: string): AgentTrace {
     requestId: deriveRequestId(executionId),
     events,
     steps: foldTraceEvents(executionId, events),
+    toolCalls: foldToolCalls(executionId, events),
+    messages: foldAgentMessages(executionId, events),
   }
 }
 
