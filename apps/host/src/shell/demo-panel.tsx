@@ -10,10 +10,10 @@ import {
 import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@platform/ui'
 
 // Presenter-only tooling for the Nationals demo — NOT a product feature.
-// Previously a floating panel that competed visually with the AI Assistant
-// launcher for the same bottom-right corner; it now lives inline in
+// Previously a floating panel that competed visually with the floating
+// chat launcher for the same bottom-right corner; it now lives inline in
 // Settings > Demo Mode (and mirrored as quick actions in the Command
-// Palette), so the only persistent floating action left is the assistant.
+// Palette), so the only persistent floating action left is the chat.
 // Each trigger mutates the same mock stores every page already reads
 // (mock-data.ts / guardrails-service.ts / system-health-service.ts), then
 // invalidates every query so the effect shows up live, wherever it's

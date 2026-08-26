@@ -3,12 +3,12 @@ export const PERMISSIONS = [
   'REQUEST_CREATE',
   'REQUEST_APPROVE',
   'DOCUMENT_VIEW',
-  'AI_ASSISTANT',
   'AI_TRACE_VIEW',
   'GUARDRAIL_VIEW',
   'AUDIT_VIEW',
   'AGENT_VIEW',
   'SYSTEM_SETTINGS',
+  'VIZORION_ASSISTANT',
 ] as const
 
 export type Permission = (typeof PERMISSIONS)[number]
@@ -22,14 +22,14 @@ export type Role = 'analyst' | 'manager' | 'admin'
 // of what this map says. See docs/rbac.md (written in Phase 22) for the
 // full contract.
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
-  analyst: ['REQUEST_VIEW', 'REQUEST_CREATE', 'DOCUMENT_VIEW', 'AI_ASSISTANT'],
+  analyst: ['REQUEST_VIEW', 'REQUEST_CREATE', 'DOCUMENT_VIEW', 'VIZORION_ASSISTANT'],
   manager: [
     'REQUEST_VIEW',
     'REQUEST_CREATE',
     'REQUEST_APPROVE',
     'DOCUMENT_VIEW',
-    'AI_ASSISTANT',
     'AI_TRACE_VIEW',
+    'VIZORION_ASSISTANT',
   ],
   admin: [...PERMISSIONS],
 }

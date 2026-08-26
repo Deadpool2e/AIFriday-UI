@@ -40,28 +40,6 @@ function NotBuiltIllustration() {
   )
 }
 
-function AssistantEmptyIllustration() {
-  return (
-    <svg viewBox="0 0 96 96" fill="none" aria-hidden="true" className="size-16">
-      <circle cx="48" cy="48" r="44" className="fill-ai-accent/[0.06]" />
-      <circle cx="40" cy="44" r="16" className="fill-surface stroke-ai-accent/40" strokeWidth="1.5" />
-      <circle cx="62" cy="58" r="9" className="fill-surface stroke-ai-accent/30" strokeWidth="1.5" />
-      <path
-        d="M40 38v12M34 44h12"
-        className="stroke-ai-accent"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M62 54.5v7M58.5 58h7"
-        className="stroke-ai-accent/70"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
-
 function ShieldClearIllustration() {
   return (
     <svg viewBox="0 0 96 96" fill="none" aria-hidden="true" className="size-16">
@@ -86,6 +64,5 @@ function ShieldClearIllustration() {
 export {
   AllCaughtUpIllustration,
   NotBuiltIllustration,
-  AssistantEmptyIllustration,
   ShieldClearIllustration,
 }

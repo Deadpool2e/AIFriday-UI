@@ -101,34 +101,45 @@ interface AiActivityPoint { date: string; aiProcessed: number; humanReview: numb
 interface ActivityItem { id: string; message: string; timestamp: string; severity: 'info' | 'success' | 'warning' | 'danger' }
 ```
 
-## AI Assistant — `ai-assistant-service.ts`
+## Vizorion — `vizorion-chat-service.ts`, `vizorion-conversations-service.ts`, `vizorion-memory-service.ts`, `vizorion-files-service.ts`
 
-Chat-facing, coarse-grained 6-stage pipeline view (contrast with Agent Trace below, which is the per-agent detail view of the same underlying execution).
+A separate, already-real backend (`u:\WEBD\Python\AIFriday\Vizorion`, package `advanced_chatbot`) — not part of this platform's own imagined API, so it isn't gated by `VITE_USE_MOCK_API`/`API_BASE_URL`. Configured via its own `VITE_VIZORION_USE_MOCK` / `VITE_VIZORION_API_URL` / `VITE_VIZORION_API_KEY` (see `packages/api-client/src/vizorion/env.ts`). Auth: `X-API-Key: <key>` on every request.
 
 | Method | Path | Behavior |
 |---|---|---|
-| POST | `/api/ai/query` | Kicks off a run for a prompt; returns an execution id to stream |
-| GET | `/api/ai/executions/{id}/stream` | SSE — see below |
+| POST | `/v1/chat` | Non-streaming chat turn |
+| POST | `/v1/chat/stream` | SSE streaming chat turn — see below |
+| GET/POST | `/v1/conversations` | List / create conversations |
+| GET/DELETE | `/v1/conversations/{id}` | Fetch / delete |
+| GET | `/v1/conversations/{id}/messages` | List messages (each with all versions) |
+| POST | `/v1/messages/{id}/feedback` | Thumbs up/down |
+| POST | `/v1/messages/{id}/regenerate` | Regenerate with a style hint |
+| POST | `/v1/messages/{id}/improve` | Regenerate from freeform feedback text |
+| GET | `/v1/memory` / POST `/v1/memory` | List / create long-term memory |
+| PATCH/DELETE | `/v1/memory/{id}` | Update / delete one memory entry |
+| DELETE | `/v1/memory/all` | Clear all memory |
+| POST | `/v1/files` | Multipart upload for RAG ingestion |
+| POST | `/v1/files/{id}/publish` \| `/unpublish` \| `/archive` | Document lifecycle |
+| DELETE | `/v1/files/{id}` | Delete document |
+| GET | `/v1/approvals` | List pending HITL approvals |
+| POST | `/v1/approvals/{id}/respond` | Resolve a paused run (`approved` \| `edited` \| `rejected`) |
+| POST | `/v1/voice/transcribe` | Multipart audio → text (speech-to-text only; voice *output* uses the browser's own `SpeechSynthesis`, no backend call) |
 
-SSE events (one JSON-encoded `AIAssistantEvent` per `message`, `done` event when finished):
+SSE events on `POST /v1/chat/stream` — framed as conventional SSE (`event: <name>\ndata: <json>\n\n`) over a POST response body, so the client reads it manually via `fetch()` + `ReadableStream`, not the native `EventSource` API (GET-only, no body). See `packages/api-client/src/vizorion/sse.ts`.
 ```ts
-type AIAssistantEvent =
-  | { type: 'step.started'; step: AIExecutionStageId }
-  | { type: 'step.completed'; step: AIExecutionStageId; detail?: string; durationMs: number }
-  | { type: 'citations.found'; citations: SourceCitation[] }
-  | { type: 'result'; result: AIExecutionResult; message: string }
-  | { type: 'error'; message: string }
-
-type AIExecutionStageId = 'understanding' | 'rag_retrieval' | 'agent_execution' | 'guardrail_check' | 'recommendation' | 'human_approval'
-interface SourceCitation { id: string; title: string; snippet: string; relevance: number }
-interface AIExecutionResult {
-  steps: { id: AIExecutionStageId; label: string; status: 'pending' | 'running' | 'completed' | 'failed'; detail?: string; durationMs?: number }[]
-  citations: SourceCitation[]
-  recommendation: Request['aiRecommendation'] // same shape, always present here
-  requiresApproval: boolean
-}
+type VizorionStreamEvent =
+  | { event: 'run_started'; data: { conversation_id: string } }
+  | { event: 'message_started'; data: {} }
+  | { event: 'reasoning_delta'; data: { delta: string } }
+  | { event: 'message_delta'; data: { delta: string } }
+  | { event: 'message_completed'; data: {} }
+  | { event: 'tool_started'; data: { tool: string | null } }
+  | { event: 'tool_completed'; data: { tool: string | null } }
+  | { event: 'approval_required'; data: VizorionPendingApproval }
+  | { event: 'run_completed'; data: { message_id: string; run_id: string; usage: Record<string, unknown> } }
+  | { event: 'error'; data: { message: string } }
 ```
-**Implementation note:** the current mock (`mockAIAssistantService.sendMessage(prompt, onEvent)`) delivers these events via a plain callback, not through the `EventStreamSource` abstraction `trace-service.ts` uses (see `packages/api-client/src/lib/event-stream.ts`). A real implementation should route this through the same `EventStreamSource`/`createSSESource()` pattern for consistency — that refactor hasn't been done yet, since there's no backend to test it against.
+**Implementation note:** the stream doesn't emit citations/tool-call detail inline — only tool *names* via `tool_started`/`tool_completed`. Once `run_completed` fires (and no approval is pending), the client re-fetches `GET /v1/conversations/{id}/messages` to reconcile the locally-streamed transcript with the persisted messages, which do carry full `citations`/`tool_calls` per message version. See `useVizorionChat`'s `reconcile()` in `packages/api-client/src/hooks/use-vizorion-chat.ts`.
 
 ## Control Tower — `control-tower-service.ts`
 

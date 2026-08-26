@@ -1,11 +1,14 @@
 import { Suspense, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
+import { useVizorionChat } from '@platform/api-client'
 import { ErrorBoundary, Skeleton, SkipLink } from '@platform/ui'
 
-import { AILauncher } from './ai-launcher'
+import { AutowakeWidget } from './autowake/autowake-widget'
+import { useAutowake } from './autowake/use-autowake'
 import { CommandPalette } from './command-palette'
 import { MobileSidebar, Sidebar } from './sidebar'
 import { Topbar } from './topbar'
+import { VizorionLauncher } from './vizorion-launcher'
 
 function RouteLoadingFallback() {
   return (
@@ -18,9 +21,16 @@ function RouteLoadingFallback() {
 
 export function AppShell() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
-  const [assistantOpen, setAssistantOpen] = useState(false)
+  const [vizorionOpen, setVizorionOpen] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
   const location = useLocation()
+
+  // Lifted here (rather than each owning its own) so a verified "Hey
+  // Athena" wake streams into the same conversation VizorionLauncher's
+  // panel shows, opens that panel automatically, and both it and
+  // AutowakeWidget can render the same live listening/recording state.
+  const vizorionChat = useVizorionChat({ conversationId: null })
+  const autowake = useAutowake({ chat: vizorionChat, onWakeVerified: () => setVizorionOpen(true) })
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -41,6 +51,13 @@ export function AppShell() {
     setLastPathname(location.pathname)
     setMobileNavOpen(false)
   }
+
+  // The FAB is fixed to the bottom-right corner (right-4, bottom-4), same
+  // corner as the full-page chat surface's own send/mic controls. Left
+  // mounted there, it visually sits on top of those controls once the
+  // full chat page fills the viewport, so hide the floating widget on
+  // Vizorion's own full page — the page itself is already the chat.
+  const onFullChatPage = location.pathname === '/vizorion'
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -64,9 +81,18 @@ export function AppShell() {
       <CommandPalette
         open={paletteOpen}
         onOpenChange={setPaletteOpen}
-        onOpenAssistant={() => setAssistantOpen(true)}
+        onOpenVizorion={() => setVizorionOpen(true)}
       />
-      <AILauncher open={assistantOpen} onOpenChange={setAssistantOpen} />
+      {!onFullChatPage && (
+        <VizorionLauncher open={vizorionOpen} onOpenChange={setVizorionOpen} chat={vizorionChat} autowake={autowake} />
+      )}
+      {/* Unlike VizorionLauncher, not hidden on /vizorion — wake-word
+          listening should work app-wide, including on Vizorion's own full
+          page, and its button sits in a different corner so it doesn't
+          collide with that page's own controls. On /vizorion,
+          onWakeVerified's setVizorionOpen(true) is a harmless no-op since
+          VizorionLauncher isn't rendered there. */}
+      <AutowakeWidget autowake={autowake} />
     </div>
   )
 }

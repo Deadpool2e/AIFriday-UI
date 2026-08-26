@@ -16,7 +16,6 @@ Permissions are a flat, frontend-defined vocabulary (`packages/auth/src/permissi
 | `REQUEST_CREATE` | Submit a new request | Main App: Requests (new-request action) |
 | `REQUEST_APPROVE` | Act on a pending approval (approve/reject/send back/request info) | Main App: Approvals |
 | `DOCUMENT_VIEW` | See the Documents page | Main App: Documents |
-| `AI_ASSISTANT` | Use the AI Assistant chat | Main App: AI Assistant |
 | `AI_TRACE_VIEW` | View an execution's full agent trace | Control Tower: Execution Trace (currently ungated beyond the outer Control Tower check — see "Known gaps" below) |
 | `GUARDRAIL_VIEW` | View guardrail rules/events | Control Tower: Guardrails |
 | `AUDIT_VIEW` | View the audit log | Control Tower: Audit Logs |
@@ -27,7 +26,7 @@ Roles are a fixed mapping onto that vocabulary (`ROLE_PERMISSIONS` in the same f
 
 | Role | Permissions |
 |---|---|
-| `analyst` | `REQUEST_VIEW`, `REQUEST_CREATE`, `DOCUMENT_VIEW`, `AI_ASSISTANT` |
+| `analyst` | `REQUEST_VIEW`, `REQUEST_CREATE`, `DOCUMENT_VIEW` |
 | `manager` | everything `analyst` has, plus `REQUEST_APPROVE`, `AI_TRACE_VIEW` |
 | `admin` | every permission in the list |
 

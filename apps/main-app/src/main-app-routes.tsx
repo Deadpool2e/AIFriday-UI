@@ -5,10 +5,10 @@ import { DashboardPage } from './pages/dashboard-page'
 import { RequestsPage } from './pages/requests-page'
 import { RequestDetailPage } from './pages/request-detail-page'
 import { DocumentsPage } from './pages/documents-page'
-import { AiAssistantPage } from './pages/ai-assistant-page'
 import { ApprovalsPage } from './pages/approvals-page'
 import { ApprovalDetailPage } from './pages/approval-detail-page'
 import { NotFoundPage } from './pages/not-found-page'
+import { VizorionPage } from './pages/vizorion/vizorion-page'
 
 // This is the piece the Host federates in — a bare <Routes> tree, no
 // providers, no router of its own. It reads from whatever router context
@@ -41,10 +41,10 @@ export function MainAppRoutes() {
         }
       />
       <Route
-        path="ai-assistant"
+        path="vizorion"
         element={
-          <ProtectedRoute permission="AI_ASSISTANT">
-            <AiAssistantPage />
+          <ProtectedRoute permission="VIZORION_ASSISTANT">
+            <VizorionPage />
           </ProtectedRoute>
         }
       />

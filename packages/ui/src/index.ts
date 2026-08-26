@@ -93,14 +93,10 @@ export { KPIWidget } from './components/kpi-widget'
 export { RiskIndicator, type RiskLevel } from './components/risk-indicator'
 export { ConfidenceScore } from './components/confidence-score'
 export { ActivityFeed, type ActivityFeedItem } from './components/activity-feed'
-export {
-  WorkflowStepper,
-  type WorkflowStep,
-  type WorkflowStepStatus,
-} from './components/workflow-stepper'
 export { SourceCitation } from './components/source-citation'
 export { AIRecommendationCard, type AIDecision } from './components/ai-recommendation-card'
 export { ChatPanel, type ChatPanelMessage } from './components/chat-panel'
+export { Markdown } from './components/markdown'
 export { Textarea } from './components/textarea'
 export { ApprovalCard } from './components/approval-card'
 export {
@@ -143,9 +139,16 @@ export { AnimatedNumber } from './components/animated-number'
 export {
   AllCaughtUpIllustration,
   NotBuiltIllustration,
-  AssistantEmptyIllustration,
   ShieldClearIllustration,
 } from './components/illustrations'
 export { LiveIndicator } from './components/live-indicator'
 export { AttentionRequired, type AttentionItem } from './components/attention-required'
 export { AIInsight } from './components/ai-insight'
+export {
+  VizorionToolCallChip,
+  type VizorionToolCallChipStatus,
+} from './components/vizorion-tool-call-chip'
+export {
+  VizorionApprovalCard,
+  type VizorionApprovalResolution,
+} from './components/vizorion-approval-card'

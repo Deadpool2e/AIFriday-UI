@@ -9,12 +9,12 @@ import { useAuth } from '@platform/auth'
 import { useTheme } from '@platform/theme'
 import { useQueryClient } from '@tanstack/react-query'
 import {
+  MessageCircleIcon,
   MoonIcon,
   RadioIcon,
   SearchIcon,
   ServerCrashIcon,
   ShieldAlertIcon,
-  SparklesIcon,
   SunIcon,
   UserPlusIcon,
 } from 'lucide-react'
@@ -24,7 +24,7 @@ import { navItems, settingsNavItem } from './nav-items'
 interface CommandPaletteProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onOpenAssistant: () => void
+  onOpenVizorion: () => void
 }
 
 const groupClass =
@@ -32,7 +32,7 @@ const groupClass =
 const itemClass =
   'data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-2 text-sm'
 
-export function CommandPalette({ open, onOpenChange, onOpenAssistant }: CommandPaletteProps) {
+export function CommandPalette({ open, onOpenChange, onOpenVizorion }: CommandPaletteProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { hasAnyPermission } = useAuth()
@@ -95,11 +95,11 @@ export function CommandPalette({ open, onOpenChange, onOpenAssistant }: CommandP
           </Command.Item>
         </Command.Group>
 
-        {hasAnyPermission(['AI_ASSISTANT']) && (
+        {hasAnyPermission(['VIZORION_ASSISTANT']) && (
           <Command.Group heading="AI" className={groupClass}>
-            <Command.Item onSelect={() => run(onOpenAssistant)} className={itemClass}>
-              <SparklesIcon className="text-ai-accent size-4" aria-hidden="true" />
-              Ask the AI Assistant
+            <Command.Item onSelect={() => run(onOpenVizorion)} className={itemClass}>
+              <MessageCircleIcon className="text-ai-accent size-4" aria-hidden="true" />
+              Ask Vizorion
             </Command.Item>
           </Command.Group>
         )}

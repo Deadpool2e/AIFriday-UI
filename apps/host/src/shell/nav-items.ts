@@ -3,9 +3,9 @@ import {
   FileTextIcon,
   FolderIcon,
   LayoutDashboardIcon,
+  MessageCircleIcon,
   RadarIcon,
   SettingsIcon,
-  SparklesIcon,
   type LucideIcon,
 } from 'lucide-react'
 import type { Permission } from '@platform/auth'
@@ -46,11 +46,11 @@ export const navItems: NavItem[] = [
     permission: 'DOCUMENT_VIEW',
   },
   {
-    label: 'AI Assistant',
-    to: '/ai-assistant',
-    icon: SparklesIcon,
+    label: 'Vizorion',
+    to: '/vizorion',
+    icon: MessageCircleIcon,
     group: 'Intelligence',
-    permission: 'AI_ASSISTANT',
+    permission: 'VIZORION_ASSISTANT',
   },
   {
     label: 'Approvals',

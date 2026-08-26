@@ -52,12 +52,9 @@ const statusConfig: Record<
   },
 }
 
-// The richer sibling of WorkflowStepper (Phase 7) — that one is a compact
-// label+status list for the chat's live progress; this shows a full
-// execution's per-agent input/output/duration/token detail as a connected
-// vertical timeline, which is what Section 21's "execution trace viewer"
-// actually needs. Same status-icon vocabulary as WorkflowStepper on
-// purpose, so the two read as one visual language across the app.
+// Shows a full execution's per-agent input/output/duration/token detail as
+// a connected vertical timeline, which is what Section 21's "execution
+// trace viewer" actually needs.
 function AgentTrace({ steps, className, ...props }: AgentTraceProps) {
   return (
     <ol data-slot="agent-trace" className={cn('space-y-6', className)} {...props}>

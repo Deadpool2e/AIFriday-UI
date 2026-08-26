@@ -17,10 +17,6 @@ export {
   useRecentActivity,
 } from './hooks/use-dashboard'
 
-export type { AIAssistantService } from './ai-assistant-service'
-export { mockAIAssistantService, STEP_LABELS } from './ai-assistant-service'
-export { useAIAssistant } from './hooks/use-ai-assistant'
-
 export type { ApprovalsService, ApprovalActionInput } from './approvals-service'
 export { mockApprovalsService } from './approvals-service'
 export { usePendingApprovals } from './hooks/use-pending-approvals'
@@ -96,3 +92,39 @@ export {
   useDecisionFactors,
   useLowConfidenceDecisions,
 } from './hooks/use-explainability'
+
+export type { VizorionChatService } from './vizorion-chat-service'
+export { mockVizorionChatService, vizorionChatService } from './vizorion-chat-service'
+export type { VizorionConversationsService } from './vizorion-conversations-service'
+export { mockVizorionConversationsService, vizorionConversationsService } from './vizorion-conversations-service'
+export type { VizorionMemoryService } from './vizorion-memory-service'
+export { mockVizorionMemoryService, vizorionMemoryService } from './vizorion-memory-service'
+export type { VizorionFilesService } from './vizorion-files-service'
+export { mockVizorionFilesService, vizorionFilesService } from './vizorion-files-service'
+export { vizorionClient } from './vizorion/client'
+export { streamVizorionChat } from './vizorion/sse'
+
+export type { VizorionChatMessage, VizorionLiveToolCall } from './hooks/use-vizorion-chat'
+export { useVizorionChat } from './hooks/use-vizorion-chat'
+export {
+  useVizorionConversations,
+  useCreateVizorionConversation,
+  useDeleteVizorionConversation,
+} from './hooks/use-vizorion-conversations'
+export {
+  useVizorionMemory,
+  useCreateVizorionMemory,
+  useUpdateVizorionMemory,
+  useDeleteVizorionMemory,
+  useDeleteAllVizorionMemory,
+} from './hooks/use-vizorion-memory'
+export {
+  useVizorionFiles,
+  useUploadVizorionFile,
+  usePublishVizorionFile,
+  useUnpublishVizorionFile,
+  useArchiveVizorionFile,
+  useDeleteVizorionFile,
+} from './hooks/use-vizorion-files'
+export { useTranscribeVoice } from './hooks/use-vizorion-voice'
+export { useEnrollSpeaker, useVerifySpeaker } from './hooks/use-vizorion-speaker'

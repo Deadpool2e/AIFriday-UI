@@ -18,17 +18,6 @@ export type {
 } from './metrics'
 
 export type {
-  AIExecutionStageId,
-  AIExecutionStepStatus,
-  AIExecutionStep,
-  SourceCitation,
-  AIExecutionResult,
-  ChatRole,
-  ChatMessage,
-  AIAssistantEvent,
-} from './ai-assistant'
-
-export type {
   ApprovalAction,
   ApprovalActionRecord,
   GuardrailCheckSummary,
@@ -92,3 +81,22 @@ export type {
   ExplainabilitySummary,
   LowConfidenceDecision,
 } from './explainability'
+
+export type {
+  VizorionConversation,
+  VizorionCitation,
+  VizorionToolCall,
+  VizorionMessageVersion,
+  VizorionMessageRole,
+  VizorionMessage,
+  VizorionPendingApproval,
+  VizorionApprovalListItem,
+  VizorionApprovalResolution,
+  VizorionChatResponse,
+  VizorionMemory,
+  VizorionDocumentStatus,
+  VizorionDocument,
+  VizorionRegenerateStyle,
+  VizorionRegenerateResult,
+  VizorionStreamEvent,
+} from './vizorion'

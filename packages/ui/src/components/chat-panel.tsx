@@ -36,6 +36,14 @@ interface ChatPanelProps {
   // the input stays usable underneath, unlike swapping the whole panel out
   // for a separate empty-state screen.
   emptyState?: React.ReactNode
+  // Overrides how a message bubble's body is rendered (e.g. Markdown for
+  // formatted replies). Defaults to plain text so generic chat consumers
+  // that pass raw strings are unaffected.
+  renderContent?: (message: ChatPanelMessage) => React.ReactNode
+  // Rendered inside the input form, between the text input and the send
+  // button — e.g. a voice-record button that should sit next to Send
+  // rather than in a separate row.
+  inputAddon?: React.ReactNode
   className?: string
 }
 
@@ -48,6 +56,8 @@ function ChatPanel({
   renderAfterMessage,
   streamingIndicator,
   emptyState,
+  renderContent,
+  inputAddon,
   className,
 }: ChatPanelProps) {
   const [value, setValue] = React.useState('')
@@ -95,7 +105,7 @@ function ChatPanel({
                       : 'bg-surface-muted text-surface-muted-foreground',
                   )}
                 >
-                  {message.content}
+                  {renderContent ? renderContent(message) : message.content}
                 </div>
                 <span className="text-muted-foreground/70 px-0.5 text-[11px] tabular-nums">
                   {formatTime(message.createdAt)}
@@ -115,6 +125,7 @@ function ChatPanel({
           disabled={disabled}
           aria-label="Message"
         />
+        {inputAddon}
         <Button
           type="submit"
           size="icon"
