@@ -1,6 +1,11 @@
 import { Link } from 'react-router'
 import { Cell, Pie, PieChart, Tooltip } from 'recharts'
-import { GaugeIcon, ListChecksIcon, TrendingDownIcon, UserCheckIcon } from 'lucide-react'
+import {
+  GaugeIcon,
+  ListChecksIcon,
+  TrendingDownIcon,
+  UserCheckIcon,
+} from 'lucide-react'
 import {
   useConfidenceBands,
   useDecisionFactors,
@@ -92,27 +97,40 @@ export function ExplainabilityPage() {
   const factors = useDecisionFactors()
   const lowConfidence = useLowConfidenceDecisions()
 
-  const maxBandCount = bands.data ? Math.max(1, ...bands.data.map((b) => b.count)) : 1
+  const maxBandCount = bands.data
+    ? Math.max(1, ...bands.data.map((b) => b.count))
+    : 1
   const maxDecisionCount = summary.data
     ? Math.max(1, ...Object.values(summary.data.decisionCounts))
     : 1
-  const maxFactorWeight = factors.data ? Math.max(1, ...factors.data.map((f) => f.weightPercent)) : 1
+  const maxFactorWeight = factors.data
+    ? Math.max(1, ...factors.data.map((f) => f.weightPercent))
+    : 1
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Explainability</h1>
+        <h2 className="text-base font-semibold tracking-tight">
+          Explainability
+        </h2>
         <p className="text-muted-foreground text-sm">
-          Why the AI decides what it decides, in aggregate — and which specific decisions need a second look.
+          Why the AI decides what it decides, in aggregate — and which specific
+          decisions need a second look.
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {summary.isLoading || !summary.data ? (
-          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
+          Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))
         ) : (
           <>
-            <KPIWidget label="Avg Confidence" value={`${summary.data.avgConfidence}%`} icon={<GaugeIcon />} />
+            <KPIWidget
+              label="Avg Confidence"
+              value={`${summary.data.avgConfidence}%`}
+              icon={<GaugeIcon />}
+            />
             <KPIWidget
               label="Human Review Rate"
               value={`${summary.data.humanReviewRate}%`}
@@ -127,8 +145,9 @@ export function ExplainabilityPage() {
               label="Most Common Decision"
               value={
                 DECISION_LABEL[
-                  (Object.entries(summary.data.decisionCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ??
-                    'approve') as ExplainabilityDecision
+                  (Object.entries(summary.data.decisionCounts).sort(
+                    (a, b) => b[1] - a[1],
+                  )[0]?.[0] ?? 'approve') as ExplainabilityDecision
                 ]
               }
               icon={<ListChecksIcon />}
@@ -141,7 +160,9 @@ export function ExplainabilityPage() {
         <Card>
           <CardHeader>
             <CardTitle>Confidence distribution</CardTitle>
-            <CardDescription>Every AI-recommended decision, bucketed by confidence.</CardDescription>
+            <CardDescription>
+              Every AI-recommended decision, bucketed by confidence.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {bands.isLoading || !bands.data ? (
@@ -168,7 +189,9 @@ export function ExplainabilityPage() {
         <Card>
           <CardHeader>
             <CardTitle>Decision breakdown</CardTitle>
-            <CardDescription>What the AI ultimately recommended, across every request.</CardDescription>
+            <CardDescription>
+              What the AI ultimately recommended, across every request.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {summary.isLoading || !summary.data ? (
@@ -182,9 +205,16 @@ export function ExplainabilityPage() {
                 <PieChart width={128} height={128} className="shrink-0">
                   <Tooltip {...chartTooltipStyle} />
                   <Pie
-                    data={(Object.entries(summary.data.decisionCounts) as [ExplainabilityDecision, number][]).map(
-                      ([decision, count]) => ({ name: DECISION_LABEL[decision], value: count, decision }),
-                    )}
+                    data={(
+                      Object.entries(summary.data.decisionCounts) as [
+                        ExplainabilityDecision,
+                        number,
+                      ][]
+                    ).map(([decision, count]) => ({
+                      name: DECISION_LABEL[decision],
+                      value: count,
+                      decision,
+                    }))}
                     dataKey="value"
                     nameKey="name"
                     cx={64}
@@ -196,24 +226,34 @@ export function ExplainabilityPage() {
                     isAnimationActive
                     animationDuration={600}
                   >
-                    {(Object.keys(summary.data.decisionCounts) as ExplainabilityDecision[]).map((decision) => (
-                      <Cell key={decision} fill={DECISION_COLOR_VAR[decision]} />
+                    {(
+                      Object.keys(
+                        summary.data.decisionCounts,
+                      ) as ExplainabilityDecision[]
+                    ).map((decision) => (
+                      <Cell
+                        key={decision}
+                        fill={DECISION_COLOR_VAR[decision]}
+                      />
                     ))}
                   </Pie>
                 </PieChart>
                 <div className="w-full space-y-3">
-                  {(Object.entries(summary.data.decisionCounts) as [ExplainabilityDecision, number][]).map(
-                    ([decision, count]) => (
-                      <ProportionBar
-                        key={decision}
-                        label={DECISION_LABEL[decision]}
-                        value={count}
-                        max={maxDecisionCount}
-                        toneClassName={DECISION_TONE[decision]}
-                        valueLabel={String(count)}
-                      />
-                    ),
-                  )}
+                  {(
+                    Object.entries(summary.data.decisionCounts) as [
+                      ExplainabilityDecision,
+                      number,
+                    ][]
+                  ).map(([decision, count]) => (
+                    <ProportionBar
+                      key={decision}
+                      label={DECISION_LABEL[decision]}
+                      value={count}
+                      max={maxDecisionCount}
+                      toneClassName={DECISION_TONE[decision]}
+                      valueLabel={String(count)}
+                    />
+                  ))}
                 </div>
               </div>
             )}
@@ -225,7 +265,8 @@ export function ExplainabilityPage() {
         <CardHeader>
           <CardTitle>What drives a decision</CardTitle>
           <CardDescription>
-            Aggregate factor weighting across the decision pipeline — not specific to any one request.
+            Aggregate factor weighting across the decision pipeline — not
+            specific to any one request.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -245,7 +286,9 @@ export function ExplainabilityPage() {
                   toneClassName="bg-info"
                   valueLabel={`${factor.weightPercent}%`}
                 />
-                <p className="text-muted-foreground text-xs">{factor.description}</p>
+                <p className="text-muted-foreground text-xs">
+                  {factor.description}
+                </p>
               </div>
             ))
           )}
@@ -255,7 +298,9 @@ export function ExplainabilityPage() {
       <Card>
         <CardHeader>
           <CardTitle>Decisions needing a second look</CardTitle>
-          <CardDescription>The lowest-confidence AI recommendations, most concerning first.</CardDescription>
+          <CardDescription>
+            The lowest-confidence AI recommendations, most concerning first.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {lowConfidence.isLoading || !lowConfidence.data ? (
@@ -277,7 +322,10 @@ export function ExplainabilityPage() {
                     to={`/requests/${decision.requestId}`}
                     className="text-primary text-sm font-medium hover:underline"
                   >
-                    {decision.title} <span className="font-mono text-xs">({decision.requestId})</span>
+                    {decision.title}{' '}
+                    <span className="font-mono text-xs">
+                      ({decision.requestId})
+                    </span>
                   </Link>
                   <AIRecommendationCard
                     decision={decision.decision}

@@ -1,4 +1,5 @@
 import {
+  ArrowLeftIcon,
   CheckCircle2Icon,
   CircleDashedIcon,
   CircleIcon,
@@ -6,10 +7,11 @@ import {
   SparklesIcon,
   XCircleIcon,
 } from 'lucide-react'
-import { useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 import { useRequest } from '@platform/api-client'
 import {
   Badge,
+  Button,
   Card,
   CardContent,
   CardHeader,
@@ -78,8 +80,24 @@ export function RequestDetailPage() {
   return (
     <div className="max-w-5xl space-y-6">
       <div className="space-y-2">
+        {/* An explicit path back to the queue this request came from —
+            the browser's back button is not a navigation affordance the
+            page gets to rely on. */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="-ml-3 h-7 gap-1.5 px-2"
+          asChild
+        >
+          <Link to="/requests">
+            <ArrowLeftIcon className="size-3.5" aria-hidden="true" />
+            All requests
+          </Link>
+        </Button>
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="font-mono text-2xl font-semibold tracking-tight">{request.id}</h1>
+          <h1 className="font-mono text-xl font-semibold tracking-tight">
+            {request.id}
+          </h1>
           <Badge variant="outline" className="capitalize">
             {request.status}
           </Badge>
@@ -87,7 +105,7 @@ export function RequestDetailPage() {
             {request.priority} priority
           </Badge>
         </div>
-        <p className="text-muted-foreground">{request.title}</p>
+        <p className="text-pretty">{request.title}</p>
         <p className="text-muted-foreground text-sm">
           Owner: {request.owner} · Created{' '}
           {new Date(request.createdAt).toLocaleDateString('en-US', {
@@ -100,7 +118,10 @@ export function RequestDetailPage() {
 
       {request.aiRecommendation && (
         <div className="border-ai-accent/30 bg-surface relative overflow-hidden rounded-xl border pl-4">
-          <span className="bg-ai-accent absolute inset-y-0 left-0 w-0.5" aria-hidden="true" />
+          <span
+            className="bg-ai-accent absolute inset-y-0 left-0 w-0.5"
+            aria-hidden="true"
+          />
           <div className="flex flex-wrap items-start justify-between gap-3 py-3.5 pr-4">
             <div className="space-y-1.5">
               <p className="text-ai-accent flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
@@ -109,9 +130,14 @@ export function RequestDetailPage() {
               </p>
               <p className="text-sm leading-snug">
                 This request appears{' '}
-                {DECISION_LABEL[request.aiRecommendation.decision] ?? request.aiRecommendation.decision}, with{' '}
-                <span className="font-medium">{request.risk}</span> risk at{' '}
-                <span className="font-medium">{request.aiRecommendation.confidence}%</span> confidence.
+                {DECISION_LABEL[request.aiRecommendation.decision] ??
+                  request.aiRecommendation.decision}
+                , with <span className="font-medium">{request.risk}</span> risk
+                at{' '}
+                <span className="font-medium">
+                  {request.aiRecommendation.confidence}%
+                </span>{' '}
+                confidence.
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
@@ -175,7 +201,9 @@ export function RequestDetailPage() {
                       {execution.agent}
                     </span>
                     <span className="text-muted-foreground font-mono tabular-nums">
-                      {execution.status === 'skipped' ? '—' : `${execution.durationMs}ms`}
+                      {execution.status === 'skipped'
+                        ? '—'
+                        : `${execution.durationMs}ms`}
                     </span>
                   </li>
                 ))}
@@ -189,14 +217,21 @@ export function RequestDetailPage() {
             </CardHeader>
             <CardContent>
               {request.documents.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No documents attached.</p>
+                <p className="text-muted-foreground text-sm">
+                  No documents attached.
+                </p>
               ) : (
                 <ul className="space-y-3">
                   {request.documents.map((doc) => (
-                    <li key={doc.id} className="flex items-center gap-2 text-sm">
+                    <li
+                      key={doc.id}
+                      className="flex items-center gap-2 text-sm"
+                    >
                       <FileIcon className="text-muted-foreground size-4" />
                       <span className="flex-1">{doc.name}</span>
-                      <span className="text-muted-foreground text-xs">{doc.sizeLabel}</span>
+                      <span className="text-muted-foreground text-xs">
+                        {doc.sizeLabel}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -213,7 +248,9 @@ export function RequestDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground text-sm">Risk level</span>
+                <span className="text-muted-foreground text-sm">
+                  Risk level
+                </span>
                 <RiskIndicator level={request.risk} />
               </div>
               {request.aiRecommendation && (

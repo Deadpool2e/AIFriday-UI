@@ -27,7 +27,13 @@ const toneGlowClass: Record<NonNullable<LiveIndicatorProps['tone']>, string> = {
   neutral: 'shadow-none',
 }
 
-function LiveIndicator({ label = 'Live', tone = 'info', isDemo = false, className, ...props }: LiveIndicatorProps) {
+function LiveIndicator({
+  label = 'Live',
+  tone = 'info',
+  isDemo = false,
+  className,
+  ...props
+}: LiveIndicatorProps) {
   if (isDemo) {
     return (
       <span
@@ -38,7 +44,10 @@ function LiveIndicator({ label = 'Live', tone = 'info', isDemo = false, classNam
         )}
         {...props}
       >
-        <span className="border-muted-foreground/40 size-1.5 rounded-full border" aria-hidden="true" />
+        <span
+          className="border-muted-foreground/40 size-1.5 rounded-full border"
+          aria-hidden="true"
+        />
         Demo data
       </span>
     )
@@ -49,12 +58,27 @@ function LiveIndicator({ label = 'Live', tone = 'info', isDemo = false, classNam
   return (
     <span
       data-slot="live-indicator"
-      className={cn('inline-flex items-center gap-1.5 text-xs font-medium tracking-wide', textClass, className)}
+      className={cn(
+        'inline-flex items-center gap-1.5 text-xs font-medium tracking-wide',
+        textClass,
+        className,
+      )}
       {...props}
     >
       <span className="relative flex size-1.5" aria-hidden="true">
-        <span className={cn('absolute inline-flex size-full animate-ping rounded-full opacity-60', dotClass)} />
-        <span className={cn('relative inline-flex size-1.5 rounded-full', dotClass, toneGlowClass[tone])} />
+        <span
+          className={cn(
+            'absolute inline-flex size-full animate-ping rounded-full opacity-60',
+            dotClass,
+          )}
+        />
+        <span
+          className={cn(
+            'relative inline-flex size-1.5 rounded-full',
+            dotClass,
+            toneGlowClass[tone],
+          )}
+        />
       </span>
       {label}
     </span>

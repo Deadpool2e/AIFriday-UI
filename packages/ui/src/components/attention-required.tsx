@@ -1,5 +1,9 @@
 import * as React from 'react'
-import { AlertTriangleIcon, ArrowRightIcon, CheckCircle2Icon } from 'lucide-react'
+import {
+  AlertTriangleIcon,
+  ArrowRightIcon,
+  CheckCircle2Icon,
+} from 'lucide-react'
 
 import { cn } from '../lib/cn'
 import { Button } from './button'
@@ -11,7 +15,10 @@ export interface AttentionItem {
   severity?: 'high' | 'medium' | 'low'
 }
 
-interface AttentionRequiredProps extends Omit<React.ComponentProps<'div'>, 'title'> {
+interface AttentionRequiredProps extends Omit<
+  React.ComponentProps<'div'>,
+  'title'
+> {
   items: AttentionItem[]
   onItemClick?: (item: AttentionItem) => void
   emptyDescription?: string
@@ -44,10 +51,15 @@ function AttentionRequired({
       <div className="flex items-center justify-between gap-2 border-b px-4 py-3">
         <div className="flex items-center gap-2">
           <AlertTriangleIcon
-            className={cn('size-4', items.length > 0 ? 'text-warning' : 'text-muted-foreground')}
+            className={cn(
+              'size-4',
+              items.length > 0 ? 'text-warning' : 'text-muted-foreground',
+            )}
             aria-hidden="true"
           />
-          <p className="text-sm font-semibold tracking-tight">Attention required</p>
+          <p className="text-sm font-semibold tracking-tight">
+            Attention required
+          </p>
         </div>
         {items.length > 0 && (
           <span className="bg-warning/10 text-warning rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">
@@ -57,11 +69,16 @@ function AttentionRequired({
       </div>
       {items.length === 0 ? (
         <div className="flex items-start gap-2.5 px-4 py-4">
-          <CheckCircle2Icon className="text-success mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <CheckCircle2Icon
+            className="text-success mt-0.5 size-4 shrink-0"
+            aria-hidden="true"
+          />
           <div className="space-y-1">
             <p className="text-sm">{emptyDescription}</p>
             {lastCheckedLabel && (
-              <p className="text-muted-foreground text-xs">Last checked: {lastCheckedLabel}</p>
+              <p className="text-muted-foreground text-xs">
+                Last checked: {lastCheckedLabel}
+              </p>
             )}
           </div>
         </div>
@@ -76,7 +93,10 @@ function AttentionRequired({
               >
                 <span className="flex items-center gap-2.5">
                   <AlertTriangleIcon
-                    className={cn('size-3.5 shrink-0', severityClass[item.severity ?? 'medium'])}
+                    className={cn(
+                      'size-3.5 shrink-0',
+                      severityClass[item.severity ?? 'medium'],
+                    )}
                     aria-hidden="true"
                   />
                   {item.label}
@@ -89,7 +109,11 @@ function AttentionRequired({
       )}
       {items.length > 0 && (
         <div className="border-t px-4 py-2.5">
-          <Button variant="outline" size="sm" onClick={() => onItemClick?.(items[0])}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onItemClick?.(items[0])}
+          >
             Review
           </Button>
         </div>

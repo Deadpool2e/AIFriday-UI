@@ -7,12 +7,21 @@ async function mockEnrollSpeaker(): Promise<{ enrolled: boolean }> {
   return { enrolled: true }
 }
 
-async function mockVerifySpeaker(): Promise<{ score: number; verified: boolean }> {
+async function mockVerifySpeaker(): Promise<{
+  score: number
+  verified: boolean
+}> {
   return { score: 0.9, verified: true }
 }
 
-const enrollSpeaker = resolveVizorionService(mockEnrollSpeaker, vizorionClient.enrollSpeaker)
-const verifySpeaker = resolveVizorionService(mockVerifySpeaker, vizorionClient.verifySpeaker)
+const enrollSpeaker = resolveVizorionService(
+  mockEnrollSpeaker,
+  vizorionClient.enrollSpeaker,
+)
+const verifySpeaker = resolveVizorionService(
+  mockVerifySpeaker,
+  vizorionClient.verifySpeaker,
+)
 
 export function useEnrollSpeaker() {
   return useMutation({

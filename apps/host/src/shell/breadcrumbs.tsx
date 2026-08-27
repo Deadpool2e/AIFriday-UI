@@ -30,7 +30,12 @@ function prettify(segment: string): string {
   if (/^[A-Z]/.test(segment)) return segment
   return segment
     .replace(/-/g, ' ')
-    .replace(/\b\w+\b/g, (word) => ACRONYM_WORDS[word.toLowerCase()] ?? word[0].toUpperCase() + word.slice(1))
+    .replace(
+      /\b\w+\b/g,
+      (word) =>
+        ACRONYM_WORDS[word.toLowerCase()] ??
+        word[0].toUpperCase() + word.slice(1),
+    )
 }
 
 interface Crumb {

@@ -15,8 +15,10 @@ import {
 import { Label } from './label'
 import type { RiskLevel } from './risk-indicator'
 import { Textarea } from './textarea'
+import { Disclosure } from './disclosure'
 
-export type ApprovalActionType = 'approve' | 'reject' | 'send_back' | 'request_info'
+export type ApprovalActionType =
+  'approve' | 'reject' | 'send_back' | 'request_info'
 
 interface HumanApprovalPanelAgentExecution {
   agent: string
@@ -48,7 +50,10 @@ interface HumanApprovalPanelProps {
   className?: string
 }
 
-const guardrailStatusClassName: Record<HumanApprovalPanelGuardrailCheck['status'], string> = {
+const guardrailStatusClassName: Record<
+  HumanApprovalPanelGuardrailCheck['status'],
+  string
+> = {
   passed: 'text-success',
   flagged: 'text-warning',
   blocked: 'text-danger',
@@ -72,6 +77,11 @@ function HumanApprovalPanel({
 }: HumanApprovalPanelProps) {
   const [comment, setComment] = React.useState('')
   const [confirmRejectOpen, setConfirmRejectOpen] = React.useState(false)
+  // Which of the four actions is in flight, so only the button that was
+  // pressed shows a spinner. `isSubmitting` alone can't say that, and a
+  // row of four simultaneously-busy buttons reads as a stuck UI.
+  const [submittedAction, setSubmittedAction] =
+    React.useState<ApprovalActionType | null>(null)
 
   // Approve is the only action that doesn't need a paper trail — reject,
   // send-back, and request-info all leave someone else needing to know
@@ -79,11 +89,22 @@ function HumanApprovalPanel({
   const commentRequired = comment.trim().length === 0
 
   function handleAction(action: ApprovalActionType) {
+    setSubmittedAction(action)
     onSubmit(action, comment.trim())
   }
 
+  const pendingFor = (action: ApprovalActionType) =>
+    isSubmitting && submittedAction === action
+
+  const guardrailIssues = guardrailChecks.filter(
+    (check) => check.status !== 'passed',
+  ).length
+
   return (
-    <div data-slot="human-approval-panel" className={cn('space-y-6', className)}>
+    <div
+      data-slot="human-approval-panel"
+      className={cn('space-y-6', className)}
+    >
       <AIRecommendationCard
         decision={decision}
         confidence={confidence}
@@ -91,38 +112,83 @@ function HumanApprovalPanel({
         summary={summary}
       />
 
+      {/* Evidence, folded. The reviewer's decision hangs on the
+          recommendation card above; who ran, what passed, and what it was
+          based on are the backup they open when something looks off. Each
+          row keeps its conclusion on the trigger, so nothing meaningful is
+          hidden — only the detail is. Guardrails default open when
+          anything was flagged or blocked, because that is the one case a
+          reviewer must not be able to skip past. */}
       <div className="space-y-2">
-        <p className="text-sm font-medium">Agents involved</p>
-        <ul className="space-y-1.5">
-          {agentsInvolved.map((agent) => (
-            <li key={agent.agent} className="flex items-center justify-between text-sm">
-              <span>{agent.agent}</span>
-              <span className="text-muted-foreground text-xs capitalize">{agent.status}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+        <p className="text-muted-foreground text-[11px] font-semibold tracking-widest uppercase">
+          Evidence
+        </p>
 
-      <div className="space-y-2">
-        <p className="text-sm font-medium">Guardrail results</p>
-        <ul className="space-y-1.5">
-          {guardrailChecks.map((check) => (
-            <li key={check.id} className="text-sm">
-              <div className="flex items-center justify-between">
-                <span>{check.rule}</span>
-                <span className={cn('text-xs font-medium capitalize', guardrailStatusClassName[check.status])}>
-                  {check.status}
+        <Disclosure
+          title="Guardrail results"
+          defaultOpen={guardrailIssues > 0}
+          summary={
+            <span
+              className={
+                guardrailIssues > 0 ? 'text-warning font-medium' : undefined
+              }
+            >
+              {guardrailIssues > 0
+                ? `${guardrailIssues} needs attention`
+                : `${guardrailChecks.length} passed`}
+            </span>
+          }
+          disabled={guardrailChecks.length === 0}
+        >
+          <ul className="space-y-2">
+            {guardrailChecks.map((check) => (
+              <li key={check.id} className="text-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <span>{check.rule}</span>
+                  <span
+                    className={cn(
+                      'text-xs font-medium capitalize',
+                      guardrailStatusClassName[check.status],
+                    )}
+                  >
+                    {check.status}
+                  </span>
+                </div>
+                {check.detail && (
+                  <p className="text-muted-foreground mt-0.5 text-xs">
+                    {check.detail}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </Disclosure>
+
+        <Disclosure
+          title="Agents involved"
+          summary={`${agentsInvolved.length} ${agentsInvolved.length === 1 ? 'agent' : 'agents'}`}
+          disabled={agentsInvolved.length === 0}
+        >
+          <ul className="space-y-1.5">
+            {agentsInvolved.map((agent) => (
+              <li
+                key={agent.agent}
+                className="flex items-center justify-between gap-3 text-sm"
+              >
+                <span>{agent.agent}</span>
+                <span className="text-muted-foreground text-xs capitalize">
+                  {agent.status}
                 </span>
-              </div>
-              {check.detail && <p className="text-muted-foreground text-xs">{check.detail}</p>}
-            </li>
-          ))}
-        </ul>
-      </div>
+              </li>
+            ))}
+          </ul>
+        </Disclosure>
 
-      {sources.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Sources</p>
+        <Disclosure
+          title="Sources"
+          summary={`${sources.length} ${sources.length === 1 ? 'document' : 'documents'}`}
+          disabled={sources.length === 0}
+        >
           <ul className="space-y-1">
             {sources.map((source) => (
               <li key={source.id} className="text-muted-foreground text-sm">
@@ -130,14 +196,14 @@ function HumanApprovalPanel({
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        </Disclosure>
+      </div>
 
       <div className="space-y-2">
         <Label htmlFor="approval-comment">
           Comment{' '}
           <span className="text-muted-foreground font-normal">
-            (required for reject / send back / request info)
+            — optional to approve, required for every other action
           </span>
         </Label>
         <Textarea
@@ -150,31 +216,59 @@ function HumanApprovalPanel({
         />
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Button onClick={() => handleAction('approve')} disabled={isSubmitting}>
+      {/* Four equally-weighted buttons made every option look like the
+          expected one. Approve is the primary path and reads as it;
+          Reject is the destructive counterweight; send-back and
+          request-info are real but secondary, so they sit apart at ghost
+          weight instead of competing for the same visual slot. */}
+      <div className="flex flex-wrap items-center gap-2 border-t pt-4">
+        <Button
+          onClick={() => handleAction('approve')}
+          disabled={isSubmitting}
+          pending={pendingFor('approve')}
+          pendingLabel="Approving…"
+        >
           Approve
         </Button>
         <Button
           variant="outline"
-          onClick={() => handleAction('send_back')}
-          disabled={isSubmitting || commentRequired}
-        >
-          Send Back
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => handleAction('request_info')}
-          disabled={isSubmitting || commentRequired}
-        >
-          Request More Info
-        </Button>
-        <Button
-          variant="destructive"
+          className="text-danger hover:text-danger hover:border-danger/50"
           onClick={() => setConfirmRejectOpen(true)}
           disabled={isSubmitting || commentRequired}
+          pending={pendingFor('reject')}
+          pendingLabel="Rejecting…"
         >
           Reject
         </Button>
+        <span
+          className="bg-border mx-1 hidden h-5 w-px sm:block"
+          aria-hidden="true"
+        />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleAction('send_back')}
+          disabled={isSubmitting || commentRequired}
+          pending={pendingFor('send_back')}
+          pendingLabel="Sending back…"
+        >
+          Send back
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleAction('request_info')}
+          disabled={isSubmitting || commentRequired}
+          pending={pendingFor('request_info')}
+          pendingLabel="Requesting…"
+        >
+          Request info
+        </Button>
+        {commentRequired && (
+          <p className="text-muted-foreground w-full text-xs sm:w-auto sm:ml-auto">
+            Add a comment to reject, send back, or request info.
+          </p>
+        )}
       </div>
 
       <Dialog open={confirmRejectOpen} onOpenChange={setConfirmRejectOpen}>
@@ -182,8 +276,9 @@ function HumanApprovalPanel({
           <DialogHeader>
             <DialogTitle>Reject this request?</DialogTitle>
             <DialogDescription>
-              This overrides the AI&apos;s {decisionConfigLabel(decision)} recommendation and cannot be
-              undone from here. Your comment will be recorded with the decision.
+              This overrides the AI&apos;s {decisionConfigLabel(decision)}{' '}
+              recommendation and cannot be undone from here. Your comment will
+              be recorded with the decision.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -197,6 +292,8 @@ function HumanApprovalPanel({
                 handleAction('reject')
               }}
               disabled={isSubmitting}
+              pending={pendingFor('reject')}
+              pendingLabel="Rejecting…"
             >
               Confirm reject
             </Button>
@@ -208,7 +305,13 @@ function HumanApprovalPanel({
 }
 
 function decisionConfigLabel(decision: AIDecision): string {
-  return decision === 'approve' ? 'Approve' : decision === 'escalate' ? 'Escalate' : decision === 'reject' ? 'Reject' : 'Needs review'
+  return decision === 'approve'
+    ? 'Approve'
+    : decision === 'escalate'
+      ? 'Escalate'
+      : decision === 'reject'
+        ? 'Reject'
+        : 'Needs review'
 }
 
 export { HumanApprovalPanel }

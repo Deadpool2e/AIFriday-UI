@@ -16,7 +16,7 @@ export function RemoteMainApp() {
       fallbackTitle="Main App unavailable"
       fallbackDescription="The business application couldn't be loaded. Make sure apps/main-app's dev server is running, then retry."
     >
-      <Suspense fallback={<RemoteLoadingFallback />}>
+      <Suspense fallback={<RemoteLoadingFallback title="Workspace" />}>
         <MainAppRoutes />
       </Suspense>
     </ErrorBoundary>

@@ -21,11 +21,17 @@ const riskLevelClassName: Record<KnownRiskLevel, string> = {
 
 export type VizorionApprovalResolution = 'approved' | 'edited' | 'rejected'
 
-interface VizorionApprovalCardProps extends Omit<React.ComponentProps<'div'>, 'onSubmit'> {
+interface VizorionApprovalCardProps extends Omit<
+  React.ComponentProps<'div'>,
+  'onSubmit'
+> {
   toolName: string
   toolArguments: Record<string, unknown>
   riskLevel: string
-  onRespond: (resolution: VizorionApprovalResolution, data?: Record<string, unknown>) => void
+  onRespond: (
+    resolution: VizorionApprovalResolution,
+    data?: Record<string, unknown>,
+  ) => void
   isSubmitting?: boolean
 }
 
@@ -45,11 +51,15 @@ function VizorionApprovalCard({
   ...props
 }: VizorionApprovalCardProps) {
   const [editing, setEditing] = React.useState(false)
-  const [editedJson, setEditedJson] = React.useState(() => JSON.stringify(toolArguments, null, 2))
+  const [editedJson, setEditedJson] = React.useState(() =>
+    JSON.stringify(toolArguments, null, 2),
+  )
   const [editError, setEditError] = React.useState<string | null>(null)
 
   const normalizedRisk = riskLevel.toLowerCase() as KnownRiskLevel
-  const riskClassName = riskLevelClassName[normalizedRisk] ?? 'bg-muted text-muted-foreground border-transparent'
+  const riskClassName =
+    riskLevelClassName[normalizedRisk] ??
+    'bg-muted text-muted-foreground border-transparent'
 
   function submitEdited() {
     try {
@@ -64,7 +74,10 @@ function VizorionApprovalCard({
   return (
     <div
       data-slot="vizorion-approval-card"
-      className={cn('bg-surface w-full space-y-3 rounded-lg border p-3', className)}
+      className={cn(
+        'bg-surface w-full space-y-3 rounded-lg border p-3',
+        className,
+      )}
       {...props}
     >
       <div className="flex items-center justify-between gap-2">
@@ -72,7 +85,10 @@ function VizorionApprovalCard({
           <ShieldAlertIcon className="text-warning size-4" aria-hidden="true" />
           Approval needed to run <span className="font-mono">{toolName}</span>
         </p>
-        <Badge className={cn('shrink-0 border capitalize', riskClassName)} variant="outline">
+        <Badge
+          className={cn('shrink-0 border capitalize', riskClassName)}
+          variant="outline"
+        >
           {riskLevel} risk
         </Badge>
       </div>
@@ -100,19 +116,38 @@ function VizorionApprovalCard({
             <Button size="sm" onClick={submitEdited} disabled={isSubmitting}>
               Submit edited arguments
             </Button>
-            <Button size="sm" variant="outline" onClick={() => setEditing(false)} disabled={isSubmitting}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setEditing(false)}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
           </>
         ) : (
           <>
-            <Button size="sm" onClick={() => onRespond('approved')} disabled={isSubmitting}>
+            <Button
+              size="sm"
+              onClick={() => onRespond('approved')}
+              disabled={isSubmitting}
+            >
               Approve
             </Button>
-            <Button size="sm" variant="outline" onClick={() => setEditing(true)} disabled={isSubmitting}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setEditing(true)}
+              disabled={isSubmitting}
+            >
               Edit arguments
             </Button>
-            <Button size="sm" variant="destructive" onClick={() => onRespond('rejected')} disabled={isSubmitting}>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => onRespond('rejected')}
+              disabled={isSubmitting}
+            >
               Reject
             </Button>
           </>

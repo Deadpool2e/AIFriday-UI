@@ -43,6 +43,19 @@ export interface RecentExecution {
   error?: string
 }
 
+// A day of platform-wide operational history. Every series here ends on
+// the value ControlTowerMetrics currently reports, so the last point of
+// any chart drawn from this is the same number shown in the KPI above it —
+// the history around it is deterministic wobble, the same technique
+// getAgentPerformanceTrend already uses per agent.
+export interface ControlTowerTrendPoint {
+  date: string
+  successRate: number
+  avgLatencyMs: number
+  tokensUsed: number
+  guardrailBlocks: number
+}
+
 export interface ControlTowerMetrics {
   activeAgents: number
   totalRequests: number

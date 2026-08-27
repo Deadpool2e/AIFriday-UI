@@ -19,7 +19,11 @@ interface AgentCommunicationProps extends React.ComponentProps<'ol'> {
 // per-agent input/output — this is the message one agent explicitly
 // passed to the next at a handoff point, not either agent's own summary
 // of its own work.
-function AgentCommunication({ messages, className, ...props }: AgentCommunicationProps) {
+function AgentCommunication({
+  messages,
+  className,
+  ...props
+}: AgentCommunicationProps) {
   const ordered = [...messages].reverse()
 
   return (
@@ -32,7 +36,10 @@ function AgentCommunication({ messages, className, ...props }: AgentCommunicatio
         <li key={message.id} className="text-sm">
           <div className="flex items-center gap-1.5 font-medium">
             <span>{message.sender}</span>
-            <ArrowRightIcon className="text-muted-foreground size-3.5" aria-hidden="true" />
+            <ArrowRightIcon
+              className="text-muted-foreground size-3.5"
+              aria-hidden="true"
+            />
             <span>{message.receiver}</span>
             <span className="text-muted-foreground ml-auto text-xs tabular-nums">
               {new Date(message.timestamp).toLocaleTimeString('en-US', {

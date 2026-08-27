@@ -60,3 +60,10 @@ export function useRecentExecutions() {
     queryFn: () => mockControlTowerService.getRecentExecutions(),
   })
 }
+
+export function useControlTowerMetricsTrend() {
+  return useQuery({
+    queryKey: ['control-tower', 'metrics-trend'],
+    queryFn: () => mockControlTowerService.getMetricsTrend(),
+  })
+}

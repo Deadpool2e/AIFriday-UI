@@ -71,7 +71,11 @@ export const navItems: NavItem[] = [
   },
 ]
 
-export const navGroupOrder: NavGroup[] = ['Workspace', 'Intelligence', 'AI Operations']
+export const navGroupOrder: NavGroup[] = [
+  'Workspace',
+  'Intelligence',
+  'AI Operations',
+]
 
 // Not part of navGroupOrder's grouped rendering — Settings is pinned
 // separately below the group list in Sidebar, so `group` here is unused

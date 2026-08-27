@@ -15,7 +15,11 @@ interface StreamVizorionChatOptions {
 }
 
 export async function streamVizorionChat(
-  request: { conversationId: string; message: string; responseLanguage?: string },
+  request: {
+    conversationId: string
+    message: string
+    responseLanguage?: string
+  },
   { onEvent, signal }: StreamVizorionChatOptions,
 ): Promise<void> {
   const response = await fetch(`${VIZORION_API_BASE_URL}/v1/chat/stream`, {

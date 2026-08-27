@@ -91,8 +91,9 @@ export function AutowakeEnrollmentDialog({
         <DialogHeader>
           <DialogTitle>Enroll your voice</DialogTitle>
           <DialogDescription>
-            Record {SAMPLE_COUNT} short samples of yourself speaking naturally — Autowake uses these to make sure
-            only your voice can trigger it after "Hey Athena".
+            Record {SAMPLE_COUNT} short samples of yourself speaking naturally —
+            Autowake uses these to make sure only your voice can trigger it
+            after "Hey Athena".
           </DialogDescription>
         </DialogHeader>
 
@@ -108,7 +109,11 @@ export function AutowakeEnrollmentDialog({
                     : 'text-muted-foreground',
                 )}
               >
-                {index < clips.length ? <CheckIcon className="size-4" /> : index + 1}
+                {index < clips.length ? (
+                  <CheckIcon className="size-4" />
+                ) : (
+                  index + 1
+                )}
               </div>
             ))}
           </div>
@@ -120,22 +125,41 @@ export function AutowakeEnrollmentDialog({
               onClick={recording ? stopSample : startSample}
               disabled={isEnrolling}
             >
-              {recording ? <SquareIcon className="mr-2 size-4" /> : <MicIcon className="mr-2 size-4" />}
-              {recording ? 'Stop recording' : `Record sample ${clips.length + 1} of ${SAMPLE_COUNT}`}
+              {recording ? (
+                <SquareIcon className="mr-2 size-4" />
+              ) : (
+                <MicIcon className="mr-2 size-4" />
+              )}
+              {recording
+                ? 'Stop recording'
+                : `Record sample ${clips.length + 1} of ${SAMPLE_COUNT}`}
             </Button>
           ) : (
-            <p className="text-muted-foreground text-sm">All samples recorded — ready to save.</p>
+            <p className="text-muted-foreground text-sm">
+              All samples recorded — ready to save.
+            </p>
           )}
 
           {error && <p className="text-danger text-xs">{error}</p>}
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isEnrolling}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isEnrolling}
+          >
             Cancel
           </Button>
-          <Button type="button" onClick={() => void handleSave()} disabled={remaining > 0 || isEnrolling}>
-            {isEnrolling ? <Loader2Icon className="mr-2 size-4 animate-spin" /> : null}
+          <Button
+            type="button"
+            onClick={() => void handleSave()}
+            disabled={remaining > 0 || isEnrolling}
+          >
+            {isEnrolling ? (
+              <Loader2Icon className="mr-2 size-4 animate-spin" />
+            ) : null}
             Save voice profile
           </Button>
         </DialogFooter>

@@ -1,6 +1,10 @@
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { buildAgentGraphTopology, describeTraceEvent, useLiveAgentTrace } from '@platform/api-client'
+import {
+  buildAgentGraphTopology,
+  describeTraceEvent,
+  useLiveAgentTrace,
+} from '@platform/api-client'
 import {
   AgentCommunication,
   AgentGraphDiagram,
@@ -45,7 +49,8 @@ export function ExecutionTracePage() {
 }
 
 function ExecutionTraceView({ executionId }: { executionId: string }) {
-  const { events, steps, toolCalls, messages, isComplete, requestId } = useLiveAgentTrace(executionId)
+  const { events, steps, toolCalls, messages, isComplete, requestId } =
+    useLiveAgentTrace(executionId)
   useDocumentTitle(`${executionId} — AI Control Tower`)
 
   // The pipeline's shape never changes across executions — only which
@@ -53,7 +58,10 @@ function ExecutionTraceView({ executionId }: { executionId: string }) {
   // does, so the topology is a plain constant and only node/edge *state*
   // is derived from this execution's own steps.
   const topology = React.useMemo(() => buildAgentGraphTopology(), [])
-  const stepByAgent = React.useMemo(() => new Map(steps.map((step) => [step.agent, step])), [steps])
+  const stepByAgent = React.useMemo(
+    () => new Map(steps.map((step) => [step.agent, step])),
+    [steps],
+  )
   const graphNodes = React.useMemo(
     () =>
       topology.nodes.map((node) => ({
@@ -63,7 +71,11 @@ function ExecutionTraceView({ executionId }: { executionId: string }) {
     [topology, stepByAgent],
   )
   const graphEdges = React.useMemo(
-    () => topology.edges.map((edge) => ({ ...edge, active: stepByAgent.has(edge.target) })),
+    () =>
+      topology.edges.map((edge) => ({
+        ...edge,
+        active: stepByAgent.has(edge.target),
+      })),
     [topology, stepByAgent],
   )
 
@@ -81,9 +93,12 @@ function ExecutionTraceView({ executionId }: { executionId: string }) {
     <div className="max-w-6xl space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <h1 className="font-mono text-2xl font-semibold tracking-tight">{executionId}</h1>
+          <h2 className="font-mono text-base font-semibold tracking-tight">
+            {executionId}
+          </h2>
           <p className="text-muted-foreground text-sm">
-            Request <span className="font-mono">{requestId}</span> · {steps.length} stage
+            Request <span className="font-mono">{requestId}</span> ·{' '}
+            {steps.length} stage
             {steps.length === 1 ? '' : 's'}
             {isComplete ? '' : ' so far'}
           </p>
@@ -95,8 +110,9 @@ function ExecutionTraceView({ executionId }: { executionId: string }) {
         <CardHeader>
           <CardTitle>Agent graph</CardTitle>
           <CardDescription>
-            The pipeline this execution runs through — colored by each agent's live status, with
-            the conditional Guardrails branch this run actually took highlighted.
+            The pipeline this execution runs through — colored by each agent's
+            live status, with the conditional Guardrails branch this run
+            actually took highlighted.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -109,7 +125,8 @@ function ExecutionTraceView({ executionId }: { executionId: string }) {
           <CardHeader>
             <CardTitle>Execution trace</CardTitle>
             <CardDescription>
-              Every agent this execution touched, in order, with input/output and cost.
+              Every agent this execution touched, in order, with input/output
+              and cost.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -128,7 +145,9 @@ function ExecutionTraceView({ executionId }: { executionId: string }) {
         <Card>
           <CardHeader>
             <CardTitle>Execution timeline</CardTitle>
-            <CardDescription>Every raw event, as it happened, newest first.</CardDescription>
+            <CardDescription>
+              Every raw event, as it happened, newest first.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {timelineEvents.length === 0 ? (
@@ -148,11 +167,15 @@ function ExecutionTraceView({ executionId }: { executionId: string }) {
         <Card>
           <CardHeader>
             <CardTitle>Tool monitor</CardTitle>
-            <CardDescription>Deterministic tool calls each agent made, before any LLM call.</CardDescription>
+            <CardDescription>
+              Deterministic tool calls each agent made, before any LLM call.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {toolCalls.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No tool calls yet.</p>
+              <p className="text-muted-foreground text-sm">
+                No tool calls yet.
+              </p>
             ) : (
               <ToolMonitor calls={toolCalls} />
             )}
@@ -162,11 +185,15 @@ function ExecutionTraceView({ executionId }: { executionId: string }) {
         <Card>
           <CardHeader>
             <CardTitle>Agent communication</CardTitle>
-            <CardDescription>Handoff messages passed from one agent to the next.</CardDescription>
+            <CardDescription>
+              Handoff messages passed from one agent to the next.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {messages.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No agent-to-agent messages yet.</p>
+              <p className="text-muted-foreground text-sm">
+                No agent-to-agent messages yet.
+              </p>
             ) : (
               <AgentCommunication messages={messages} />
             )}

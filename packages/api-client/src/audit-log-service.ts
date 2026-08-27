@@ -54,7 +54,8 @@ const MOCK_AUDIT_LOG: AuditLogEntry[] = [
     category: 'system',
     action: 'Incident opened',
     actor: { type: 'system', name: 'Monitoring' },
-    detail: 'Vector Database query latency exceeded threshold (p95 > 800ms). Incident INC-118 opened.',
+    detail:
+      'Vector Database query latency exceeded threshold (p95 > 800ms). Incident INC-118 opened.',
     timestamp: '45 min ago',
   },
   {
@@ -99,7 +100,8 @@ const MOCK_AUDIT_LOG: AuditLogEntry[] = [
     category: 'system',
     action: 'Incident resolved',
     actor: { type: 'system', name: 'Monitoring' },
-    detail: 'LLM Gateway rate-limit errors resolved after upstream traffic normalized. Incident INC-117 closed.',
+    detail:
+      'LLM Gateway rate-limit errors resolved after upstream traffic normalized. Incident INC-117 closed.',
     timestamp: '2 days ago',
   },
   {
@@ -107,7 +109,8 @@ const MOCK_AUDIT_LOG: AuditLogEntry[] = [
     category: 'approval',
     action: 'Rejected request',
     actor: { type: 'user', name: 'Marcus Webb' },
-    detail: 'Rejected REQ-92780 — did not meet policy thresholds even after review.',
+    detail:
+      'Rejected REQ-92780 — did not meet policy thresholds even after review.',
     requestId: 'REQ-92780',
     timestamp: '3 days ago',
   },
@@ -116,12 +119,15 @@ const MOCK_AUDIT_LOG: AuditLogEntry[] = [
     category: 'access',
     action: 'Permission denied',
     actor: { type: 'user', name: 'Priya Nair' },
-    detail: 'Attempted to open the Guardrails page without GUARDRAIL_VIEW permission.',
+    detail:
+      'Attempted to open the Guardrails page without GUARDRAIL_VIEW permission.',
     timestamp: '3 days ago',
   },
 ]
 
-function computeCategoryCounts(entries: AuditLogEntry[]): Record<AuditCategory, number> {
+function computeCategoryCounts(
+  entries: AuditLogEntry[],
+): Record<AuditCategory, number> {
   return {
     execution: entries.filter((e) => e.category === 'execution').length,
     guardrail: entries.filter((e) => e.category === 'guardrail').length,

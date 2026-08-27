@@ -55,13 +55,17 @@ function computeSummary(): ExplainabilitySummary {
     const rec = request.aiRecommendation!
     decisionCounts[rec.decision] += 1
     confidenceSum += rec.confidence
-    if (rec.confidence < NEEDS_REVIEW_CONFIDENCE_THRESHOLD) lowConfidenceCount += 1
+    if (rec.confidence < NEEDS_REVIEW_CONFIDENCE_THRESHOLD)
+      lowConfidenceCount += 1
   }
 
-  const humanReviewCount = MOCK_REQUESTS.filter((r) => r.humanReviewRequired).length
+  const humanReviewCount = MOCK_REQUESTS.filter(
+    (r) => r.humanReviewRequired,
+  ).length
 
   return {
-    avgConfidence: decided.length === 0 ? 0 : Math.round(confidenceSum / decided.length),
+    avgConfidence:
+      decided.length === 0 ? 0 : Math.round(confidenceSum / decided.length),
     decisionCounts,
     lowConfidenceCount,
     humanReviewRate:
@@ -73,7 +77,11 @@ function computeSummary(): ExplainabilitySummary {
 
 function computeConfidenceBands(): ConfidenceBand[] {
   const decided = decidedRequests()
-  const counts: Record<ConfidenceBand['band'], number> = { high: 0, medium: 0, low: 0 }
+  const counts: Record<ConfidenceBand['band'], number> = {
+    high: 0,
+    medium: 0,
+    low: 0,
+  }
   for (const request of decided) {
     counts[confidenceBand(request.aiRecommendation!.confidence)] += 1
   }
@@ -86,8 +94,12 @@ function computeConfidenceBands(): ConfidenceBand[] {
 
 function lowConfidenceDecisions(): LowConfidenceDecision[] {
   return decidedRequests()
-    .filter((r) => r.aiRecommendation!.confidence < NEEDS_REVIEW_CONFIDENCE_THRESHOLD)
-    .sort((a, b) => a.aiRecommendation!.confidence - b.aiRecommendation!.confidence)
+    .filter(
+      (r) => r.aiRecommendation!.confidence < NEEDS_REVIEW_CONFIDENCE_THRESHOLD,
+    )
+    .sort(
+      (a, b) => a.aiRecommendation!.confidence - b.aiRecommendation!.confidence,
+    )
     .slice(0, 8)
     .map((r) => ({
       requestId: r.id,
@@ -106,12 +118,37 @@ function lowConfidenceDecisions(): LowConfidenceDecision[] {
 // model feature-attribution data (Phase 22 backend integration), which
 // this mock has no equivalent of.
 const DECISION_FACTORS: DecisionFactor[] = [
-  { name: 'Risk Score', description: 'Composite financial and operational risk score from the Risk Agent.', weightPercent: 28 },
-  { name: 'Policy Compliance Match', description: 'How closely the request matches known compliant patterns.', weightPercent: 22 },
-  { name: 'Historical Pattern Similarity', description: 'Similarity to previously approved or rejected requests.', weightPercent: 18 },
-  { name: 'Sanctions / Watchlist Check', description: 'Screening result against active sanctions and watchlists.', weightPercent: 15 },
-  { name: 'Transaction Amount Threshold', description: 'Whether the amount crosses a policy review threshold.', weightPercent: 10 },
-  { name: 'Customer Due Diligence Status', description: 'Completeness of on-file customer due diligence.', weightPercent: 7 },
+  {
+    name: 'Risk Score',
+    description:
+      'Composite financial and operational risk score from the Risk Agent.',
+    weightPercent: 28,
+  },
+  {
+    name: 'Policy Compliance Match',
+    description: 'How closely the request matches known compliant patterns.',
+    weightPercent: 22,
+  },
+  {
+    name: 'Historical Pattern Similarity',
+    description: 'Similarity to previously approved or rejected requests.',
+    weightPercent: 18,
+  },
+  {
+    name: 'Sanctions / Watchlist Check',
+    description: 'Screening result against active sanctions and watchlists.',
+    weightPercent: 15,
+  },
+  {
+    name: 'Transaction Amount Threshold',
+    description: 'Whether the amount crosses a policy review threshold.',
+    weightPercent: 10,
+  },
+  {
+    name: 'Customer Due Diligence Status',
+    description: 'Completeness of on-file customer due diligence.',
+    weightPercent: 7,
+  },
 ]
 
 export interface ExplainabilityService {

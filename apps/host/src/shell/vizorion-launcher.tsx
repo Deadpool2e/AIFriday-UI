@@ -1,8 +1,16 @@
-import { ArrowUpRightIcon, Loader2Icon, MessageCircleIcon, MicIcon, SquareIcon, XIcon } from 'lucide-react'
+import {
+  ArrowUpRightIcon,
+  Loader2Icon,
+  MessageCircleIcon,
+  MicIcon,
+  SquareIcon,
+  XIcon,
+} from 'lucide-react'
 import { Link } from 'react-router'
 import type { useVizorionChat, VizorionChatMessage } from '@platform/api-client'
 import { useAuth } from '@platform/auth'
 import {
+  AIActivity,
   Button,
   ChatPanel,
   type ChatPanelMessage,
@@ -13,10 +21,16 @@ import {
   VizorionToolCallChip,
 } from '@platform/ui'
 
-import { AUTOWAKE_PANEL_STATES, AUTOWAKE_STATE_LABEL } from './autowake/autowake-labels'
+import {
+  AUTOWAKE_PANEL_STATES,
+  AUTOWAKE_STATE_LABEL,
+} from './autowake/autowake-labels'
 import type { useAutowake } from './autowake/use-autowake'
 
-const SUGGESTED_PROMPTS = ['What can you help me with?', 'Summarize this conversation so far']
+const SUGGESTED_PROMPTS = [
+  'What can you help me with?',
+  'Summarize this conversation so far',
+]
 
 function VizorionMessageExtra({
   message,
@@ -27,21 +41,34 @@ function VizorionMessageExtra({
 }) {
   const persistedToolCalls = message.toolCalls ?? []
   const citations = message.citations ?? []
-  if (persistedToolCalls.length === 0 && citations.length === 0 && liveToolCalls.length === 0) return null
+  if (
+    persistedToolCalls.length === 0 &&
+    citations.length === 0 &&
+    liveToolCalls.length === 0
+  )
+    return null
 
   return (
     <div className="bg-surface w-full space-y-2 rounded-lg border p-3">
       {liveToolCalls.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {liveToolCalls.map((call) => (
-            <VizorionToolCallChip key={call.id} name={call.tool} status={call.status} />
+            <VizorionToolCallChip
+              key={call.id}
+              name={call.tool}
+              status={call.status}
+            />
           ))}
         </div>
       )}
       {persistedToolCalls.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {persistedToolCalls.map((call, index) => (
-            <VizorionToolCallChip key={`${call.name}-${index}`} name={call.name} status="completed" />
+            <VizorionToolCallChip
+              key={`${call.name}-${index}`}
+              name={call.name}
+              status="completed"
+            />
           ))}
         </div>
       )}
@@ -50,7 +77,11 @@ function VizorionMessageExtra({
           {citations.slice(0, 2).map((citation, index) => (
             <SourceCitation
               key={`${citation.document_id}-${index}`}
-              title={citation.page ? `${citation.document_id} (p. ${citation.page})` : citation.document_id}
+              title={
+                citation.page
+                  ? `${citation.document_id} (p. ${citation.page})`
+                  : citation.document_id
+              }
               snippet={citation.text}
             />
           ))}
@@ -76,10 +107,22 @@ interface VizorionLauncherProps {
   autowake: ReturnType<typeof useAutowake>
 }
 
-export function VizorionLauncher({ open, onOpenChange, chat, autowake }: VizorionLauncherProps) {
+export function VizorionLauncher({
+  open,
+  onOpenChange,
+  chat,
+  autowake,
+}: VizorionLauncherProps) {
   const { hasAnyPermission } = useAuth()
   const canUseVizorion = hasAnyPermission(['VIZORION_ASSISTANT'])
-  const { messages, sendMessage, isStreaming, liveToolCalls, pendingApproval, respondToApproval } = chat
+  const {
+    messages,
+    sendMessage,
+    isStreaming,
+    liveToolCalls,
+    pendingApproval,
+    respondToApproval,
+  } = chat
 
   if (!canUseVizorion) return null
 
@@ -108,12 +151,18 @@ export function VizorionLauncher({ open, onOpenChange, chat, autowake }: Vizorio
           >
             <div>
               <p className="flex items-center gap-1.5 text-sm font-semibold">
-                <MessageCircleIcon className="text-ai-accent size-4" aria-hidden="true" />
+                <MessageCircleIcon
+                  className="text-ai-accent size-4"
+                  aria-hidden="true"
+                />
                 Vizorion
               </p>
               <p className="text-muted-foreground mt-0.5 flex items-center gap-1.5 text-xs">
                 <span
-                  className={cn('size-1.5 rounded-full', isStreaming ? 'bg-info' : 'bg-success')}
+                  className={cn(
+                    'size-1.5 rounded-full',
+                    isStreaming ? 'bg-info' : 'bg-success',
+                  )}
                   aria-hidden="true"
                 />
                 {isStreaming ? 'Working' : 'Ready'}
@@ -121,7 +170,11 @@ export function VizorionLauncher({ open, onOpenChange, chat, autowake }: Vizorio
             </div>
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="icon" className="size-7" asChild>
-                <Link to="/vizorion" aria-label="Open full Vizorion" onClick={() => onOpenChange(false)}>
+                <Link
+                  to="/vizorion"
+                  aria-label="Open full Vizorion"
+                  onClick={() => onOpenChange(false)}
+                >
                   <ArrowUpRightIcon className="size-4" />
                 </Link>
               </Button>
@@ -140,7 +193,12 @@ export function VizorionLauncher({ open, onOpenChange, chat, autowake }: Vizorio
           {showAutowakeBanner && (
             <div className="bg-ai-accent/5 flex items-center justify-between gap-2 border-b px-3 py-2">
               <p className="text-ai-accent flex items-center gap-1.5 text-xs font-medium">
-                <MicIcon className={cn('size-3.5', autowake.state === 'recording' && 'animate-pulse')} />
+                <MicIcon
+                  className={cn(
+                    'size-3.5',
+                    autowake.state === 'recording' && 'animate-pulse',
+                  )}
+                />
                 {AUTOWAKE_STATE_LABEL[autowake.state]}
               </p>
               {autowake.state === 'recording' && (
@@ -185,12 +243,15 @@ export function VizorionLauncher({ open, onOpenChange, chat, autowake }: Vizorio
                 const original = messages.find((m) => m.id === message.id)
                 if (!original) return null
                 const isLastAssistant =
-                  original.role === 'assistant' && messages[messages.length - 1]?.id === original.id
+                  original.role === 'assistant' &&
+                  messages[messages.length - 1]?.id === original.id
                 return (
                   <>
                     <VizorionMessageExtra
                       message={original}
-                      liveToolCalls={isLastAssistant && isStreaming ? liveToolCalls : []}
+                      liveToolCalls={
+                        isLastAssistant && isStreaming ? liveToolCalls : []
+                      }
                     />
                     {pendingApproval && isLastAssistant && (
                       <VizorionApprovalCard
@@ -206,10 +267,7 @@ export function VizorionLauncher({ open, onOpenChange, chat, autowake }: Vizorio
               }}
               streamingIndicator={
                 isStreaming ? (
-                  <div className="bg-surface-muted flex w-full items-center gap-2 rounded-lg p-3 text-sm">
-                    <Loader2Icon className="size-4 animate-spin" />
-                    <span>Thinking…</span>
-                  </div>
+                  <AIActivity toolCalls={liveToolCalls} />
                 ) : undefined
               }
             />
@@ -228,7 +286,11 @@ export function VizorionLauncher({ open, onOpenChange, chat, autowake }: Vizorio
           open && 'ring-ai-accent/50 ring-2 ring-offset-2',
         )}
       >
-        {isStreaming ? <Loader2Icon className="size-5 animate-spin" /> : <MessageCircleIcon className="size-5" />}
+        {isStreaming ? (
+          <Loader2Icon className="size-5 animate-spin" />
+        ) : (
+          <MessageCircleIcon className="size-5" />
+        )}
       </Button>
     </>
   )

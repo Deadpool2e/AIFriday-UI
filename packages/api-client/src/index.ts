@@ -32,6 +32,7 @@ export {
   useAgentPerformanceTrend,
   useSystemHealth,
   useAgentSuccessRateTrend,
+  useControlTowerMetricsTrend,
   useRecentExecutions,
 } from './hooks/use-control-tower'
 
@@ -48,8 +49,15 @@ export type { EventStreamHandle, EventStreamSource } from './lib/event-stream'
 export { createMockEventSource, createSSESource } from './lib/event-stream'
 
 export type { GuardrailsService } from './guardrails-service'
-export { mockGuardrailsService, triggerDemoGuardrailBlock } from './guardrails-service'
-export { useGuardrailRules, useGuardrailEvents, useGuardrailSummary } from './hooks/use-guardrails'
+export {
+  mockGuardrailsService,
+  triggerDemoGuardrailBlock,
+} from './guardrails-service'
+export {
+  useGuardrailRules,
+  useGuardrailEvents,
+  useGuardrailSummary,
+} from './hooks/use-guardrails'
 
 export type { RagService } from './rag-service'
 export { mockRagService } from './rag-service'
@@ -62,7 +70,11 @@ export {
 
 export type { LlmUsageService } from './llm-usage-service'
 export { mockLlmUsageService } from './llm-usage-service'
-export { useModelUsage, useLlmUsageSummary, useLlmUsageTrend } from './hooks/use-llm-usage'
+export {
+  useModelUsage,
+  useLlmUsageSummary,
+  useLlmUsageTrend,
+} from './hooks/use-llm-usage'
 
 export type { LatencyService } from './latency-service'
 export { mockLatencyService } from './latency-service'
@@ -74,7 +86,10 @@ export {
 } from './hooks/use-latency'
 
 export type { SystemHealthService } from './system-health-service'
-export { mockSystemHealthService, triggerDemoIncident } from './system-health-service'
+export {
+  mockSystemHealthService,
+  triggerDemoIncident,
+} from './system-health-service'
 export {
   useSystemComponentMetrics,
   useSystemIncidents,
@@ -94,17 +109,32 @@ export {
 } from './hooks/use-explainability'
 
 export type { VizorionChatService } from './vizorion-chat-service'
-export { mockVizorionChatService, vizorionChatService } from './vizorion-chat-service'
+export {
+  mockVizorionChatService,
+  vizorionChatService,
+} from './vizorion-chat-service'
 export type { VizorionConversationsService } from './vizorion-conversations-service'
-export { mockVizorionConversationsService, vizorionConversationsService } from './vizorion-conversations-service'
+export {
+  mockVizorionConversationsService,
+  vizorionConversationsService,
+} from './vizorion-conversations-service'
 export type { VizorionMemoryService } from './vizorion-memory-service'
-export { mockVizorionMemoryService, vizorionMemoryService } from './vizorion-memory-service'
+export {
+  mockVizorionMemoryService,
+  vizorionMemoryService,
+} from './vizorion-memory-service'
 export type { VizorionFilesService } from './vizorion-files-service'
-export { mockVizorionFilesService, vizorionFilesService } from './vizorion-files-service'
+export {
+  mockVizorionFilesService,
+  vizorionFilesService,
+} from './vizorion-files-service'
 export { vizorionClient } from './vizorion/client'
 export { streamVizorionChat } from './vizorion/sse'
 
-export type { VizorionChatMessage, VizorionLiveToolCall } from './hooks/use-vizorion-chat'
+export type {
+  VizorionChatMessage,
+  VizorionLiveToolCall,
+} from './hooks/use-vizorion-chat'
 export { useVizorionChat } from './hooks/use-vizorion-chat'
 export {
   useVizorionConversations,
@@ -127,4 +157,7 @@ export {
   useDeleteVizorionFile,
 } from './hooks/use-vizorion-files'
 export { useTranscribeVoice } from './hooks/use-vizorion-voice'
-export { useEnrollSpeaker, useVerifySpeaker } from './hooks/use-vizorion-speaker'
+export {
+  useEnrollSpeaker,
+  useVerifySpeaker,
+} from './hooks/use-vizorion-speaker'

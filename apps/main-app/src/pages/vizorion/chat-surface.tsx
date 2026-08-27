@@ -1,7 +1,6 @@
 import * as React from 'react'
 import {
   ChevronDownIcon,
-  Loader2Icon,
   RotateCcwIcon,
   SparklesIcon,
   ThumbsDownIcon,
@@ -10,8 +9,12 @@ import {
   VolumeXIcon,
 } from 'lucide-react'
 import { useVizorionChat, type VizorionChatMessage } from '@platform/api-client'
-import type { VizorionConversation, VizorionRegenerateStyle } from '@platform/types'
+import type {
+  VizorionConversation,
+  VizorionRegenerateStyle,
+} from '@platform/types'
 import {
+  AIActivity,
   Button,
   ChatPanel,
   type ChatPanelMessage,
@@ -40,7 +43,10 @@ interface MessageReasoningState {
   [messageId: string]: boolean
 }
 
-export function ChatSurface({ conversationId, onConversationCreated }: ChatSurfaceProps) {
+export function ChatSurface({
+  conversationId,
+  onConversationCreated,
+}: ChatSurfaceProps) {
   const {
     messages,
     isStreaming,
@@ -54,10 +60,15 @@ export function ChatSurface({ conversationId, onConversationCreated }: ChatSurfa
     submitFeedback,
   } = useVizorionChat({ conversationId, onConversationCreated })
 
-  const [improvingMessageId, setImprovingMessageId] = React.useState<string | null>(null)
+  const [improvingMessageId, setImprovingMessageId] = React.useState<
+    string | null
+  >(null)
   const [improveText, setImproveText] = React.useState('')
-  const [feedbackGiven, setFeedbackGiven] = React.useState<Record<string, 'up' | 'down'>>({})
-  const [expandedReasoning, setExpandedReasoning] = React.useState<MessageReasoningState>({})
+  const [feedbackGiven, setFeedbackGiven] = React.useState<
+    Record<string, 'up' | 'down'>
+  >({})
+  const [expandedReasoning, setExpandedReasoning] =
+    React.useState<MessageReasoningState>({})
   const [autoSpeak, setAutoSpeak] = React.useState(false)
 
   const hasConversation = messages.length > 0
@@ -96,7 +107,10 @@ export function ChatSurface({ conversationId, onConversationCreated }: ChatSurfa
     void submitFeedback(message.id, rating)
   }
 
-  function handleRegenerate(message: VizorionChatMessage, style?: VizorionRegenerateStyle) {
+  function handleRegenerate(
+    message: VizorionChatMessage,
+    style?: VizorionRegenerateStyle,
+  ) {
     void regenerate(message.id, style)
   }
 
@@ -121,9 +135,17 @@ export function ChatSurface({ conversationId, onConversationCreated }: ChatSurfa
           className="h-7 gap-1.5 text-xs"
           aria-pressed={autoSpeak}
           onClick={toggleAutoSpeak}
-          title={autoSpeak ? 'Auto-speak replies is on — click to turn off' : 'Turn on auto-speak for replies'}
+          title={
+            autoSpeak
+              ? 'Auto-speak replies is on — click to turn off'
+              : 'Turn on auto-speak for replies'
+          }
         >
-          {autoSpeak ? <Volume2Icon className="size-3.5" /> : <VolumeXIcon className="size-3.5" />}
+          {autoSpeak ? (
+            <Volume2Icon className="size-3.5" />
+          ) : (
+            <VolumeXIcon className="size-3.5" />
+          )}
           Auto-speak replies
         </Button>
       </div>
@@ -157,7 +179,9 @@ export function ChatSurface({ conversationId, onConversationCreated }: ChatSurfa
           disabled={isStreaming}
           placeholder="Ask Vizorion..."
           renderContent={(message) => <Markdown text={message.content} />}
-          inputAddon={<VoiceControls onTranscribed={sendMessage} disabled={isStreaming} />}
+          inputAddon={
+            <VoiceControls onTranscribed={sendMessage} disabled={isStreaming} />
+          }
           emptyState={
             <EmptyState
               icon={<SparklesIcon />}
@@ -172,9 +196,11 @@ export function ChatSurface({ conversationId, onConversationCreated }: ChatSurfa
             const isAssistant = original.role === 'assistant'
             const citations = original.citations ?? []
             const toolCalls = original.toolCalls ?? []
-            const showLiveToolCalls = isLast && isStreaming && liveToolCalls.length > 0
+            const showLiveToolCalls =
+              isLast && isStreaming && liveToolCalls.length > 0
             const rating = feedbackGiven[original.id]
-            const showReasoning = expandedReasoning[original.id] && original.reasoning
+            const showReasoning =
+              expandedReasoning[original.id] && original.reasoning
 
             return (
               <div className="w-full space-y-2">
@@ -186,7 +212,11 @@ export function ChatSurface({ conversationId, onConversationCreated }: ChatSurfa
                   >
                     <ChevronDownIcon
                       className="size-3.5 transition-transform"
-                      style={{ transform: showReasoning ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+                      style={{
+                        transform: showReasoning
+                          ? 'rotate(0deg)'
+                          : 'rotate(-90deg)',
+                      }}
                     />
                     Reasoning
                   </button>
@@ -194,7 +224,10 @@ export function ChatSurface({ conversationId, onConversationCreated }: ChatSurfa
 
                 {showReasoning && (
                   <div className="bg-surface-muted rounded-md border p-2.5 text-xs leading-relaxed">
-                    <Markdown text={original.reasoning ?? ''} className="text-xs" />
+                    <Markdown
+                      text={original.reasoning ?? ''}
+                      className="text-xs"
+                    />
                   </div>
                 )}
 
@@ -202,11 +235,19 @@ export function ChatSurface({ conversationId, onConversationCreated }: ChatSurfa
                   <div className="flex flex-wrap gap-1.5">
                     {showLiveToolCalls &&
                       liveToolCalls.map((call) => (
-                        <VizorionToolCallChip key={call.id} name={call.tool} status={call.status} />
+                        <VizorionToolCallChip
+                          key={call.id}
+                          name={call.tool}
+                          status={call.status}
+                        />
                       ))}
                     {!showLiveToolCalls &&
                       toolCalls.map((call, index) => (
-                        <VizorionToolCallChip key={`${call.name}-${index}`} name={call.name} status="completed" />
+                        <VizorionToolCallChip
+                          key={`${call.name}-${index}`}
+                          name={call.name}
+                          status="completed"
+                        />
                       ))}
                   </div>
                 )}
@@ -216,7 +257,11 @@ export function ChatSurface({ conversationId, onConversationCreated }: ChatSurfa
                     {citations.map((citation, index) => (
                       <SourceCitation
                         key={`${citation.document_id}-${index}`}
-                        title={citation.page ? `${citation.document_id} (p. ${citation.page})` : citation.document_id}
+                        title={
+                          citation.page
+                            ? `${citation.document_id} (p. ${citation.page})`
+                            : citation.document_id
+                        }
                         snippet={citation.text}
                       />
                     ))}
@@ -226,10 +271,16 @@ export function ChatSurface({ conversationId, onConversationCreated }: ChatSurfa
                 {original.usage && isAssistant && (
                   <div className="text-muted-foreground flex flex-wrap items-center gap-3 rounded-md bg-muted/50 px-2.5 py-1.5 text-xs font-medium">
                     <span>📊 Tokens:</span>
-                    <span>⬅️ {original.usage.inputTokens.toLocaleString()}</span>
-                    <span>➡️ {original.usage.outputTokens.toLocaleString()}</span>
+                    <span>
+                      ⬅️ {original.usage.inputTokens.toLocaleString()}
+                    </span>
+                    <span>
+                      ➡️ {original.usage.outputTokens.toLocaleString()}
+                    </span>
                     {original.usage.estimatedCostUsd > 0 && (
-                      <span>💵 ${original.usage.estimatedCostUsd.toFixed(4)}</span>
+                      <span>
+                        💵 ${original.usage.estimatedCostUsd.toFixed(4)}
+                      </span>
                     )}
                   </div>
                 )}
@@ -244,74 +295,80 @@ export function ChatSurface({ conversationId, onConversationCreated }: ChatSurfa
                   />
                 )}
 
-                {isAssistant && original.content && !(isLast && isStreaming) && (
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-7"
-                      aria-label="Read reply aloud"
-                      title="Read aloud"
-                      onClick={() => speakText(original.content)}
-                    >
-                      <Volume2Icon className="size-3.5" />
-                    </Button>
-                    <Button
-                      variant={rating === 'up' ? 'secondary' : 'ghost'}
-                      size="icon"
-                      className="size-7"
-                      aria-label="Good response"
-                      onClick={() => handleFeedback(original, 'up')}
-                    >
-                      <ThumbsUpIcon className="size-3.5" />
-                    </Button>
-                    <Button
-                      variant={rating === 'down' ? 'secondary' : 'ghost'}
-                      size="icon"
-                      className="size-7"
-                      aria-label="Bad response"
-                      onClick={() => handleFeedback(original, 'down')}
-                    >
-                      <ThumbsDownIcon className="size-3.5" />
-                    </Button>
-                    <div className="h-5 w-px bg-border" />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 gap-1 text-xs"
-                      onClick={() => handleRegenerate(original, 'shorter')}
-                    >
-                      <RotateCcwIcon className="size-3" />
-                      Shorter
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 text-xs"
-                      onClick={() => handleRegenerate(original, 'detailed')}
-                    >
-                      More detail
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 text-xs"
-                      onClick={() => handleRegenerate(original, 'with_citations')}
-                    >
-                      Add citations
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 text-xs"
-                      onClick={() =>
-                        setImprovingMessageId((prev) => (prev === original.id ? null : original.id))
-                      }
-                    >
-                      Improve
-                    </Button>
-                  </div>
-                )}
+                {isAssistant &&
+                  original.content &&
+                  !(isLast && isStreaming) && (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-7"
+                        aria-label="Read reply aloud"
+                        title="Read aloud"
+                        onClick={() => speakText(original.content)}
+                      >
+                        <Volume2Icon className="size-3.5" />
+                      </Button>
+                      <Button
+                        variant={rating === 'up' ? 'secondary' : 'ghost'}
+                        size="icon"
+                        className="size-7"
+                        aria-label="Good response"
+                        onClick={() => handleFeedback(original, 'up')}
+                      >
+                        <ThumbsUpIcon className="size-3.5" />
+                      </Button>
+                      <Button
+                        variant={rating === 'down' ? 'secondary' : 'ghost'}
+                        size="icon"
+                        className="size-7"
+                        aria-label="Bad response"
+                        onClick={() => handleFeedback(original, 'down')}
+                      >
+                        <ThumbsDownIcon className="size-3.5" />
+                      </Button>
+                      <div className="h-5 w-px bg-border" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 gap-1 text-xs"
+                        onClick={() => handleRegenerate(original, 'shorter')}
+                      >
+                        <RotateCcwIcon className="size-3" />
+                        Shorter
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={() => handleRegenerate(original, 'detailed')}
+                      >
+                        More detail
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={() =>
+                          handleRegenerate(original, 'with_citations')
+                        }
+                      >
+                        Add citations
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={() =>
+                          setImprovingMessageId((prev) =>
+                            prev === original.id ? null : original.id,
+                          )
+                        }
+                      >
+                        Improve
+                      </Button>
+                    </div>
+                  )}
 
                 {improvingMessageId === original.id && (
                   <div className="space-y-1.5">
@@ -323,7 +380,11 @@ export function ChatSurface({ conversationId, onConversationCreated }: ChatSurfa
                       className="text-sm"
                     />
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={() => submitImprove(original)} disabled={!improveText.trim()}>
+                      <Button
+                        size="sm"
+                        onClick={() => submitImprove(original)}
+                        disabled={!improveText.trim()}
+                      >
                         Submit feedback
                       </Button>
                       <Button
@@ -343,12 +404,7 @@ export function ChatSurface({ conversationId, onConversationCreated }: ChatSurfa
             )
           }}
           streamingIndicator={
-            isStreaming ? (
-              <div className="bg-surface-muted flex w-full items-center gap-2 rounded-lg p-3 text-sm">
-                <Loader2Icon className="size-4 animate-spin" />
-                <span>Thinking…</span>
-              </div>
-            ) : undefined
+            isStreaming ? <AIActivity toolCalls={liveToolCalls} /> : undefined
           }
         />
       </div>

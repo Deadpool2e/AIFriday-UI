@@ -16,11 +16,15 @@ const SettingsPage = lazy(() =>
   import('./pages/settings-page').then((m) => ({ default: m.SettingsPage })),
 )
 const DesignSystemPage = lazy(() =>
-  import('./pages/design-system-page').then((m) => ({ default: m.DesignSystemPage })),
+  import('./pages/design-system-page').then((m) => ({
+    default: m.DesignSystemPage,
+  })),
 )
 
 const controlTowerElement = (
-  <ProtectedRoute permission={['AGENT_VIEW', 'AI_TRACE_VIEW', 'GUARDRAIL_VIEW', 'AUDIT_VIEW']}>
+  <ProtectedRoute
+    permission={['AGENT_VIEW', 'AI_TRACE_VIEW', 'GUARDRAIL_VIEW', 'AUDIT_VIEW']}
+  >
     <RemoteControlTower />
   </ProtectedRoute>
 )

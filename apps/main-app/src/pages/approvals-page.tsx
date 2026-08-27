@@ -3,9 +3,11 @@ import { usePendingApprovals } from '@platform/api-client'
 import {
   AllCaughtUpIllustration,
   ApprovalCard,
+  Badge,
   Button,
   EmptyState,
   ErrorState,
+  PageHeader,
   Skeleton,
   useDocumentTitle,
 } from '@platform/ui'
@@ -16,15 +18,24 @@ export function ApprovalsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">Intelligence</p>
-        <h1 className="text-3xl font-semibold tracking-tight">Approvals</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          {pending.data
-            ? `${pending.data.length} request${pending.data.length === 1 ? '' : 's'} need your review`
-            : 'Loading…'}
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Intelligence"
+        title="Approvals"
+        description={
+          pending.data
+            ? pending.data.length === 0
+              ? 'Nothing is waiting on you right now.'
+              : `${pending.data.length} request${pending.data.length === 1 ? '' : 's'} need your review — highest risk first.`
+            : 'Loading…'
+        }
+        meta={
+          pending.data && pending.data.length > 0 ? (
+            <Badge variant="secondary" className="tabular-nums">
+              {pending.data.length} pending
+            </Badge>
+          ) : undefined
+        }
+      />
 
       {pending.isLoading ? (
         <div className="space-y-3">

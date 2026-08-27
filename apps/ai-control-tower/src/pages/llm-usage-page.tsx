@@ -1,7 +1,19 @@
 import * as React from 'react'
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 import { CoinsIcon, DollarSignIcon, ReceiptIcon, ZapIcon } from 'lucide-react'
-import { useLlmUsageSummary, useLlmUsageTrend, useModelUsage } from '@platform/api-client'
+import {
+  useLlmUsageSummary,
+  useLlmUsageTrend,
+  useModelUsage,
+} from '@platform/api-client'
 import type { ModelUsage } from '@platform/types'
 import {
   Badge,
@@ -98,7 +110,7 @@ export function LlmUsagePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">LLM Usage</h1>
+        <h2 className="text-base font-semibold tracking-tight">LLM Usage</h2>
         <p className="text-muted-foreground text-sm">
           Token consumption and estimated spend, broken down by model and agent.
         </p>
@@ -106,7 +118,9 @@ export function LlmUsagePage() {
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {summary.isLoading ? (
-          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
+          Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))
         ) : summary.data ? (
           <>
             <KPIWidget
@@ -137,7 +151,9 @@ export function LlmUsagePage() {
       <Card>
         <CardHeader>
           <CardTitle>Token usage trend</CardTitle>
-          <CardDescription>Estimated daily token consumption, last 14 days</CardDescription>
+          <CardDescription>
+            Estimated daily token consumption, last 14 days
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {trend.isLoading || !trend.data ? (
@@ -145,7 +161,10 @@ export function LlmUsagePage() {
           ) : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={trend.data} margin={{ left: 0, right: 8 }}>
-                <ChartAreaGradient id="llm-tokens" colorVar="var(--color-chart-warning)" />
+                <ChartAreaGradient
+                  id="llm-tokens"
+                  colorVar="var(--color-chart-warning)"
+                />
                 <CartesianGrid stroke={chartGridStroke} vertical={false} />
                 <XAxis
                   dataKey="date"
@@ -162,9 +181,18 @@ export function LlmUsagePage() {
                 />
                 <Tooltip
                   {...chartTooltipStyle}
-                  formatter={(value) => [`${Number(value).toLocaleString('en-US')} tokens`, 'Usage']}
+                  formatter={(value) => [
+                    `${Number(value).toLocaleString('en-US')} tokens`,
+                    'Usage',
+                  ]}
                 />
-                <Bar dataKey="tokens" fill="url(#llm-tokens)" stroke="var(--color-chart-warning)" strokeWidth={1} radius={[4, 4, 0, 0]} />
+                <Bar
+                  dataKey="tokens"
+                  fill="url(#llm-tokens)"
+                  stroke="var(--color-chart-warning)"
+                  strokeWidth={1}
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -174,7 +202,10 @@ export function LlmUsagePage() {
       <Card>
         <CardHeader>
           <CardTitle>Usage by model</CardTitle>
-          <CardDescription>Every model currently in use, grouped from the same agent data as the Agents page.</CardDescription>
+          <CardDescription>
+            Every model currently in use, grouped from the same agent data as
+            the Agents page.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <DataTable
@@ -186,7 +217,10 @@ export function LlmUsagePage() {
             onPageChange={setPage}
             isLoading={usage.isLoading}
             emptyState={
-              <EmptyState title="No usage recorded" description="Model usage will show up here." />
+              <EmptyState
+                title="No usage recorded"
+                description="Model usage will show up here."
+              />
             }
           />
         </CardContent>

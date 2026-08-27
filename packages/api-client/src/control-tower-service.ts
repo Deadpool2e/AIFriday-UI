@@ -2,6 +2,7 @@ import type {
   Agent,
   AgentSuccessRatePoint,
   ControlTowerMetrics,
+  ControlTowerTrendPoint,
   RecentExecution,
   SystemHealthItem,
 } from '@platform/types'
@@ -22,7 +23,8 @@ export const MOCK_AGENTS: Agent[] = [
   {
     id: 'agent-orchestrator',
     name: 'Orchestrator',
-    description: 'Routes each request through the multi-agent pipeline and aggregates results.',
+    description:
+      'Routes each request through the multi-agent pipeline and aggregates results.',
     model: 'azure/genailab-maas-gpt-4o-mini',
     status: 'running',
     requestsHandled: 47,
@@ -34,7 +36,8 @@ export const MOCK_AGENTS: Agent[] = [
   {
     id: 'agent-rag',
     name: 'RAG Agent',
-    description: 'Retrieves relevant policy and compliance documents for each request.',
+    description:
+      'Retrieves relevant policy and compliance documents for each request.',
     model: 'azure/genailab-maas-text-embedding-3-large',
     status: 'idle',
     requestsHandled: 41,
@@ -58,7 +61,8 @@ export const MOCK_AGENTS: Agent[] = [
   {
     id: 'agent-compliance',
     name: 'Compliance Agent',
-    description: 'Checks each request against policy documents and regulatory rules.',
+    description:
+      'Checks each request against policy documents and regulatory rules.',
     model: 'azure/genailab-maas-gpt-4o-mini',
     status: 'degraded',
     requestsHandled: 47,
@@ -70,7 +74,8 @@ export const MOCK_AGENTS: Agent[] = [
   {
     id: 'agent-decision',
     name: 'Decision Agent',
-    description: 'Generates the final recommendation from all upstream agent output.',
+    description:
+      'Generates the final recommendation from all upstream agent output.',
     model: 'azure/genailab-maas-gpt-4o',
     status: 'idle',
     requestsHandled: 47,
@@ -153,7 +158,10 @@ const ERROR_MESSAGES = [
 // degraded agent (Compliance, 87%) shows real failures in its history;
 // Orchestrator (98%) shows almost none. Deterministic, not random, so a
 // demo re-run always looks the same.
-function generateAgentExecutions(agent: Agent, count: number): RecentExecution[] {
+function generateAgentExecutions(
+  agent: Agent,
+  count: number,
+): RecentExecution[] {
   const failureRate = Math.max(0, 100 - agent.successRate)
   const executions: RecentExecution[] = []
   for (let i = 0; i < count; i++) {
@@ -164,7 +172,11 @@ function generateAgentExecutions(agent: Agent, count: number): RecentExecution[]
       id: `EXEC-${agent.id}-${i}`,
       requestId: `REQ-${requestIndex}`,
       agent: agent.name,
-      status: shouldFail ? 'failed' : isLatest && agent.status === 'running' ? 'running' : 'completed',
+      status: shouldFail
+        ? 'failed'
+        : isLatest && agent.status === 'running'
+          ? 'running'
+          : 'completed',
       durationMs: Math.max(50, agent.avgLatencyMs + (((i * 53) % 200) - 100)),
       timestamp: i === 0 ? 'Just now' : `${i * 12} min ago`,
       error: shouldFail ? ERROR_MESSAGES[i % ERROR_MESSAGES.length] : undefined,
@@ -173,14 +185,20 @@ function generateAgentExecutions(agent: Agent, count: number): RecentExecution[]
   return executions
 }
 
-function generateAgentTrend(agent: Agent, days: number): AgentSuccessRatePoint[] {
+function generateAgentTrend(
+  agent: Agent,
+  days: number,
+): AgentSuccessRatePoint[] {
   const base = Date.parse('2026-08-20T00:00:00Z')
   const points: AgentSuccessRatePoint[] = []
   for (let i = days - 1; i >= 0; i--) {
     const date = new Date(base - i * 24 * 60 * 60 * 1000)
     const wobble = ((i * 5) % 7) - 3
     points.push({
-      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      date: date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      }),
       successRate: Math.min(100, Math.max(50, agent.successRate + wobble)),
     })
   }
@@ -193,10 +211,47 @@ function generateSuccessRateTrend(days: number): AgentSuccessRatePoint[] {
   for (let i = days - 1; i >= 0; i--) {
     const date = new Date(base - i * 24 * 60 * 60 * 1000)
     points.push({
-      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      date: date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      }),
       successRate: 88 + ((i * 3) % 10),
     })
   }
+  return points
+}
+
+// Platform-wide operational history, anchored to today's real numbers.
+//
+// The final point of every series is exactly what computeControlTowerMetrics
+// reports right now, and earlier days wobble around it deterministically —
+// so the Control Tower's charts and its KPI strip can never disagree, and
+// a demo trigger that moves a metric moves the end of its chart with it.
+// Same approach as generateAgentPerformanceTrend above, one level up.
+function generateMetricsTrend(days: number): ControlTowerTrendPoint[] {
+  const current = computeControlTowerMetrics()
+  const base = Date.parse('2026-08-20T00:00:00Z')
+  const points: ControlTowerTrendPoint[] = []
+
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(base - i * 24 * 60 * 60 * 1000)
+    // i === 0 is today: no wobble, the real value.
+    const swing = i === 0 ? 0 : ((i * 37) % 21) - 10
+
+    points.push({
+      date: date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      }),
+      // Clamped to a plausible band rather than allowed to run past 100%
+      // or below zero, which a raw percentage wobble would do.
+      successRate: Math.min(100, Math.max(60, current.successRate + Math.round(swing * 0.6))),
+      avgLatencyMs: Math.max(50, current.avgLatencyMs + swing * 8),
+      tokensUsed: Math.max(0, Math.round(current.tokensUsed * (1 + swing / 100))),
+      guardrailBlocks: Math.max(0, current.guardrailBlocks + Math.round(swing / 4)),
+    })
+  }
+
   return points
 }
 
@@ -211,19 +266,25 @@ function computeControlTowerMetrics(): ControlTowerMetrics {
   const avgSuccessRate =
     MOCK_AGENTS.reduce((sum, a) => sum + a.successRate, 0) / MOCK_AGENTS.length
   const guardrailBlocks = MOCK_REQUESTS.reduce(
-    (count, r) => count + r.guardrailChecks.filter((g) => g.status === 'blocked').length,
+    (count, r) =>
+      count + r.guardrailChecks.filter((g) => g.status === 'blocked').length,
     0,
   )
-  const humanEscalations = MOCK_REQUESTS.filter((r) => r.status === 'escalated').length
+  const humanEscalations = MOCK_REQUESTS.filter(
+    (r) => r.status === 'escalated',
+  ).length
 
   return {
     activeAgents: MOCK_AGENTS.filter((a) => a.status === 'running').length,
     totalRequests: MOCK_REQUESTS.length,
     successRate: Math.round(avgSuccessRate),
     avgLatencyMs: Math.round(
-      MOCK_AGENTS.reduce((sum, a) => sum + a.avgLatencyMs, 0) / MOCK_AGENTS.length,
+      MOCK_AGENTS.reduce((sum, a) => sum + a.avgLatencyMs, 0) /
+        MOCK_AGENTS.length,
     ),
-    p95LatencyMs: Math.round(Math.max(...MOCK_AGENTS.map((a) => a.avgLatencyMs)) * 1.15),
+    p95LatencyMs: Math.round(
+      Math.max(...MOCK_AGENTS.map((a) => a.avgLatencyMs)) * 1.15,
+    ),
     tokensUsed: totalTokens,
     estimatedCostUsd: Math.round(totalTokens * 0.000_002 * 100) / 100,
     guardrailBlocks,
@@ -239,6 +300,7 @@ export interface ControlTowerService {
   getAgentPerformanceTrend(agentId: string): Promise<AgentSuccessRatePoint[]>
   getSystemHealth(): Promise<SystemHealthItem[]>
   getAgentSuccessRateTrend(): Promise<AgentSuccessRatePoint[]>
+  getMetricsTrend(): Promise<ControlTowerTrendPoint[]>
   getRecentExecutions(): Promise<RecentExecution[]>
 }
 
@@ -277,6 +339,10 @@ export const mockControlTowerService: ControlTowerService = {
   async getAgentSuccessRateTrend() {
     await delay(300)
     return generateSuccessRateTrend(14)
+  },
+  async getMetricsTrend() {
+    await delay(300)
+    return generateMetricsTrend(14)
   },
   async getRecentExecutions() {
     await delay(250)

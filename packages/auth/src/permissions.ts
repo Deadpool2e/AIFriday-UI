@@ -22,7 +22,12 @@ export type Role = 'analyst' | 'manager' | 'admin'
 // of what this map says. See docs/rbac.md (written in Phase 22) for the
 // full contract.
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
-  analyst: ['REQUEST_VIEW', 'REQUEST_CREATE', 'DOCUMENT_VIEW', 'VIZORION_ASSISTANT'],
+  analyst: [
+    'REQUEST_VIEW',
+    'REQUEST_CREATE',
+    'DOCUMENT_VIEW',
+    'VIZORION_ASSISTANT',
+  ],
   manager: [
     'REQUEST_VIEW',
     'REQUEST_CREATE',

@@ -8,7 +8,10 @@ import { Input } from './input'
 function formatTime(iso: string) {
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return ''
-  return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+  })
 }
 
 export interface ChatPanelMessage {
@@ -78,25 +81,50 @@ function ChatPanel({
   }
 
   return (
-    <div data-slot="chat-panel" className={cn('flex h-full flex-col', className)}>
+    <div
+      data-slot="chat-panel"
+      className={cn('flex h-full flex-col', className)}
+    >
       <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-4">
         {messages.length === 0 && emptyState && !streamingIndicator ? (
-          <div className="flex h-full items-center justify-center">{emptyState}</div>
+          <div className="flex h-full items-center justify-center">
+            {emptyState}
+          </div>
         ) : null}
         {messages.map((message) => {
           const isUser = message.role === 'user'
           return (
-            <div key={message.id} className={cn('flex gap-2.5', isUser ? 'flex-row-reverse' : 'flex-row')}>
+            <div
+              key={message.id}
+              className={cn(
+                // A short rise-and-fade on arrival. Messages appearing
+                // instantly at full opacity read as a list re-rendering;
+                // this reads as one message being added to a conversation.
+                'animate-in fade-in-0 slide-in-from-bottom-1 flex gap-2.5 duration-(--duration-base) ease-out',
+                isUser ? 'flex-row-reverse' : 'flex-row',
+              )}
+            >
               <div
                 className={cn(
                   'mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full',
-                  isUser ? 'bg-muted text-muted-foreground' : 'bg-ai-accent/10 text-ai-accent',
+                  isUser
+                    ? 'bg-muted text-muted-foreground'
+                    : 'bg-ai-accent/10 text-ai-accent',
                 )}
                 aria-hidden="true"
               >
-                {isUser ? <UserIcon className="size-3.5" /> : <SparklesIcon className="size-3.5" />}
+                {isUser ? (
+                  <UserIcon className="size-3.5" />
+                ) : (
+                  <SparklesIcon className="size-3.5" />
+                )}
               </div>
-              <div className={cn('max-w-[85%] space-y-1.5', isUser && 'flex flex-col items-end')}>
+              <div
+                className={cn(
+                  'max-w-[85%] space-y-1.5',
+                  isUser && 'flex flex-col items-end',
+                )}
+              >
                 <div
                   className={cn(
                     'rounded-lg px-3 py-2 text-sm',
@@ -115,9 +143,14 @@ function ChatPanel({
             </div>
           )
         })}
-        {streamingIndicator && <div className="flex justify-start">{streamingIndicator}</div>}
+        {streamingIndicator && (
+          <div className="flex justify-start">{streamingIndicator}</div>
+        )}
       </div>
-      <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t p-3">
+      <form
+        onSubmit={handleSubmit}
+        className="flex items-center gap-2 border-t p-3"
+      >
         <Input
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -129,8 +162,9 @@ function ChatPanel({
         <Button
           type="submit"
           size="icon"
-          disabled={disabled || isSending || !value.trim()}
-          aria-label="Send message"
+          disabled={disabled || !value.trim()}
+          pending={isSending}
+          aria-label={isSending ? 'Sending message' : 'Send message'}
         >
           <SendIcon />
         </Button>

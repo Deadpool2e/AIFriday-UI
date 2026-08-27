@@ -1,6 +1,11 @@
 import * as React from 'react'
 import { Link } from 'react-router'
-import { ActivityIcon, AlertTriangleIcon, BotIcon, CircleDashedIcon } from 'lucide-react'
+import {
+  ActivityIcon,
+  AlertTriangleIcon,
+  BotIcon,
+  CircleDashedIcon,
+} from 'lucide-react'
 import { useAgents } from '@platform/api-client'
 import type { Agent, AgentStatus } from '@platform/types'
 import {
@@ -21,7 +26,10 @@ const STATUS_RANK: Record<AgentStatus, number> = {
   failed: 3,
 }
 
-const STATUS_VARIANT: Record<AgentStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+const STATUS_VARIANT: Record<
+  AgentStatus,
+  'default' | 'secondary' | 'destructive' | 'outline'
+> = {
   running: 'default',
   idle: 'secondary',
   degraded: 'outline',
@@ -116,7 +124,7 @@ export function AgentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Agents</h1>
+        <h2 className="text-base font-semibold tracking-tight">Agents</h2>
         <p className="text-muted-foreground text-sm">
           {agents.data ? `${agents.data.length} agents registered` : 'Loading…'}
         </p>
@@ -124,10 +132,16 @@ export function AgentsPage() {
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {agents.isLoading ? (
-          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
+          Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))
         ) : agents.data ? (
           <>
-            <KPIWidget label="Total Agents" value={agents.data.length} icon={<BotIcon />} />
+            <KPIWidget
+              label="Total Agents"
+              value={agents.data.length}
+              icon={<BotIcon />}
+            />
             <KPIWidget
               label="Running"
               value={agents.data.filter((a) => a.status === 'running').length}
@@ -140,7 +154,11 @@ export function AgentsPage() {
             />
             <KPIWidget
               label="Degraded / Failed"
-              value={agents.data.filter((a) => a.status === 'degraded' || a.status === 'failed').length}
+              value={
+                agents.data.filter(
+                  (a) => a.status === 'degraded' || a.status === 'failed',
+                ).length
+              }
               icon={<AlertTriangleIcon />}
             />
           </>
@@ -163,7 +181,10 @@ export function AgentsPage() {
           onPageChange={setPage}
           isLoading={agents.isLoading}
           emptyState={
-            <EmptyState title="No agents registered" description="Agents will show up here." />
+            <EmptyState
+              title="No agents registered"
+              description="Agents will show up here."
+            />
           }
         />
       )}

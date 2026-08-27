@@ -14,7 +14,9 @@ function DrawerTrigger(
   return <DialogPrimitive.Trigger data-slot="drawer-trigger" {...props} />
 }
 
-function DrawerClose(props: React.ComponentProps<typeof DialogPrimitive.Close>) {
+function DrawerClose(
+  props: React.ComponentProps<typeof DialogPrimitive.Close>,
+) {
   return <DialogPrimitive.Close data-slot="drawer-close" {...props} />
 }
 

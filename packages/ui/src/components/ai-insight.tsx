@@ -15,7 +15,14 @@ interface AIInsightProps extends Omit<React.ComponentProps<'div'>, 'title'> {
 // radial wash in the single reserved AI-accent hue, so an AI-generated
 // observation reads as categorically different from a raw metric even at a
 // glance, without repeating the same accent anywhere else on the page.
-function AIInsight({ observation, driver, actionLabel, onAction, className, ...props }: AIInsightProps) {
+function AIInsight({
+  observation,
+  driver,
+  actionLabel,
+  onAction,
+  className,
+  ...props
+}: AIInsightProps) {
   return (
     <div
       data-slot="ai-insight"
@@ -42,7 +49,12 @@ function AIInsight({ observation, driver, actionLabel, onAction, className, ...p
           </p>
         )}
         {actionLabel && onAction && (
-          <Button variant="outline" size="sm" className="mt-1" onClick={onAction}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-1"
+            onClick={onAction}
+          >
             {actionLabel}
           </Button>
         )}

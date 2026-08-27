@@ -22,7 +22,10 @@ function SourceCitation({
       className={cn('flex gap-2 rounded-md border p-3 text-sm', className)}
       {...props}
     >
-      <FileTextIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" aria-hidden="true" />
+      <FileTextIcon
+        className="text-muted-foreground mt-0.5 size-4 shrink-0"
+        aria-hidden="true"
+      />
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-center justify-between gap-2">
           <p className="truncate font-medium">{title}</p>

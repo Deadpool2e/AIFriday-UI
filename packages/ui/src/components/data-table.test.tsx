@@ -18,11 +18,25 @@ const rows: Row[] = [
 ]
 
 const columns: DataTableColumn<Row>[] = [
-  { id: 'name', header: 'Name', sortable: true, sortValue: (r) => r.name, cell: (r) => r.name },
-  { id: 'score', header: 'Score', sortable: true, sortValue: (r) => r.score, cell: (r) => r.score },
+  {
+    id: 'name',
+    header: 'Name',
+    sortable: true,
+    sortValue: (r) => r.name,
+    cell: (r) => r.name,
+  },
+  {
+    id: 'score',
+    header: 'Score',
+    sortable: true,
+    sortValue: (r) => r.score,
+    cell: (r) => r.score,
+  },
 ]
 
-function renderTable(overrides: Partial<React.ComponentProps<typeof DataTable<Row>>> = {}) {
+function renderTable(
+  overrides: Partial<React.ComponentProps<typeof DataTable<Row>>> = {},
+) {
   return render(
     <DataTable
       columns={columns}
@@ -37,7 +51,10 @@ function renderTable(overrides: Partial<React.ComponentProps<typeof DataTable<Ro
 }
 
 function bodyRowNames() {
-  return screen.getAllByRole('row').slice(1).map((row) => row.textContent)
+  return screen
+    .getAllByRole('row')
+    .slice(1)
+    .map((row) => row.textContent)
 }
 
 describe('DataTable', () => {
@@ -73,9 +90,16 @@ describe('DataTable', () => {
     expect(bodyRowNames()).toHaveLength(1)
   })
 
-  it('shows the loading skeleton instead of rows when isLoading', () => {
+  it('shows a skeleton of the real table instead of rows when isLoading', () => {
     renderTable({ isLoading: true })
-    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    // The table's frame and headers stay, so the load fills in rather
+    // than replacing one layout with another; only the data is absent.
+    expect(screen.getByRole('table')).toBeInTheDocument()
+    expect(
+      screen.getByRole('columnheader', { name: 'Name' }),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('Bravo')).not.toBeInTheDocument()
+    expect(screen.queryByText('Alpha')).not.toBeInTheDocument()
   })
 
   it('shows the empty state when data is empty', () => {

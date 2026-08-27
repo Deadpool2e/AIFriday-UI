@@ -1,47 +1,64 @@
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
 import { useVizorionChat } from '@platform/api-client'
-import { ErrorBoundary, Skeleton, SkipLink } from '@platform/ui'
+import { useTheme } from '@platform/theme'
+import {
+  AppLoadingView,
+  ErrorBoundary,
+  Kbd,
+  SkipLink,
+  type ProgressStage,
+} from '@platform/ui'
 
 import { AutowakeWidget } from './autowake/autowake-widget'
 import { useAutowake } from './autowake/use-autowake'
 import { CommandPalette } from './command-palette'
+import { ShortcutsDialog } from './shortcuts-dialog'
 import { MobileSidebar, Sidebar } from './sidebar'
 import { Topbar } from './topbar'
+import { useKeyboardShortcuts } from './use-keyboard-shortcuts'
 import { VizorionLauncher } from './vizorion-launcher'
 
+// Host-owned lazy routes (Settings, the design system) are a single local
+// chunk, so this is a much shorter story than a federated remote's.
+const ROUTE_STAGES: ProgressStage[] = [
+  { id: 'chunk', label: 'Loading page module' },
+  { id: 'data', label: 'Fetching page data' },
+  { id: 'render', label: 'Rendering' },
+]
+
 function RouteLoadingFallback() {
-  return (
-    <div className="space-y-4">
-      <Skeleton className="h-8 w-64" />
-      <Skeleton className="h-48 w-full" />
-    </div>
-  )
+  return <AppLoadingView title="Page" stages={ROUTE_STAGES} preview="detail" />
 }
 
 export function AppShell() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [vizorionOpen, setVizorionOpen] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const location = useLocation()
+  const { resolvedColorMode, setColorMode } = useTheme()
 
   // Lifted here (rather than each owning its own) so a verified "Hey
   // Athena" wake streams into the same conversation VizorionLauncher's
   // panel shows, opens that panel automatically, and both it and
   // AutowakeWidget can render the same live listening/recording state.
   const vizorionChat = useVizorionChat({ conversationId: null })
-  const autowake = useAutowake({ chat: vizorionChat, onWakeVerified: () => setVizorionOpen(true) })
+  const autowake = useAutowake({
+    chat: vizorionChat,
+    onWakeVerified: () => setVizorionOpen(true),
+  })
 
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault()
-        setPaletteOpen((prev) => !prev)
-      }
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [])
+  // Disabled while an overlay owns the keyboard, so `g` typed into the
+  // palette's search field searches instead of navigating.
+  const { chord } = useKeyboardShortcuts({
+    onOpenPalette: () => setPaletteOpen((prev) => !prev),
+    onOpenShortcuts: () => setShortcutsOpen(true),
+    onOpenAssistant: () => setVizorionOpen(true),
+    onToggleTheme: () =>
+      setColorMode(resolvedColorMode === 'dark' ? 'light' : 'dark'),
+    enabled: !paletteOpen && !shortcutsOpen && !mobileNavOpen,
+  })
 
   // Close the mobile drawer on every navigation. Adjusted during render
   // (React's documented pattern for "reset state when a prop changes")
@@ -65,11 +82,17 @@ export function AppShell() {
       <Sidebar />
       <MobileSidebar open={mobileNavOpen} onOpenChange={setMobileNavOpen} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar onOpenSidebar={() => setMobileNavOpen(true)} onOpenPalette={() => setPaletteOpen(true)} />
-        <main id="main-content" className="flex-1 overflow-y-auto p-6">
+        <Topbar
+          onOpenSidebar={() => setMobileNavOpen(true)}
+          onOpenPalette={() => setPaletteOpen(true)}
+        />
+        <main id="main-content" className="flex-1 overflow-y-auto p-4 sm:p-6">
           {/* Keyed by pathname so a crashed page's error state clears
               automatically on navigation instead of sticking forever. */}
-          <div key={location.pathname} className="animate-in fade-in-0 slide-in-from-bottom-1 duration-200">
+          <div
+            key={location.pathname}
+            className="animate-in fade-in-0 slide-in-from-bottom-1 duration-(--duration-base) ease-out"
+          >
             <ErrorBoundary fallbackTitle="This page failed to load">
               <Suspense fallback={<RouteLoadingFallback />}>
                 <Outlet />
@@ -78,13 +101,36 @@ export function AppShell() {
           </div>
         </main>
       </div>
+
+      {/* Chord hint. A `g` prefix is invisible feedback otherwise — the
+          user presses a key and nothing appears to happen for a second.
+          This shows the shell heard it and is waiting for the second key. */}
+      {chord && (
+        <div
+          role="status"
+          className="bg-surface-elevated animate-in fade-in-0 zoom-in-95 fixed bottom-4 left-1/2 z-(--z-toast) flex -translate-x-1/2 items-center gap-2 rounded-lg border px-3 py-2 text-xs shadow-lg duration-(--duration-fast)"
+        >
+          <Kbd keys="g" size="sm" />
+          <span className="text-muted-foreground">
+            then a page key — Esc to cancel
+          </span>
+        </div>
+      )}
+
       <CommandPalette
         open={paletteOpen}
         onOpenChange={setPaletteOpen}
         onOpenVizorion={() => setVizorionOpen(true)}
+        onOpenShortcuts={() => setShortcutsOpen(true)}
       />
+      <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
       {!onFullChatPage && (
-        <VizorionLauncher open={vizorionOpen} onOpenChange={setVizorionOpen} chat={vizorionChat} autowake={autowake} />
+        <VizorionLauncher
+          open={vizorionOpen}
+          onOpenChange={setVizorionOpen}
+          chat={vizorionChat}
+          autowake={autowake}
+        />
       )}
       {/* Unlike VizorionLauncher, not hidden on /vizorion — wake-word
           listening should work app-wide, including on Vizorion's own full

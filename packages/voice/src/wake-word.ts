@@ -96,7 +96,10 @@ export function startWakeWordListening(
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       // "no-speech" and "aborted" are routine in always-on listening —
       // only surface genuine failures (e.g. denied mic permission).
-      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+      if (
+        event.error === 'not-allowed' ||
+        event.error === 'service-not-allowed'
+      ) {
         stopped = true
         onError?.('Microphone access was denied.')
       }

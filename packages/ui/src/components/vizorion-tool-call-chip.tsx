@@ -17,18 +17,30 @@ interface VizorionToolCallChipProps extends React.ComponentProps<'span'> {
 // packages/ui's existing ToolMonitor — that's shaped around the AI
 // Assistant's per-agent call log (agent + tool + duration); this is
 // Vizorion's simpler tool-name + running/completed pill.
-function VizorionToolCallChip({ name, status, detail, className, ...props }: VizorionToolCallChipProps) {
+function VizorionToolCallChip({
+  name,
+  status,
+  detail,
+  className,
+  ...props
+}: VizorionToolCallChipProps) {
   return (
     <span
       data-slot="vizorion-tool-call-chip"
       className={cn('inline-flex items-center', className)}
       {...props}
     >
-      <Badge variant={status === 'running' ? 'secondary' : 'outline'} className="gap-1.5">
+      <Badge
+        variant={status === 'running' ? 'secondary' : 'outline'}
+        className="gap-1.5"
+      >
         {status === 'running' ? (
           <Loader2Icon className="size-3 animate-spin" aria-hidden="true" />
         ) : (
-          <CheckCircle2Icon className="text-success size-3" aria-hidden="true" />
+          <CheckCircle2Icon
+            className="text-success size-3"
+            aria-hidden="true"
+          />
         )}
         <WrenchIcon className="size-3" aria-hidden="true" />
         {name}

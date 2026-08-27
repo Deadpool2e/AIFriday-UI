@@ -7,9 +7,11 @@
 // real while the rest of the platform stays on its mocks.
 // Defaults to mock, same polarity as USE_MOCK_API in ../lib/env — unset
 // or anything other than 'false' means mock.
-export const VIZORION_USE_MOCK = import.meta.env.VITE_VIZORION_USE_MOCK !== 'false'
+export const VIZORION_USE_MOCK =
+  import.meta.env.VITE_VIZORION_USE_MOCK !== 'false'
 
-export const VIZORION_API_BASE_URL = import.meta.env.VITE_VIZORION_API_URL ?? 'http://localhost:8000'
+export const VIZORION_API_BASE_URL =
+  import.meta.env.VITE_VIZORION_API_URL ?? 'http://localhost:8000'
 
 // Baked into the client bundle and visible in devtools — acceptable for
 // an internal/demo deployment only. Swap for a per-user token issued by a

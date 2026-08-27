@@ -14,7 +14,10 @@ function DropdownMenuTrigger(
   props: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>,
 ) {
   return (
-    <DropdownMenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props} />
+    <DropdownMenuPrimitive.Trigger
+      data-slot="dropdown-menu-trigger"
+      {...props}
+    />
   )
 }
 
@@ -41,7 +44,9 @@ function DropdownMenuContent({
 function DropdownMenuGroup(
   props: React.ComponentProps<typeof DropdownMenuPrimitive.Group>,
 ) {
-  return <DropdownMenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />
+  return (
+    <DropdownMenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />
+  )
 }
 
 function DropdownMenuItem({

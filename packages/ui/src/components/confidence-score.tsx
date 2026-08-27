@@ -18,7 +18,11 @@ function ConfidenceScore({
     clamped >= 80 ? 'bg-success' : clamped >= 50 ? 'bg-warning' : 'bg-danger'
 
   return (
-    <div data-slot="confidence-score" className={cn('space-y-1', className)} {...props}>
+    <div
+      data-slot="confidence-score"
+      className={cn('space-y-1', className)}
+      {...props}
+    >
       <div className="flex items-center justify-between text-xs">
         <span className="text-muted-foreground">{label}</span>
         <span className="font-medium tabular-nums">{clamped}%</span>

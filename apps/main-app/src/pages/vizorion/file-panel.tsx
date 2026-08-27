@@ -37,12 +37,22 @@ export function FilePanel() {
         <div>
           <h2 className="text-lg font-semibold">Documents (RAG)</h2>
           <p className="text-muted-foreground text-sm">
-            Upload documents for Vizorion to cite in its answers. Only published documents are retrievable.
+            Upload documents for Vizorion to cite in its answers. Only published
+            documents are retrievable.
           </p>
         </div>
         <div>
-          <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} />
-          <Button size="sm" onClick={() => fileInputRef.current?.click()} disabled={upload.isPending}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+          <Button
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={upload.isPending}
+          >
             <UploadIcon className="size-4" />
             Upload
           </Button>
@@ -59,21 +69,37 @@ export function FilePanel() {
 
       <ul className="space-y-2">
         {documents.map((document) => (
-          <li key={document.id} className="bg-surface flex items-center justify-between gap-3 rounded-lg border p-3">
+          <li
+            key={document.id}
+            className="bg-surface flex items-center justify-between gap-3 rounded-lg border p-3"
+          >
             <div className="min-w-0 space-y-0.5">
-              <p className="truncate text-sm font-medium">{document.source ?? document.id}</p>
-              <Badge variant={statusVariant[document.status] ?? 'outline'} className="capitalize">
+              <p className="truncate text-sm font-medium">
+                {document.source ?? document.id}
+              </p>
+              <Badge
+                variant={statusVariant[document.status] ?? 'outline'}
+                className="capitalize"
+              >
                 {document.status}
               </Badge>
             </div>
             <div className="flex shrink-0 items-center gap-1">
               {document.status !== 'published' && (
-                <Button variant="outline" size="sm" onClick={() => publish.mutate(document.id)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => publish.mutate(document.id)}
+                >
                   Publish
                 </Button>
               )}
               {document.status === 'published' && (
-                <Button variant="outline" size="sm" onClick={() => unpublish.mutate(document.id)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => unpublish.mutate(document.id)}
+                >
                   Unpublish
                 </Button>
               )}

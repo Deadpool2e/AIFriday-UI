@@ -2,7 +2,8 @@ import * as React from 'react'
 
 import { cn } from '../lib/cn'
 
-export type ExecutionTimelineEventTone = 'default' | 'success' | 'danger' | 'warning' | 'info'
+export type ExecutionTimelineEventTone =
+  'default' | 'success' | 'danger' | 'warning' | 'info'
 
 export interface ExecutionTimelineEvent {
   id: string
@@ -29,7 +30,11 @@ const toneClassName: Record<ExecutionTimelineEventTone, string> = {
 // agent. Consumers derive `label`/`tone` from their own event union (see
 // describeTraceEvent in @platform/api-client) so this component stays
 // decoupled from any specific event vocabulary.
-function ExecutionTimeline({ events, className, ...props }: ExecutionTimelineProps) {
+function ExecutionTimeline({
+  events,
+  className,
+  ...props
+}: ExecutionTimelineProps) {
   const ordered = [...events].reverse()
 
   return (
@@ -47,7 +52,9 @@ function ExecutionTimeline({ events, className, ...props }: ExecutionTimelinePro
               second: '2-digit',
             })}
           </span>
-          <span className={cn('min-w-0', toneClassName[event.tone ?? 'default'])}>
+          <span
+            className={cn('min-w-0', toneClassName[event.tone ?? 'default'])}
+          >
             {event.label}
           </span>
         </li>

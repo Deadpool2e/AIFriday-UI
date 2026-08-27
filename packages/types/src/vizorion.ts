@@ -120,5 +120,12 @@ export type VizorionStreamEvent =
   | { event: 'tool_started'; data: { tool: string | null } }
   | { event: 'tool_completed'; data: { tool: string | null } }
   | { event: 'approval_required'; data: VizorionPendingApproval }
-  | { event: 'run_completed'; data: { message_id: string; run_id: string; usage: Record<string, unknown> } }
+  | {
+      event: 'run_completed'
+      data: {
+        message_id: string
+        run_id: string
+        usage: Record<string, unknown>
+      }
+    }
   | { event: 'error'; data: { message: string } }

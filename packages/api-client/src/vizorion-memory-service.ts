@@ -29,7 +29,9 @@ export const mockVizorionMemoryService: VizorionMemoryService = {
     return memory
   },
   async update(memoryId, content) {
-    mockMemory = mockMemory.map((m) => (m.id === memoryId ? { ...m, content } : m))
+    mockMemory = mockMemory.map((m) =>
+      m.id === memoryId ? { ...m, content } : m,
+    )
     return mockMemory.find((m) => m.id === memoryId)!
   },
   async delete(memoryId) {
@@ -48,4 +50,7 @@ export const realVizorionMemoryService: VizorionMemoryService = {
   deleteAll: () => vizorionClient.deleteAllMemory(),
 }
 
-export const vizorionMemoryService = resolveVizorionService(mockVizorionMemoryService, realVizorionMemoryService)
+export const vizorionMemoryService = resolveVizorionService(
+  mockVizorionMemoryService,
+  realVizorionMemoryService,
+)

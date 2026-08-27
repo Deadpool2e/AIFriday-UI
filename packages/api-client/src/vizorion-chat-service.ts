@@ -26,10 +26,22 @@ export interface VizorionChatService {
   ): Promise<VizorionChatResponse>
   submitFeedback(
     messageId: string,
-    input: { conversationId: string; rating: 'up' | 'down'; reason?: string; comment?: string; runId?: string },
+    input: {
+      conversationId: string
+      rating: 'up' | 'down'
+      reason?: string
+      comment?: string
+      runId?: string
+    },
   ): Promise<void>
-  regenerate(messageId: string, style?: VizorionRegenerateStyle): Promise<VizorionRegenerateResult>
-  improve(messageId: string, feedbackText?: string): Promise<VizorionRegenerateResult>
+  regenerate(
+    messageId: string,
+    style?: VizorionRegenerateStyle,
+  ): Promise<VizorionRegenerateResult>
+  improve(
+    messageId: string,
+    feedbackText?: string,
+  ): Promise<VizorionRegenerateResult>
 }
 
 function delay(ms: number) {
@@ -49,7 +61,10 @@ export const mockVizorionChatService: VizorionChatService = {
     const reply = `(mock) You said: "${message}". Set VITE_VIZORION_USE_MOCK=false with a real VITE_VIZORION_API_URL / VITE_VIZORION_API_KEY to talk to Vizorion.`
     const words = reply.split(' ')
 
-    onEvent({ event: 'run_started', data: { conversation_id: _conversationId } })
+    onEvent({
+      event: 'run_started',
+      data: { conversation_id: _conversationId },
+    })
     await delay(150)
     onEvent({ event: 'message_started', data: {} })
 
@@ -62,7 +77,11 @@ export const mockVizorionChatService: VizorionChatService = {
     onEvent({ event: 'message_completed', data: {} })
     onEvent({
       event: 'run_completed',
-      data: { message_id: `mock-msg-${Date.now()}`, run_id: `mock-run-${Date.now()}`, usage: {} },
+      data: {
+        message_id: `mock-msg-${Date.now()}`,
+        run_id: `mock-run-${Date.now()}`,
+        usage: {},
+      },
     })
   },
 
@@ -84,11 +103,19 @@ export const mockVizorionChatService: VizorionChatService = {
   async submitFeedback() {},
 
   async regenerate(messageId, style) {
-    return { message_id: messageId, version_id: `mock-version-${Date.now()}`, content: `(mock, ${style ?? 'default'} style)` }
+    return {
+      message_id: messageId,
+      version_id: `mock-version-${Date.now()}`,
+      content: `(mock, ${style ?? 'default'} style)`,
+    }
   },
 
   async improve(messageId) {
-    return { message_id: messageId, version_id: `mock-version-${Date.now()}`, content: '(mock, improved)' }
+    return {
+      message_id: messageId,
+      version_id: `mock-version-${Date.now()}`,
+      content: '(mock, improved)',
+    }
   },
 }
 
@@ -96,10 +123,16 @@ export const realVizorionChatService: VizorionChatService = {
   listMessages: (conversationId) => vizorionClient.listMessages(conversationId),
   streamMessage: (conversationId, message, onEvent, signal) =>
     streamVizorionChat({ conversationId, message }, { onEvent, signal }),
-  respondToApproval: (approvalId, resolution, data) => vizorionClient.respondToApproval(approvalId, resolution, data),
-  submitFeedback: (messageId, input) => vizorionClient.submitFeedback(messageId, input),
+  respondToApproval: (approvalId, resolution, data) =>
+    vizorionClient.respondToApproval(approvalId, resolution, data),
+  submitFeedback: (messageId, input) =>
+    vizorionClient.submitFeedback(messageId, input),
   regenerate: (messageId, style) => vizorionClient.regenerate(messageId, style),
-  improve: (messageId, feedbackText) => vizorionClient.improve(messageId, feedbackText),
+  improve: (messageId, feedbackText) =>
+    vizorionClient.improve(messageId, feedbackText),
 }
 
-export const vizorionChatService = resolveVizorionService(mockVizorionChatService, realVizorionChatService)
+export const vizorionChatService = resolveVizorionService(
+  mockVizorionChatService,
+  realVizorionChatService,
+)

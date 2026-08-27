@@ -53,11 +53,27 @@ const STATUSES: RequestStatus[] = [
   'failed',
 ]
 
-const PRIORITIES: RequestPriority[] = ['normal', 'normal', 'high', 'low', 'urgent']
+const PRIORITIES: RequestPriority[] = [
+  'normal',
+  'normal',
+  'high',
+  'low',
+  'urgent',
+]
 
-const RISKS: RiskLevel[] = ['low', 'low', 'medium', 'medium', 'high', 'critical']
+const RISKS: RiskLevel[] = [
+  'low',
+  'low',
+  'medium',
+  'medium',
+  'high',
+  'critical',
+]
 
-function generateGuardrailChecks(id: string, risk: RiskLevel): GuardrailCheckSummary[] {
+function generateGuardrailChecks(
+  id: string,
+  risk: RiskLevel,
+): GuardrailCheckSummary[] {
   const checks: GuardrailCheckSummary[] = [
     { id: `${id}-GR1`, rule: 'Sensitive data exposure', status: 'passed' },
     {
@@ -119,14 +135,22 @@ function generateRequests(count: number): Request[] {
       aiRecommendation: aiProcessed
         ? {
             decision:
-              risk === 'critical' ? 'escalate' : risk === 'high' ? 'review' : 'approve',
+              risk === 'critical'
+                ? 'escalate'
+                : risk === 'high'
+                  ? 'review'
+                  : 'approve',
             confidence: 60 + ((i * 13) % 38),
             risk,
             summary: `Automated review found ${risk} risk based on transaction pattern and policy match history.`,
           }
         : undefined,
       agentExecutions: [
-        { agent: 'Orchestrator', status: 'completed', durationMs: 120 + (i % 5) * 40 },
+        {
+          agent: 'Orchestrator',
+          status: 'completed',
+          durationMs: 120 + (i % 5) * 40,
+        },
         {
           agent: 'Risk Agent',
           status: aiProcessed ? 'completed' : 'skipped',
@@ -144,11 +168,26 @@ function generateRequests(count: number): Request[] {
         },
       ],
       documents: [
-        { id: `${id}-DOC-1`, name: 'Supporting evidence.pdf', type: 'PDF', sizeLabel: '482 KB' },
-        { id: `${id}-DOC-2`, name: 'Policy reference.docx', type: 'DOCX', sizeLabel: '128 KB' },
+        {
+          id: `${id}-DOC-1`,
+          name: 'Supporting evidence.pdf',
+          type: 'PDF',
+          sizeLabel: '482 KB',
+        },
+        {
+          id: `${id}-DOC-2`,
+          name: 'Policy reference.docx',
+          type: 'DOCX',
+          sizeLabel: '128 KB',
+        },
       ],
       timeline: [
-        { id: `${id}-T1`, label: 'Request submitted', timestamp: createdAt, status: 'completed' },
+        {
+          id: `${id}-T1`,
+          label: 'Request submitted',
+          timestamp: createdAt,
+          status: 'completed',
+        },
         {
           id: `${id}-T2`,
           label: 'AI review completed',
@@ -214,7 +253,8 @@ export function triggerDemoPendingApproval(): Request {
       decision: 'review',
       confidence: 68,
       risk: 'high',
-      summary: 'Automated review found high risk based on transaction pattern and policy match history.',
+      summary:
+        'Automated review found high risk based on transaction pattern and policy match history.',
     },
     agentExecutions: [
       { agent: 'Orchestrator', status: 'completed', durationMs: 140 },
@@ -223,12 +263,32 @@ export function triggerDemoPendingApproval(): Request {
       { agent: 'Decision Agent', status: 'completed', durationMs: 410 },
     ],
     documents: [
-      { id: `${id}-DOC-1`, name: 'Supporting evidence.pdf', type: 'PDF', sizeLabel: '512 KB' },
+      {
+        id: `${id}-DOC-1`,
+        name: 'Supporting evidence.pdf',
+        type: 'PDF',
+        sizeLabel: '512 KB',
+      },
     ],
     timeline: [
-      { id: `${id}-T1`, label: 'Request submitted', timestamp: now, status: 'completed' },
-      { id: `${id}-T2`, label: 'AI review completed', timestamp: now, status: 'completed' },
-      { id: `${id}-T3`, label: 'Human approval', timestamp: now, status: 'current' },
+      {
+        id: `${id}-T1`,
+        label: 'Request submitted',
+        timestamp: now,
+        status: 'completed',
+      },
+      {
+        id: `${id}-T2`,
+        label: 'AI review completed',
+        timestamp: now,
+        status: 'completed',
+      },
+      {
+        id: `${id}-T3`,
+        label: 'Human approval',
+        timestamp: now,
+        status: 'current',
+      },
     ],
     guardrailChecks: generateGuardrailChecks(id, 'high'),
   }

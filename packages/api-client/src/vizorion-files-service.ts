@@ -19,20 +19,30 @@ export const mockVizorionFilesService: VizorionFilesService = {
     return mockDocuments
   },
   async upload(file) {
-    const document: VizorionDocument = { id: `mock-doc-${Date.now()}`, status: 'draft', source: file.name }
+    const document: VizorionDocument = {
+      id: `mock-doc-${Date.now()}`,
+      status: 'draft',
+      source: file.name,
+    }
     mockDocuments = [document, ...mockDocuments]
     return document
   },
   async publish(documentId) {
-    mockDocuments = mockDocuments.map((d) => (d.id === documentId ? { ...d, status: 'published' } : d))
+    mockDocuments = mockDocuments.map((d) =>
+      d.id === documentId ? { ...d, status: 'published' } : d,
+    )
     return mockDocuments.find((d) => d.id === documentId)!
   },
   async unpublish(documentId) {
-    mockDocuments = mockDocuments.map((d) => (d.id === documentId ? { ...d, status: 'draft' } : d))
+    mockDocuments = mockDocuments.map((d) =>
+      d.id === documentId ? { ...d, status: 'draft' } : d,
+    )
     return mockDocuments.find((d) => d.id === documentId)!
   },
   async archive(documentId) {
-    mockDocuments = mockDocuments.map((d) => (d.id === documentId ? { ...d, status: 'archived' } : d))
+    mockDocuments = mockDocuments.map((d) =>
+      d.id === documentId ? { ...d, status: 'archived' } : d,
+    )
     return mockDocuments.find((d) => d.id === documentId)!
   },
   async delete(documentId) {
@@ -57,4 +67,7 @@ export const realVizorionFilesService: VizorionFilesService = {
   delete: (documentId) => vizorionClient.deleteFile(documentId),
 }
 
-export const vizorionFilesService = resolveVizorionService(mockVizorionFilesService, realVizorionFilesService)
+export const vizorionFilesService = resolveVizorionService(
+  mockVizorionFilesService,
+  realVizorionFilesService,
+)

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { mockGuardrailsService, triggerDemoGuardrailBlock } from './guardrails-service'
+import {
+  mockGuardrailsService,
+  triggerDemoGuardrailBlock,
+} from './guardrails-service'
 
 // Deliberately asserting invariants/relationships rather than hardcoded
 // numbers pinned to today's mock data — these should stay true no matter
@@ -16,13 +19,17 @@ describe('mockGuardrailsService.getSummary', () => {
   it('blocksLast24h counts exactly the blocked events', async () => {
     const events = await mockGuardrailsService.getEvents()
     const summary = await mockGuardrailsService.getSummary()
-    expect(summary.blocksLast24h).toBe(events.filter((e) => e.action === 'blocked').length)
+    expect(summary.blocksLast24h).toBe(
+      events.filter((e) => e.action === 'blocked').length,
+    )
   })
 
   it('topRule is the rule with the highest blockCount among rules that have blocked at least once', async () => {
     const rules = await mockGuardrailsService.getRules()
     const summary = await mockGuardrailsService.getSummary()
-    const expectedTop = [...rules].filter((r) => r.blockCount > 0).sort((a, b) => b.blockCount - a.blockCount)[0]
+    const expectedTop = [...rules]
+      .filter((r) => r.blockCount > 0)
+      .sort((a, b) => b.blockCount - a.blockCount)[0]
 
     expect(summary.topRule?.name).toBe(expectedTop.name)
     expect(summary.topRule?.blockCount).toBe(expectedTop.blockCount)
@@ -56,7 +63,9 @@ describe('triggerDemoGuardrailBlock', () => {
     // until after triggering — so snapshot every rule's blockCount as a
     // plain number keyed by id first, then compare by id afterward.
     const rulesBefore = await mockGuardrailsService.getRules()
-    const blockCountsBefore = new Map(rulesBefore.map((r) => [r.id, r.blockCount]))
+    const blockCountsBefore = new Map(
+      rulesBefore.map((r) => [r.id, r.blockCount]),
+    )
 
     const event = triggerDemoGuardrailBlock()
 

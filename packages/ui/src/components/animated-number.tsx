@@ -20,7 +20,10 @@ function easeOutExpo(t: number) {
 // `[data-motion='reduced'] *` CSS kill-switch, so the two stay in sync for
 // free.
 function prefersReducedMotion() {
-  return typeof document !== 'undefined' && document.documentElement.dataset.motion === 'reduced'
+  return (
+    typeof document !== 'undefined' &&
+    document.documentElement.dataset.motion === 'reduced'
+  )
 }
 
 // Tweens on *change*, not on mount — the first render shows the real value
@@ -28,7 +31,10 @@ function prefersReducedMotion() {
 // live data, per the dashboard "don't fake liveness" rule this app already
 // follows elsewhere). Skips straight to the final value when the user has
 // reduced motion set.
-function AnimatedNumber({ value, format = (v) => v.toLocaleString('en-US') }: AnimatedNumberProps) {
+function AnimatedNumber({
+  value,
+  format = (v) => v.toLocaleString('en-US'),
+}: AnimatedNumberProps) {
   const [display, setDisplay] = React.useState(value)
   const fromRef = React.useRef(value)
   const mountedRef = React.useRef(false)

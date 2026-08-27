@@ -8,8 +8,21 @@ function AllCaughtUpIllustration() {
   return (
     <svg viewBox="0 0 96 96" fill="none" aria-hidden="true" className="size-16">
       <circle cx="48" cy="48" r="44" className="fill-success/[0.06]" />
-      <circle cx="48" cy="48" r="30" className="stroke-success/25" strokeWidth="1.5" strokeDasharray="3 5" />
-      <circle cx="48" cy="48" r="18" className="fill-surface stroke-success/40" strokeWidth="1.5" />
+      <circle
+        cx="48"
+        cy="48"
+        r="30"
+        className="stroke-success/25"
+        strokeWidth="1.5"
+        strokeDasharray="3 5"
+      />
+      <circle
+        cx="48"
+        cy="48"
+        r="18"
+        className="fill-surface stroke-success/40"
+        strokeWidth="1.5"
+      />
       <path
         d="M40 48.5 45.5 54 57 41"
         className="stroke-success"
@@ -34,7 +47,13 @@ function NotBuiltIllustration() {
         strokeWidth="1.5"
         strokeDasharray="4 5"
       />
-      <path d="M32 62 42 48l8 8 8-12 6 8" className="stroke-muted-foreground/40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M32 62 42 48l8 8 8-12 6 8"
+        className="stroke-muted-foreground/40"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       <circle cx="48" cy="48" r="3" className="fill-ai-accent/70" />
     </svg>
   )

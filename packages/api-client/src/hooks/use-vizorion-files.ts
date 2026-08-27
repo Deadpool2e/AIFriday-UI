@@ -21,12 +21,17 @@ export function useUploadVizorionFile() {
       // Vizorion has no GET /v1/files list endpoint (see
       // vizorion-files-service.ts) — documents this session has touched
       // are tracked directly in the query cache instead of refetched.
-      queryClient.setQueryData<VizorionDocument[]>(QUERY_KEY, (prev = []) => [document, ...prev])
+      queryClient.setQueryData<VizorionDocument[]>(QUERY_KEY, (prev = []) => [
+        document,
+        ...prev,
+      ])
     },
   })
 }
 
-function useDocumentLifecycleMutation(action: (documentId: string) => Promise<VizorionDocument>) {
+function useDocumentLifecycleMutation(
+  action: (documentId: string) => Promise<VizorionDocument>,
+) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: action,
@@ -39,15 +44,21 @@ function useDocumentLifecycleMutation(action: (documentId: string) => Promise<Vi
 }
 
 export function usePublishVizorionFile() {
-  return useDocumentLifecycleMutation((documentId) => vizorionFilesService.publish(documentId))
+  return useDocumentLifecycleMutation((documentId) =>
+    vizorionFilesService.publish(documentId),
+  )
 }
 
 export function useUnpublishVizorionFile() {
-  return useDocumentLifecycleMutation((documentId) => vizorionFilesService.unpublish(documentId))
+  return useDocumentLifecycleMutation((documentId) =>
+    vizorionFilesService.unpublish(documentId),
+  )
 }
 
 export function useArchiveVizorionFile() {
-  return useDocumentLifecycleMutation((documentId) => vizorionFilesService.archive(documentId))
+  return useDocumentLifecycleMutation((documentId) =>
+    vizorionFilesService.archive(documentId),
+  )
 }
 
 export function useDeleteVizorionFile() {
@@ -55,7 +66,9 @@ export function useDeleteVizorionFile() {
   return useMutation({
     mutationFn: (documentId: string) => vizorionFilesService.delete(documentId),
     onSuccess: (_result, documentId) => {
-      queryClient.setQueryData<VizorionDocument[]>(QUERY_KEY, (prev = []) => prev.filter((d) => d.id !== documentId))
+      queryClient.setQueryData<VizorionDocument[]>(QUERY_KEY, (prev = []) =>
+        prev.filter((d) => d.id !== documentId),
+      )
     },
   })
 }

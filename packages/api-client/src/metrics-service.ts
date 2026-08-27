@@ -15,11 +15,15 @@ function computeDashboardMetrics(): DashboardMetrics {
   return {
     totalRequests: MOCK_REQUESTS.length,
     completed: MOCK_REQUESTS.filter((r) => r.status === 'completed').length,
-    pending: MOCK_REQUESTS.filter((r) => r.status === 'pending' || r.status === 'running')
-      .length,
-    highRisk: MOCK_REQUESTS.filter((r) => r.risk === 'high' || r.risk === 'critical').length,
+    pending: MOCK_REQUESTS.filter(
+      (r) => r.status === 'pending' || r.status === 'running',
+    ).length,
+    highRisk: MOCK_REQUESTS.filter(
+      (r) => r.risk === 'high' || r.risk === 'critical',
+    ).length,
     aiProcessed: MOCK_REQUESTS.filter((r) => r.aiProcessed).length,
-    humanReviewRequired: MOCK_REQUESTS.filter((r) => r.humanReviewRequired).length,
+    humanReviewRequired: MOCK_REQUESTS.filter((r) => r.humanReviewRequired)
+      .length,
   }
 }
 
@@ -31,7 +35,10 @@ function generateRequestVolume(days: number): RequestVolumePoint[] {
     const submitted = 8 + ((i * 7) % 11)
     const completed = Math.max(3, submitted - 2 - (i % 3))
     points.push({
-      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      date: date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      }),
       submitted,
       completed,
     })
@@ -45,7 +52,10 @@ function generateAiActivity(days: number): AiActivityPoint[] {
   for (let i = days - 1; i >= 0; i--) {
     const date = new Date(base - i * 24 * 60 * 60 * 1000)
     points.push({
-      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      date: date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      }),
       aiProcessed: 10 + ((i * 5) % 9),
       humanReview: 2 + (i % 4),
     })

@@ -87,7 +87,10 @@ const columns: DataTableColumn<RagDocument>[] = [
     sortValue: (d) => d.lastIndexedAt,
     cellClassName: 'tabular-nums',
     cell: (d) =>
-      new Date(d.lastIndexedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      new Date(d.lastIndexedAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      }),
   },
 ]
 
@@ -105,7 +108,9 @@ export function RagMonitoringPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">RAG Monitoring</h1>
+        <h2 className="text-base font-semibold tracking-tight">
+          RAG Monitoring
+        </h2>
         <p className="text-muted-foreground text-sm">
           What the retrieval layer is finding, how relevant it is, and how fast.
         </p>
@@ -113,7 +118,9 @@ export function RagMonitoringPage() {
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {summary.isLoading ? (
-          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
+          Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))
         ) : summary.data ? (
           <>
             <KPIWidget
@@ -144,7 +151,9 @@ export function RagMonitoringPage() {
       <Card>
         <CardHeader>
           <CardTitle>Relevance trend</CardTitle>
-          <CardDescription>Average retrieval relevance score, last 14 days</CardDescription>
+          <CardDescription>
+            Average retrieval relevance score, last 14 days
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {trend.isLoading || !trend.data ? (
@@ -152,7 +161,10 @@ export function RagMonitoringPage() {
           ) : (
             <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={trend.data} margin={{ left: 0, right: 8 }}>
-                <ChartAreaGradient id="rag-relevance" colorVar="var(--color-chart-info)" />
+                <ChartAreaGradient
+                  id="rag-relevance"
+                  colorVar="var(--color-chart-info)"
+                />
                 <CartesianGrid stroke={chartGridStroke} vertical={false} />
                 <XAxis
                   dataKey="date"
@@ -194,7 +206,9 @@ export function RagMonitoringPage() {
       <Card>
         <CardHeader>
           <CardTitle>Knowledge base</CardTitle>
-          <CardDescription>Every document currently indexed for retrieval.</CardDescription>
+          <CardDescription>
+            Every document currently indexed for retrieval.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <DataTable
@@ -206,7 +220,10 @@ export function RagMonitoringPage() {
             onPageChange={setPage}
             isLoading={documents.isLoading}
             emptyState={
-              <EmptyState title="No documents indexed" description="Indexed documents will show up here." />
+              <EmptyState
+                title="No documents indexed"
+                description="Indexed documents will show up here."
+              />
             }
           />
         </CardContent>
@@ -215,7 +232,9 @@ export function RagMonitoringPage() {
       <Card>
         <CardHeader>
           <CardTitle>Recent retrieval queries</CardTitle>
-          <CardDescription>What agents asked the retrieval layer, and what it found.</CardDescription>
+          <CardDescription>
+            What agents asked the retrieval layer, and what it found.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {queries.isLoading || !queries.data ? (
@@ -225,7 +244,9 @@ export function RagMonitoringPage() {
               ))}
             </div>
           ) : queries.data.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No retrieval activity recorded yet.</p>
+            <p className="text-muted-foreground text-sm">
+              No retrieval activity recorded yet.
+            </p>
           ) : (
             <ul className="space-y-4">
               {queries.data.map((query) => (

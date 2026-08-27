@@ -2,7 +2,12 @@ import * as React from 'react'
 import { Link } from 'react-router'
 import { SearchIcon, SearchXIcon } from 'lucide-react'
 import { useRequests } from '@platform/api-client'
-import type { Request, RequestPriority, RequestStatus, RiskLevel } from '@platform/types'
+import type {
+  Request,
+  RequestPriority,
+  RequestStatus,
+  RiskLevel,
+} from '@platform/types'
 import {
   Badge,
   Button,
@@ -11,6 +16,7 @@ import {
   EmptyState,
   ErrorState,
   Input,
+  PageHeader,
   RiskIndicator,
   Select,
   SelectContent,
@@ -38,7 +44,12 @@ const PRIORITY_RANK: Record<RequestPriority, number> = {
   high: 2,
   urgent: 3,
 }
-const RISK_RANK: Record<RiskLevel, number> = { low: 0, medium: 1, high: 2, critical: 3 }
+const RISK_RANK: Record<RiskLevel, number> = {
+  low: 0,
+  medium: 1,
+  high: 2,
+  critical: 3,
+}
 
 const PAGE_SIZE = 10
 
@@ -49,7 +60,10 @@ const columns: DataTableColumn<Request>[] = [
     sortable: true,
     sortValue: (r) => r.id,
     cell: (r) => (
-      <Link to={`/requests/${r.id}`} className="text-primary font-medium hover:underline">
+      <Link
+        to={`/requests/${r.id}`}
+        className="text-primary font-medium hover:underline"
+      >
         {r.id}
       </Link>
     ),
@@ -111,15 +125,20 @@ export function RequestsPage() {
   const requests = useRequests()
 
   const [search, setSearch] = React.useState('')
-  const [statusFilter, setStatusFilter] = React.useState<RequestStatus | 'all'>('all')
+  const [statusFilter, setStatusFilter] = React.useState<RequestStatus | 'all'>(
+    'all',
+  )
   const [riskFilter, setRiskFilter] = React.useState<RiskLevel | 'all'>('all')
-  const [priorityFilter, setPriorityFilter] = React.useState<RequestPriority | 'all'>('all')
+  const [priorityFilter, setPriorityFilter] = React.useState<
+    RequestPriority | 'all'
+  >('all')
   const [page, setPage] = React.useState(1)
 
   // Reset to page 1 whenever a filter changes — adjusted during render
   // (see AppShell for why this beats a useEffect for this exact case).
   const filterSignature = `${search}|${statusFilter}|${riskFilter}|${priorityFilter}`
-  const [lastFilterSignature, setLastFilterSignature] = React.useState(filterSignature)
+  const [lastFilterSignature, setLastFilterSignature] =
+    React.useState(filterSignature)
   if (filterSignature !== lastFilterSignature) {
     setLastFilterSignature(filterSignature)
     setPage(1)
@@ -157,76 +176,95 @@ export function RequestsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">Workspace</p>
-        <h1 className="text-3xl font-semibold tracking-tight">Requests</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          {requests.data ? `${requests.data.length} total requests` : 'Loading requests…'}
-        </p>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative min-w-[220px] flex-1">
-          <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by ID, title, or owner..."
-            className="pl-8"
-            aria-label="Search requests"
-          />
-        </div>
-        <Select
-          value={statusFilter}
-          onValueChange={(v) => setStatusFilter(v as RequestStatus | 'all')}
-        >
-          <SelectTrigger className="w-40" aria-label="Filter by status">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            {STATUS_OPTIONS.map((status) => (
-              <SelectItem key={status} value={status} className="capitalize">
-                {status}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={riskFilter} onValueChange={(v) => setRiskFilter(v as RiskLevel | 'all')}>
-          <SelectTrigger className="w-36" aria-label="Filter by risk">
-            <SelectValue placeholder="Risk" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All risk levels</SelectItem>
-            {RISK_OPTIONS.map((risk) => (
-              <SelectItem key={risk} value={risk} className="capitalize">
-                {risk}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select
-          value={priorityFilter}
-          onValueChange={(v) => setPriorityFilter(v as RequestPriority | 'all')}
-        >
-          <SelectTrigger className="w-36" aria-label="Filter by priority">
-            <SelectValue placeholder="Priority" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All priorities</SelectItem>
-            {PRIORITY_OPTIONS.map((priority) => (
-              <SelectItem key={priority} value={priority} className="capitalize">
-                {priority}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={clearFilters}>
-            Clear filters
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        eyebrow="Workspace"
+        title="Requests"
+        description={
+          requests.data
+            ? `${filtered.length} of ${requests.data.length} requests${hasActiveFilters ? ' match your filters' : ''}`
+            : 'Loading requests…'
+        }
+        // The filter bar belongs to the page frame, not to the content:
+        // it stays put while the table below it changes, which is exactly
+        // what the header's job is.
+        toolbar={
+          <div className="flex flex-wrap items-center gap-2 pb-4">
+            <div className="relative min-w-[220px] flex-1">
+              <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by ID, title, or owner..."
+                className="pl-8"
+                aria-label="Search requests"
+              />
+            </div>
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => setStatusFilter(v as RequestStatus | 'all')}
+            >
+              <SelectTrigger className="w-40" aria-label="Filter by status">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                {STATUS_OPTIONS.map((status) => (
+                  <SelectItem
+                    key={status}
+                    value={status}
+                    className="capitalize"
+                  >
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={riskFilter}
+              onValueChange={(v) => setRiskFilter(v as RiskLevel | 'all')}
+            >
+              <SelectTrigger className="w-36" aria-label="Filter by risk">
+                <SelectValue placeholder="Risk" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All risk levels</SelectItem>
+                {RISK_OPTIONS.map((risk) => (
+                  <SelectItem key={risk} value={risk} className="capitalize">
+                    {risk}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={priorityFilter}
+              onValueChange={(v) =>
+                setPriorityFilter(v as RequestPriority | 'all')
+              }
+            >
+              <SelectTrigger className="w-36" aria-label="Filter by priority">
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All priorities</SelectItem>
+                {PRIORITY_OPTIONS.map((priority) => (
+                  <SelectItem
+                    key={priority}
+                    value={priority}
+                    className="capitalize"
+                  >
+                    {priority}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                Clear filters
+              </Button>
+            )}
+          </div>
+        }
+      />
 
       {requests.isError ? (
         <ErrorState
@@ -256,7 +294,10 @@ export function RequestsPage() {
                 }
               />
             ) : (
-              <EmptyState title="No requests yet" description="Requests will show up here." />
+              <EmptyState
+                title="No requests yet"
+                description="Requests will show up here."
+              />
             )
           }
         />

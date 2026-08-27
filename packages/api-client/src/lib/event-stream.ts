@@ -3,7 +3,10 @@ export interface EventStreamHandle {
 }
 
 export interface EventStreamSource<TEvent> {
-  connect(onEvent: (event: TEvent) => void, onComplete: () => void): EventStreamHandle
+  connect(
+    onEvent: (event: TEvent) => void,
+    onComplete: () => void,
+  ): EventStreamHandle
 }
 
 // Drives a pre-generated, deterministic event schedule through setTimeout —
@@ -49,7 +52,9 @@ export function createMockEventSource<TEvent>(
 // per `message`, and a `done` named event when the stream ends — a
 // conventional SSE shape. Untested against a live backend (none exists
 // yet); the seam is what matters for now.
-export function createSSESource<TEvent>(url: string): EventStreamSource<TEvent> {
+export function createSSESource<TEvent>(
+  url: string,
+): EventStreamSource<TEvent> {
   return {
     connect(onEvent, onComplete) {
       const source = new EventSource(url)

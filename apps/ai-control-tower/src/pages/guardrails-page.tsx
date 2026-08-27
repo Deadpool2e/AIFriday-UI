@@ -1,7 +1,16 @@
 import * as React from 'react'
 import { Link } from 'react-router'
-import { ShieldAlertIcon, ShieldCheckIcon, ShieldIcon, ShieldOffIcon } from 'lucide-react'
-import { useGuardrailEvents, useGuardrailRules, useGuardrailSummary } from '@platform/api-client'
+import {
+  ShieldAlertIcon,
+  ShieldCheckIcon,
+  ShieldIcon,
+  ShieldOffIcon,
+} from 'lucide-react'
+import {
+  useGuardrailEvents,
+  useGuardrailRules,
+  useGuardrailSummary,
+} from '@platform/api-client'
 import type { GuardrailRule, GuardrailSeverity } from '@platform/types'
 import {
   Badge,
@@ -39,7 +48,10 @@ const SEVERITY_TONE: Record<GuardrailSeverity, string> = {
 
 function SeverityBadge({ severity }: { severity: GuardrailSeverity }) {
   return (
-    <Badge variant="outline" className={`capitalize ${SEVERITY_TONE[severity]}`}>
+    <Badge
+      variant="outline"
+      className={`capitalize ${SEVERITY_TONE[severity]}`}
+    >
       {severity}
     </Badge>
   )
@@ -114,15 +126,18 @@ export function GuardrailsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Guardrails</h1>
+        <h2 className="text-base font-semibold tracking-tight">Guardrails</h2>
         <p className="text-muted-foreground text-sm">
-          Policy and safety rules screening every agent execution, and what they've caught.
+          Policy and safety rules screening every agent execution, and what
+          they've caught.
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {summary.isLoading ? (
-          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
+          Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))
         ) : summary.data ? (
           <>
             <KPIWidget
@@ -152,7 +167,9 @@ export function GuardrailsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Rules</CardTitle>
-          <CardDescription>Every guardrail currently configured, enabled or not.</CardDescription>
+          <CardDescription>
+            Every guardrail currently configured, enabled or not.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <DataTable
@@ -164,7 +181,10 @@ export function GuardrailsPage() {
             onPageChange={setPage}
             isLoading={rules.isLoading}
             emptyState={
-              <EmptyState title="No rules configured" description="Guardrail rules will show up here." />
+              <EmptyState
+                title="No rules configured"
+                description="Guardrail rules will show up here."
+              />
             }
           />
         </CardContent>
@@ -173,7 +193,10 @@ export function GuardrailsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Recent guardrail events</CardTitle>
-          <CardDescription>Every block or flag, with a link back to the execution it happened in.</CardDescription>
+          <CardDescription>
+            Every block or flag, with a link back to the execution it happened
+            in.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {events.isLoading || !events.data ? (
@@ -202,7 +225,8 @@ export function GuardrailsPage() {
                         {event.ruleName}
                       </Link>
                       <span className="text-muted-foreground">
-                        {event.action === 'blocked' ? 'blocked' : 'flagged'} by {event.agent}
+                        {event.action === 'blocked' ? 'blocked' : 'flagged'} by{' '}
+                        {event.agent}
                       </span>
                     </span>
                     <span className="text-muted-foreground font-mono text-xs tabular-nums">

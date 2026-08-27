@@ -21,7 +21,9 @@ export interface PcmCaptureHandle {
   takeAllWav: () => Blob
 }
 
-export async function startPcmCapture(maxBufferSeconds: number): Promise<PcmCaptureHandle> {
+export async function startPcmCapture(
+  maxBufferSeconds: number,
+): Promise<PcmCaptureHandle> {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
   const audioContext = new AudioContext()
   const source = audioContext.createMediaStreamSource(stream)
@@ -83,7 +85,8 @@ function encodeWav(samples: Float32Array, sampleRate: number): Blob {
   const view = new DataView(arrayBuffer)
 
   function writeString(offset: number, str: string) {
-    for (let i = 0; i < str.length; i += 1) view.setUint8(offset + i, str.charCodeAt(i))
+    for (let i = 0; i < str.length; i += 1)
+      view.setUint8(offset + i, str.charCodeAt(i))
   }
 
   writeString(0, 'RIFF')

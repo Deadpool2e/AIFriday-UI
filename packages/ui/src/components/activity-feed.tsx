@@ -28,7 +28,11 @@ const severityDot: Record<ActivityFeedItem['severity'], string> = {
 
 function ActivityFeed({ items, className, ...props }: ActivityFeedProps) {
   return (
-    <ul data-slot="activity-feed" className={cn('space-y-3', className)} {...props}>
+    <ul
+      data-slot="activity-feed"
+      className={cn('space-y-3', className)}
+      {...props}
+    >
       {items.map((item) => (
         <li key={item.id} className="flex items-start gap-3 text-sm">
           <span

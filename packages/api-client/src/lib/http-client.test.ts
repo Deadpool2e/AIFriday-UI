@@ -14,7 +14,9 @@ afterAll(() => server.close())
 describe('apiFetch', () => {
   it('resolves with the parsed JSON body on a 2xx response', async () => {
     server.use(
-      http.get(`${API_BASE_URL}/api/requests`, () => HttpResponse.json([{ id: 'REQ-1' }])),
+      http.get(`${API_BASE_URL}/api/requests`, () =>
+        HttpResponse.json([{ id: 'REQ-1' }]),
+      ),
     )
 
     const result = await apiFetch<{ id: string }[]>('/api/requests')
@@ -37,10 +39,13 @@ describe('apiFetch', () => {
   it('sends a JSON-encoded body and Content-Type header for POST requests', async () => {
     let capturedBody: unknown = null
     server.use(
-      http.post(`${API_BASE_URL}/api/approvals/REQ-1/action`, async ({ request }) => {
-        capturedBody = await request.json()
-        return HttpResponse.json({ ok: true })
-      }),
+      http.post(
+        `${API_BASE_URL}/api/approvals/REQ-1/action`,
+        async ({ request }) => {
+          capturedBody = await request.json()
+          return HttpResponse.json({ ok: true })
+        },
+      ),
     )
 
     await apiFetch('/api/approvals/REQ-1/action', {
@@ -52,18 +57,26 @@ describe('apiFetch', () => {
 
   it('throws an ApiError with the response status on a non-2xx response', async () => {
     server.use(
-      http.get(`${API_BASE_URL}/api/requests/missing`, () => new HttpResponse('not found', { status: 404 })),
+      http.get(
+        `${API_BASE_URL}/api/requests/missing`,
+        () => new HttpResponse('not found', { status: 404 }),
+      ),
     )
 
     await expect(apiFetch('/api/requests/missing')).rejects.toMatchObject({
       status: 404,
     })
-    await expect(apiFetch('/api/requests/missing')).rejects.toBeInstanceOf(ApiError)
+    await expect(apiFetch('/api/requests/missing')).rejects.toBeInstanceOf(
+      ApiError,
+    )
   })
 
   it('returns undefined for a 204 No Content response', async () => {
     server.use(
-      http.post(`${API_BASE_URL}/api/noop`, () => new HttpResponse(null, { status: 204 })),
+      http.post(
+        `${API_BASE_URL}/api/noop`,
+        () => new HttpResponse(null, { status: 204 }),
+      ),
     )
     const result = await apiFetch('/api/noop', { method: 'POST' })
     expect(result).toBeUndefined()

@@ -27,10 +27,19 @@ import {
   useDocumentTitle,
 } from '@platform/ui'
 
-const CATEGORY_CONFIG: Record<AuditCategory, { label: string; icon: React.ReactNode }> = {
+const CATEGORY_CONFIG: Record<
+  AuditCategory,
+  { label: string; icon: React.ReactNode }
+> = {
   execution: { label: 'Execution', icon: <BotIcon className="size-3.5" /> },
-  guardrail: { label: 'Guardrail', icon: <ShieldAlertIcon className="size-3.5" /> },
-  approval: { label: 'Approval', icon: <CheckSquareIcon className="size-3.5" /> },
+  guardrail: {
+    label: 'Guardrail',
+    icon: <ShieldAlertIcon className="size-3.5" />,
+  },
+  approval: {
+    label: 'Approval',
+    icon: <CheckSquareIcon className="size-3.5" />,
+  },
   access: { label: 'Access', icon: <KeyRoundIcon className="size-3.5" /> },
   system: { label: 'System', icon: <ServerIcon className="size-3.5" /> },
 }
@@ -93,7 +102,9 @@ const columns: DataTableColumn<AuditLogEntry>[] = [
           {e.executionId}
         </Link>
       ) : e.requestId ? (
-        <span className="text-muted-foreground font-mono text-xs">{e.requestId}</span>
+        <span className="text-muted-foreground font-mono text-xs">
+          {e.requestId}
+        </span>
       ) : (
         <span className="text-muted-foreground">—</span>
       ),
@@ -120,21 +131,26 @@ export function AuditLogsPage() {
 
   const filteredEntries = React.useMemo(() => {
     if (!log.data) return []
-    return filter === 'all' ? log.data : log.data.filter((e) => e.category === filter)
+    return filter === 'all'
+      ? log.data
+      : log.data.filter((e) => e.category === filter)
   }, [log.data, filter])
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Audit Logs</h1>
+        <h2 className="text-base font-semibold tracking-tight">Audit Logs</h2>
         <p className="text-muted-foreground text-sm">
-          Every execution, guardrail action, approval decision, and access event, in one trail.
+          Every execution, guardrail action, approval decision, and access
+          event, in one trail.
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {counts.isLoading || !counts.data ? (
-          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
+          Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))
         ) : (
           <>
             <KPIWidget
@@ -142,9 +158,21 @@ export function AuditLogsPage() {
               value={Object.values(counts.data).reduce((sum, n) => sum + n, 0)}
               icon={<ListIcon />}
             />
-            <KPIWidget label="Approvals" value={counts.data.approval} icon={<CheckSquareIcon />} />
-            <KPIWidget label="Guardrail Actions" value={counts.data.guardrail} icon={<ShieldAlertIcon />} />
-            <KPIWidget label="System Events" value={counts.data.system} icon={<ServerIcon />} />
+            <KPIWidget
+              label="Approvals"
+              value={counts.data.approval}
+              icon={<CheckSquareIcon />}
+            />
+            <KPIWidget
+              label="Guardrail Actions"
+              value={counts.data.guardrail}
+              icon={<ShieldAlertIcon />}
+            />
+            <KPIWidget
+              label="System Events"
+              value={counts.data.system}
+              icon={<ServerIcon />}
+            />
           </>
         )}
       </div>
@@ -152,7 +180,9 @@ export function AuditLogsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Log</CardTitle>
-          <CardDescription>Filter by category, or view the full trail.</CardDescription>
+          <CardDescription>
+            Filter by category, or view the full trail.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
@@ -182,7 +212,10 @@ export function AuditLogsPage() {
             onPageChange={setPage}
             isLoading={log.isLoading}
             emptyState={
-              <EmptyState title="No matching events" description="Try a different category filter." />
+              <EmptyState
+                title="No matching events"
+                description="Try a different category filter."
+              />
             }
           />
         </CardContent>

@@ -29,12 +29,17 @@ export function MemoryPanel() {
         <div>
           <h2 className="text-lg font-semibold">Long-term memory</h2>
           <p className="text-muted-foreground text-sm">
-            Facts Vizorion remembers across conversations. Add one manually, or delete anything it picked up on
-            its own.
+            Facts Vizorion remembers across conversations. Add one manually, or
+            delete anything it picked up on its own.
           </p>
         </div>
         {memories.length > 0 && (
-          <Button variant="outline" size="sm" onClick={() => deleteAll.mutate()} disabled={deleteAll.isPending}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => deleteAll.mutate()}
+            disabled={deleteAll.isPending}
+          >
             Clear all
           </Button>
         )}
@@ -47,7 +52,10 @@ export function MemoryPanel() {
           placeholder="e.g. Prefers answers in bullet points"
           aria-label="New memory"
         />
-        <Button type="submit" disabled={!content.trim() || createMemory.isPending}>
+        <Button
+          type="submit"
+          disabled={!content.trim() || createMemory.isPending}
+        >
           Add
         </Button>
       </form>
@@ -60,12 +68,19 @@ export function MemoryPanel() {
       )}
 
       {!isLoading && memories.length === 0 && (
-        <EmptyState icon={<BrainIcon />} title="No memories yet" description="Nothing has been remembered yet." />
+        <EmptyState
+          icon={<BrainIcon />}
+          title="No memories yet"
+          description="Nothing has been remembered yet."
+        />
       )}
 
       <ul className="space-y-2">
         {memories.map((memory) => (
-          <li key={memory.id} className="bg-surface flex items-start justify-between gap-3 rounded-lg border p-3">
+          <li
+            key={memory.id}
+            className="bg-surface flex items-start justify-between gap-3 rounded-lg border p-3"
+          >
             <div className="min-w-0 space-y-0.5">
               <p className="text-sm">{memory.content}</p>
               <p className="text-muted-foreground text-xs">

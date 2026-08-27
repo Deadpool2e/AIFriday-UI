@@ -11,7 +11,11 @@ interface TraceEventBase {
 }
 
 export type TraceEvent =
-  | (TraceEventBase & { type: 'agent.started'; agent: string; inputSummary: string })
+  | (TraceEventBase & {
+      type: 'agent.started'
+      agent: string
+      inputSummary: string
+    })
   | (TraceEventBase & {
       type: 'agent.completed'
       agent: string
@@ -19,7 +23,12 @@ export type TraceEvent =
       tokens: number
       outputSummary: string
     })
-  | (TraceEventBase & { type: 'agent.failed'; agent: string; durationMs: number; error: string })
+  | (TraceEventBase & {
+      type: 'agent.failed'
+      agent: string
+      durationMs: number
+      error: string
+    })
   | (TraceEventBase & { type: 'tool.invoked'; agent: string; tool: string })
   | (TraceEventBase & {
       type: 'tool.completed'
@@ -28,7 +37,12 @@ export type TraceEvent =
       status: ToolCallStatus
       durationMs: number
     })
-  | (TraceEventBase & { type: 'agent.message'; sender: string; receiver: string; summary: string })
+  | (TraceEventBase & {
+      type: 'agent.message'
+      sender: string
+      receiver: string
+      summary: string
+    })
   | (TraceEventBase & {
       type: 'guardrail.blocked'
       rule: string
@@ -43,7 +57,8 @@ export type TraceEvent =
 // single event, for stages with no separate start). The mock trace
 // service builds this today the same way a real SSE consumer will build
 // it in Phase 13: fold incoming TraceEvents into TraceSteps as they arrive.
-export type TraceStepStatus = 'completed' | 'running' | 'failed' | 'blocked' | 'pending'
+export type TraceStepStatus =
+  'completed' | 'running' | 'failed' | 'blocked' | 'pending'
 
 export interface TraceStep {
   id: string

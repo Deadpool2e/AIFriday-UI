@@ -24,7 +24,10 @@ interface VizorionRequestOptions extends Omit<RequestInit, 'body'> {
   body?: unknown
 }
 
-async function vizorionFetch<T>(path: string, options: VizorionRequestOptions = {}): Promise<T> {
+async function vizorionFetch<T>(
+  path: string,
+  options: VizorionRequestOptions = {},
+): Promise<T> {
   const { body, headers, ...rest } = options
   const isFormData = body instanceof FormData
 
@@ -35,7 +38,8 @@ async function vizorionFetch<T>(path: string, options: VizorionRequestOptions = 
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...headers,
     },
-    body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
+    body:
+      body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
   })
 
   if (!response.ok) {
@@ -75,7 +79,10 @@ export const vizorionClient = {
     return vizorionFetch(`/v1/conversations/${conversationId}`)
   },
 
-  branchConversation(conversationId: string, fromMessageId?: string): Promise<VizorionConversation> {
+  branchConversation(
+    conversationId: string,
+    fromMessageId?: string,
+  ): Promise<VizorionConversation> {
     return vizorionFetch(`/v1/conversations/${conversationId}/branch`, {
       method: 'POST',
       body: { from_message_id: fromMessageId },
@@ -83,7 +90,9 @@ export const vizorionClient = {
   },
 
   deleteConversation(conversationId: string): Promise<void> {
-    return vizorionFetch(`/v1/conversations/${conversationId}`, { method: 'DELETE' })
+    return vizorionFetch(`/v1/conversations/${conversationId}`, {
+      method: 'DELETE',
+    })
   },
 
   listMessages(conversationId: string): Promise<VizorionMessage[]> {
@@ -92,17 +101,27 @@ export const vizorionClient = {
 
   // --- chat (non-streaming) ---
 
-  sendMessage(conversationId: string, message: string, responseLanguage?: string): Promise<VizorionChatResponse> {
+  sendMessage(
+    conversationId: string,
+    message: string,
+    responseLanguage?: string,
+  ): Promise<VizorionChatResponse> {
     return vizorionFetch('/v1/chat', {
       method: 'POST',
-      body: { conversation_id: conversationId, message, response_language: responseLanguage },
+      body: {
+        conversation_id: conversationId,
+        message,
+        response_language: responseLanguage,
+      },
     })
   },
 
   // --- HITL approvals ---
 
   listApprovals(conversationId?: string): Promise<VizorionApprovalListItem[]> {
-    const query = conversationId ? `?conversation_id=${encodeURIComponent(conversationId)}` : ''
+    const query = conversationId
+      ? `?conversation_id=${encodeURIComponent(conversationId)}`
+      : ''
     return vizorionFetch(`/v1/approvals${query}`)
   },
 
@@ -121,7 +140,13 @@ export const vizorionClient = {
 
   submitFeedback(
     messageId: string,
-    input: { conversationId: string; rating: 'up' | 'down'; reason?: string; comment?: string; runId?: string },
+    input: {
+      conversationId: string
+      rating: 'up' | 'down'
+      reason?: string
+      comment?: string
+      runId?: string
+    },
   ): Promise<void> {
     return vizorionFetch(`/v1/messages/${messageId}/feedback`, {
       method: 'POST',
@@ -135,11 +160,20 @@ export const vizorionClient = {
     })
   },
 
-  regenerate(messageId: string, style?: VizorionRegenerateStyle): Promise<VizorionRegenerateResult> {
-    return vizorionFetch(`/v1/messages/${messageId}/regenerate`, { method: 'POST', body: { style } })
+  regenerate(
+    messageId: string,
+    style?: VizorionRegenerateStyle,
+  ): Promise<VizorionRegenerateResult> {
+    return vizorionFetch(`/v1/messages/${messageId}/regenerate`, {
+      method: 'POST',
+      body: { style },
+    })
   },
 
-  improve(messageId: string, feedbackText?: string): Promise<VizorionRegenerateResult> {
+  improve(
+    messageId: string,
+    feedbackText?: string,
+  ): Promise<VizorionRegenerateResult> {
     return vizorionFetch(`/v1/messages/${messageId}/improve`, {
       method: 'POST',
       body: { feedback_text: feedbackText },
@@ -153,11 +187,17 @@ export const vizorionClient = {
   },
 
   createMemory(content: string, key?: string): Promise<VizorionMemory> {
-    return vizorionFetch('/v1/memory', { method: 'POST', body: { content, key } })
+    return vizorionFetch('/v1/memory', {
+      method: 'POST',
+      body: { content, key },
+    })
   },
 
   updateMemory(memoryId: string, content: string): Promise<VizorionMemory> {
-    return vizorionFetch(`/v1/memory/${memoryId}`, { method: 'PATCH', body: { content } })
+    return vizorionFetch(`/v1/memory/${memoryId}`, {
+      method: 'PATCH',
+      body: { content },
+    })
   },
 
   deleteMemory(memoryId: string): Promise<void> {
@@ -185,7 +225,9 @@ export const vizorionClient = {
   },
 
   unpublishFile(documentId: string): Promise<VizorionDocument> {
-    return vizorionFetch(`/v1/files/${documentId}/unpublish`, { method: 'POST' })
+    return vizorionFetch(`/v1/files/${documentId}/unpublish`, {
+      method: 'POST',
+    })
   },
 
   archiveFile(documentId: string): Promise<VizorionDocument> {
@@ -198,24 +240,39 @@ export const vizorionClient = {
 
   // --- voice ---
 
-  transcribeVoice(audio: Blob, filename: string, language?: string): Promise<{ text: string }> {
+  transcribeVoice(
+    audio: Blob,
+    filename: string,
+    language?: string,
+  ): Promise<{ text: string }> {
     const form = new FormData()
     form.append('file', audio, filename)
     const query = language ? `?language=${encodeURIComponent(language)}` : ''
-    return vizorionFetch(`/v1/voice/transcribe${query}`, { method: 'POST', body: form })
+    return vizorionFetch(`/v1/voice/transcribe${query}`, {
+      method: 'POST',
+      body: form,
+    })
   },
 
   // --- speaker verification (Autowake) ---
 
   enrollSpeaker(clips: Blob[]): Promise<{ enrolled: boolean }> {
     const form = new FormData()
-    clips.forEach((clip, index) => form.append('files', clip, `sample-${index}.wav`))
-    return vizorionFetch('/v1/voice/speaker/enroll', { method: 'POST', body: form })
+    clips.forEach((clip, index) =>
+      form.append('files', clip, `sample-${index}.wav`),
+    )
+    return vizorionFetch('/v1/voice/speaker/enroll', {
+      method: 'POST',
+      body: form,
+    })
   },
 
   verifySpeaker(clip: Blob): Promise<{ score: number; verified: boolean }> {
     const form = new FormData()
     form.append('file', clip, 'clip.wav')
-    return vizorionFetch('/v1/voice/speaker/verify', { method: 'POST', body: form })
+    return vizorionFetch('/v1/voice/speaker/verify', {
+      method: 'POST',
+      body: form,
+    })
   },
 }

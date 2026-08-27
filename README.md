@@ -65,8 +65,21 @@ A suggested walkthrough, roughly in order of "familiar business app" to "AI oper
    - Click into any execution's trace (**Agent Trace**) — watch it **stream live**, stage by stage, with a spinner on the currently-running agent (this is real `EventStreamSource` infrastructure, not a canned animation — see `packages/api-client/src/lib/event-stream.ts`).
    - **Guardrails, RAG Monitoring, LLM Usage, Latency, System Health, Audit Logs, Explainability** — each is a real, derived view over the same underlying mock data, not a static mockup (e.g. LLM Usage's token totals match Overview's KPI exactly, down to the number).
    - **Explainability**'s low-confidence decision list links straight into Main App's request detail page — cross-app navigation through the shared router.
-4. **The Demo Panel** (bottom-right, every page) — presenter-only tooling. Trigger a live guardrail block, a system incident, or a new pending approval, and watch it appear immediately on whichever page shows it — proof the whole system reacts to live events, not just replays a fixed array on page load.
+4. **The Demo Panel** (Settings → Demo Mode, or any of its entries in the command palette) — presenter-only tooling. Trigger a live guardrail block, a system incident, or a new pending approval, and watch it appear immediately on whichever page shows it — proof the whole system reacts to live events, not just replays a fixed array on page load.
 5. **Settings → Accessibility Center** — toggle high contrast, large text, or reduced motion; every page respects it immediately, everywhere, because every component is styled off semantic theme tokens, never a raw color utility.
+6. **Press `⌘K` / `Ctrl+K` anywhere** — the command palette searches real requests by ID, title, or owner, jumps to any page, and fires the demo triggers. `?` lists every shortcut; `g` then a letter jumps between pages without it.
+
+## Design system
+
+Shared UI lives in `packages/ui`, styled entirely from the semantic tokens in `packages/theme/src/tokens.css` — no component ever reaches for a raw color utility, which is what makes light/dark/high-contrast work everywhere for free. `/design-system` (not in the nav — navigate to it directly) renders every primitive live, including the interactive ones.
+
+Three conventions are worth knowing, because they're what the rest of the UI is built on:
+
+**Motion is a fixed vocabulary, and it means something.** Four durations (`--duration-instant/fast/base/slow`) and three curves, defined once in `tokens.css`; `--ease-out` and `--ease-in-out` deliberately override Tailwind's defaults so there's one set of curves, not ours competing with theirs. Motion is reserved for communicating state and causality — a card that lifts on hover is a card you can click (`<Card interactive>`), and one that doesn't, isn't. Every animation is zeroed automatically under the reduced-motion setting.
+
+**Loading is a designed state, not a spinner.** `AppLoadingView` + `StagedProgress` replace generic fallbacks with a branded mark, the named operation, and its actual stages as they run — see `apps/host/src/remotes/remote-loading-fallback.tsx`, where the stage list is the real sequence of a Module Federation load (fetch remote entry → negotiate shared singletons → pull chunks → restore session). It never claims completion the work hasn't reached: `useStagedProgress` only resolves when its `isActive` flag goes false. Loaders also wait ~180ms before appearing, so a fast operation shows nothing rather than a flash. Below the loader sits a skeleton shaped like the content that's about to land, so the swap reads as the page filling in rather than one screen replacing another — `DataTable`'s loading state renders the real table with skeleton cells for the same reason. Before React has even mounted, an inline boot screen in `apps/host/index.html` paints on the first frame in the user's saved theme.
+
+**Every action confirms itself.** `ToastProvider` / `useToast` (mounted in `apps/host/src/main.tsx`) is the app-wide feedback layer: submitting an approval, firing a demo event, or failing to reach a service all say so. `useToast().update()` promotes a `pending` toast in place rather than stacking a second one. Approvals also update optimistically — the queue drops the item the instant you click and rolls back if the service refuses.
 
 ## AI Voice Assistant — Vizorion & Autowake
 

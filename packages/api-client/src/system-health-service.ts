@@ -1,4 +1,8 @@
-import type { SystemComponentMetric, SystemHealthStatus, SystemIncident } from '@platform/types'
+import type {
+  SystemComponentMetric,
+  SystemHealthStatus,
+  SystemIncident,
+} from '@platform/types'
 
 import { MOCK_SYSTEM_HEALTH } from './control-tower-service'
 
@@ -36,14 +40,16 @@ const MOCK_INCIDENTS: SystemIncident[] = [
     id: 'INC-118',
     component: 'Vector Database',
     status: 'monitoring',
-    summary: 'Elevated query latency (p95 > 800ms) traced to a re-indexing job. Job throttled, latency recovering.',
+    summary:
+      'Elevated query latency (p95 > 800ms) traced to a re-indexing job. Job throttled, latency recovering.',
     startedAt: '2026-08-20T13:15:00Z',
   },
   {
     id: 'INC-117',
     component: 'LLM Gateway',
     status: 'resolved',
-    summary: 'Brief rate-limit errors from the upstream model provider during a traffic spike.',
+    summary:
+      'Brief rate-limit errors from the upstream model provider during a traffic spike.',
     startedAt: '2026-08-18T09:40:00Z',
     resolvedAt: '2026-08-18T10:05:00Z',
   },
@@ -51,7 +57,8 @@ const MOCK_INCIDENTS: SystemIncident[] = [
     id: 'INC-116',
     component: 'Agent Orchestrator',
     status: 'resolved',
-    summary: 'Deployment rollout briefly increased orchestration latency for in-flight requests.',
+    summary:
+      'Deployment rollout briefly increased orchestration latency for in-flight requests.',
     startedAt: '2026-08-15T22:10:00Z',
     resolvedAt: '2026-08-15T22:24:00Z',
   },
@@ -66,10 +73,13 @@ let demoIncidentCounter = 0
 // component live, visible on both this page and Overview simultaneously.
 export function triggerDemoIncident(): SystemIncident {
   demoIncidentCounter += 1
-  const healthyIndex = MOCK_SYSTEM_HEALTH.findIndex((c) => c.status === 'healthy')
+  const healthyIndex = MOCK_SYSTEM_HEALTH.findIndex(
+    (c) => c.status === 'healthy',
+  )
   const targetIndex = healthyIndex === -1 ? 0 : healthyIndex
   const target = MOCK_SYSTEM_HEALTH[targetIndex]
-  const detail = 'Elevated error rate detected. Investigating — triggered from the Demo Panel.'
+  const detail =
+    'Elevated error rate detected. Investigating — triggered from the Demo Panel.'
 
   MOCK_SYSTEM_HEALTH[targetIndex] = { ...target, status: 'degraded', detail }
 

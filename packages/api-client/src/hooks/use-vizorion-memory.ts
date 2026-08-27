@@ -14,7 +14,8 @@ export function useVizorionMemory() {
 export function useCreateVizorionMemory() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ content, key }: { content: string; key?: string }) => vizorionMemoryService.create(content, key),
+    mutationFn: ({ content, key }: { content: string; key?: string }) =>
+      vizorionMemoryService.create(content, key),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },
@@ -24,8 +25,13 @@ export function useCreateVizorionMemory() {
 export function useUpdateVizorionMemory() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ memoryId, content }: { memoryId: string; content: string }) =>
-      vizorionMemoryService.update(memoryId, content),
+    mutationFn: ({
+      memoryId,
+      content,
+    }: {
+      memoryId: string
+      content: string
+    }) => vizorionMemoryService.update(memoryId, content),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },

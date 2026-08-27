@@ -1,5 +1,12 @@
 import * as React from 'react'
-import { Loader2Icon, MicIcon, MicOffIcon, SquareIcon, Volume2Icon, XIcon } from 'lucide-react'
+import {
+  Loader2Icon,
+  MicIcon,
+  MicOffIcon,
+  SquareIcon,
+  Volume2Icon,
+  XIcon,
+} from 'lucide-react'
 import { useAuth } from '@platform/auth'
 import { Button, cn } from '@platform/ui'
 
@@ -21,7 +28,12 @@ function renderStateIcon(state: AutowakeState, className: string) {
     case 'verifying':
     case 'transcribing':
     case 'thinking':
-      return <Loader2Icon className={cn(className, 'animate-spin')} aria-hidden="true" />
+      return (
+        <Loader2Icon
+          className={cn(className, 'animate-spin')}
+          aria-hidden="true"
+        />
+      )
     case 'speaking':
       return <Volume2Icon className={className} aria-hidden="true" />
     default:
@@ -70,7 +82,8 @@ export function AutowakeWidget({ autowake }: AutowakeWidgetProps) {
 
   if (!canUseVizorion) return null
 
-  const isPulsing = autowake.state === 'idle-listening' || autowake.state === 'recording'
+  const isPulsing =
+    autowake.state === 'idle-listening' || autowake.state === 'recording'
 
   return (
     <>
@@ -93,12 +106,19 @@ export function AutowakeWidget({ autowake }: AutowakeWidgetProps) {
             </Button>
           </div>
 
-          <p className={cn('flex items-center gap-1.5 text-xs', stateColorClass(autowake.state))}>
+          <p
+            className={cn(
+              'flex items-center gap-1.5 text-xs',
+              stateColorClass(autowake.state),
+            )}
+          >
             {renderStateIcon(autowake.state, 'size-3.5')}
             {AUTOWAKE_STATE_LABEL[autowake.state]}
           </p>
 
-          {autowake.error && <p className="text-danger text-xs">{autowake.error}</p>}
+          {autowake.error && (
+            <p className="text-danger text-xs">{autowake.error}</p>
+          )}
 
           {autowake.state === 'recording' && (
             <Button
@@ -114,7 +134,13 @@ export function AutowakeWidget({ autowake }: AutowakeWidgetProps) {
           )}
 
           <div className="flex items-center gap-2">
-            <Button type="button" size="sm" variant="outline" className="flex-1" onClick={() => setEnrollOpen(true)}>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="flex-1"
+              onClick={() => setEnrollOpen(true)}
+            >
               {autowake.enrolled ? 'Re-enroll voice' : 'Enroll voice'}
             </Button>
             <Button
@@ -144,7 +170,10 @@ export function AutowakeWidget({ autowake }: AutowakeWidgetProps) {
           isPulsing && 'animate-pulse',
         )}
       >
-        {renderStateIcon(autowake.state, cn('size-5', stateColorClass(autowake.state)))}
+        {renderStateIcon(
+          autowake.state,
+          cn('size-5', stateColorClass(autowake.state)),
+        )}
       </Button>
 
       <AutowakeEnrollmentDialog

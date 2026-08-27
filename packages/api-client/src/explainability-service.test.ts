@@ -5,7 +5,10 @@ import { mockExplainabilityService } from './explainability-service'
 describe('mockExplainabilityService.getSummary', () => {
   it('decisionCounts sum to the number of requests with an aiRecommendation', async () => {
     const summary = await mockExplainabilityService.getSummary()
-    const total = Object.values(summary.decisionCounts).reduce((sum, n) => sum + n, 0)
+    const total = Object.values(summary.decisionCounts).reduce(
+      (sum, n) => sum + n,
+      0,
+    )
     // Every decided request has exactly one decision, so the counts must
     // sum to the same population getConfidenceBands() buckets.
     const bands = await mockExplainabilityService.getConfidenceBands()
@@ -42,20 +45,23 @@ describe('mockExplainabilityService.getConfidenceBands', () => {
 
 describe('mockExplainabilityService.getLowConfidenceDecisions', () => {
   it('every returned decision is below the 75% review threshold', async () => {
-    const decisions = await mockExplainabilityService.getLowConfidenceDecisions()
+    const decisions =
+      await mockExplainabilityService.getLowConfidenceDecisions()
     for (const decision of decisions) {
       expect(decision.confidence).toBeLessThan(75)
     }
   })
 
   it('is sorted ascending by confidence (most concerning first)', async () => {
-    const decisions = await mockExplainabilityService.getLowConfidenceDecisions()
+    const decisions =
+      await mockExplainabilityService.getLowConfidenceDecisions()
     const confidences = decisions.map((d) => d.confidence)
     expect(confidences).toEqual([...confidences].sort((a, b) => a - b))
   })
 
   it('returns at most 8 decisions', async () => {
-    const decisions = await mockExplainabilityService.getLowConfidenceDecisions()
+    const decisions =
+      await mockExplainabilityService.getLowConfidenceDecisions()
     expect(decisions.length).toBeLessThanOrEqual(8)
   })
 })

@@ -8,7 +8,9 @@ describe('permissions data model', () => {
   })
 
   it('every permission granted to a role is a real, known permission (catches typos)', () => {
-    for (const role of Object.keys(ROLE_PERMISSIONS) as (keyof typeof ROLE_PERMISSIONS)[]) {
+    for (const role of Object.keys(
+      ROLE_PERMISSIONS,
+    ) as (keyof typeof ROLE_PERMISSIONS)[]) {
       for (const permission of ROLE_PERMISSIONS[role]) {
         expect(PERMISSIONS).toContain(permission)
       }
@@ -16,7 +18,9 @@ describe('permissions data model', () => {
   })
 
   it('no role has duplicate permissions', () => {
-    for (const role of Object.keys(ROLE_PERMISSIONS) as (keyof typeof ROLE_PERMISSIONS)[]) {
+    for (const role of Object.keys(
+      ROLE_PERMISSIONS,
+    ) as (keyof typeof ROLE_PERMISSIONS)[]) {
       const perms = ROLE_PERMISSIONS[role]
       expect(new Set(perms).size).toBe(perms.length)
     }
@@ -29,13 +33,17 @@ describe('permissions data model', () => {
     for (const permission of ROLE_PERMISSIONS.analyst) {
       expect(ROLE_PERMISSIONS.manager).toContain(permission)
     }
-    expect(ROLE_PERMISSIONS.manager.length).toBeGreaterThan(ROLE_PERMISSIONS.analyst.length)
+    expect(ROLE_PERMISSIONS.manager.length).toBeGreaterThan(
+      ROLE_PERMISSIONS.analyst.length,
+    )
   })
 
   it('admin is a strict superset of manager', () => {
     for (const permission of ROLE_PERMISSIONS.manager) {
       expect(ROLE_PERMISSIONS.admin).toContain(permission)
     }
-    expect(ROLE_PERMISSIONS.admin.length).toBeGreaterThan(ROLE_PERMISSIONS.manager.length)
+    expect(ROLE_PERMISSIONS.admin.length).toBeGreaterThan(
+      ROLE_PERMISSIONS.manager.length,
+    )
   })
 })

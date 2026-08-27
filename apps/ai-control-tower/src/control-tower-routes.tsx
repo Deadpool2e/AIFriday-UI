@@ -2,7 +2,6 @@ import { Outlet, Route, Routes } from 'react-router'
 import { ProtectedRoute } from '@platform/auth'
 
 import { ControlTowerHero } from './control-tower-hero'
-import { ControlTowerNav } from './control-tower-nav'
 import { OverviewPage } from './pages/overview-page'
 import { AgentsPage } from './pages/agents-page'
 import { AgentDetailPage } from './pages/agent-detail-page'
@@ -16,14 +15,14 @@ import { AuditLogsPage } from './pages/audit-logs-page'
 import { ExplainabilityPage } from './pages/explainability-page'
 import { NotFoundPage } from './pages/not-found-page'
 
-// Renders the section tabs once, above whichever page is currently routed
-// — every route below is a child of this layout route, so none of them
-// need to render ControlTowerNav themselves.
+// Renders the Control Tower header — status line, stat strip, and the
+// section tabs it now owns — once, above whichever page is currently
+// routed. Every route below is a child of this layout route, so none of
+// them render navigation themselves.
 function ControlTowerLayout() {
   return (
     <div className="space-y-6">
       <ControlTowerHero />
-      <ControlTowerNav />
       <Outlet />
     </div>
   )
@@ -55,7 +54,10 @@ export function ControlTowerRoutes() {
           <Route index element={<AgentsPage />} />
           <Route path=":id" element={<AgentDetailPage />} />
         </Route>
-        <Route path="executions/:executionId" element={<ExecutionTracePage />} />
+        <Route
+          path="executions/:executionId"
+          element={<ExecutionTracePage />}
+        />
         <Route
           path="guardrails"
           element={

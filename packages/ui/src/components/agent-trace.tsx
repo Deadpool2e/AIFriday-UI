@@ -1,9 +1,15 @@
 import * as React from 'react'
-import { CheckCircle2Icon, ClockIcon, Loader2Icon, XCircleIcon } from 'lucide-react'
+import {
+  CheckCircle2Icon,
+  ClockIcon,
+  Loader2Icon,
+  XCircleIcon,
+} from 'lucide-react'
 
 import { cn } from '../lib/cn'
 
-export type AgentTraceStepStatus = 'completed' | 'running' | 'failed' | 'blocked' | 'pending'
+export type AgentTraceStepStatus =
+  'completed' | 'running' | 'failed' | 'blocked' | 'pending'
 
 export interface AgentTraceStep {
   id: string
@@ -57,7 +63,11 @@ const statusConfig: Record<
 // trace viewer" actually needs.
 function AgentTrace({ steps, className, ...props }: AgentTraceProps) {
   return (
-    <ol data-slot="agent-trace" className={cn('space-y-6', className)} {...props}>
+    <ol
+      data-slot="agent-trace"
+      className={cn('space-y-6', className)}
+      {...props}
+    >
       {steps.map((step, index) => {
         const config = statusConfig[step.status]
         const isLast = index === steps.length - 1
@@ -80,7 +90,9 @@ function AgentTrace({ steps, className, ...props }: AgentTraceProps) {
             <div className="min-w-0 flex-1 space-y-1.5 pb-2">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-medium">{step.agent}</span>
-                <span className="text-muted-foreground text-xs">{config.label}</span>
+                <span className="text-muted-foreground text-xs">
+                  {config.label}
+                </span>
               </div>
               <div className="text-muted-foreground flex flex-wrap gap-x-3 text-xs tabular-nums">
                 <span>
@@ -90,7 +102,9 @@ function AgentTrace({ steps, className, ...props }: AgentTraceProps) {
                     second: '2-digit',
                   })}
                 </span>
-                {step.durationMs !== undefined && <span>{step.durationMs}ms</span>}
+                {step.durationMs !== undefined && (
+                  <span>{step.durationMs}ms</span>
+                )}
                 {step.tokens !== undefined && (
                   <span>{step.tokens.toLocaleString('en-US')} tokens</span>
                 )}
@@ -107,7 +121,9 @@ function AgentTrace({ steps, className, ...props }: AgentTraceProps) {
                   {step.outputSummary}
                 </p>
               )}
-              {step.error && <p className="text-danger text-sm">{step.error}</p>}
+              {step.error && (
+                <p className="text-danger text-sm">{step.error}</p>
+              )}
             </div>
           </li>
         )

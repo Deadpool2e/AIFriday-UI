@@ -35,7 +35,7 @@ export {
   TableCell,
   TableCaption,
 } from './components/table'
-export { Skeleton } from './components/skeleton'
+export { Skeleton, SkeletonText } from './components/skeleton'
 export { SkipLink } from './components/skip-link'
 export { EmptyState } from './components/empty-state'
 export { ErrorState } from './components/error-state'
@@ -94,7 +94,10 @@ export { RiskIndicator, type RiskLevel } from './components/risk-indicator'
 export { ConfidenceScore } from './components/confidence-score'
 export { ActivityFeed, type ActivityFeedItem } from './components/activity-feed'
 export { SourceCitation } from './components/source-citation'
-export { AIRecommendationCard, type AIDecision } from './components/ai-recommendation-card'
+export {
+  AIRecommendationCard,
+  type AIDecision,
+} from './components/ai-recommendation-card'
 export { ChatPanel, type ChatPanelMessage } from './components/chat-panel'
 export { Markdown } from './components/markdown'
 export { Textarea } from './components/textarea'
@@ -142,7 +145,10 @@ export {
   ShieldClearIllustration,
 } from './components/illustrations'
 export { LiveIndicator } from './components/live-indicator'
-export { AttentionRequired, type AttentionItem } from './components/attention-required'
+export {
+  AttentionRequired,
+  type AttentionItem,
+} from './components/attention-required'
 export { AIInsight } from './components/ai-insight'
 export {
   VizorionToolCallChip,
@@ -152,3 +158,36 @@ export {
   VizorionApprovalCard,
   type VizorionApprovalResolution,
 } from './components/vizorion-approval-card'
+
+export { PageHeader } from './components/page-header'
+export { Kbd } from './components/kbd'
+export { Tooltip } from './components/tooltip'
+export {
+  ToastProvider,
+  useToast,
+  type ToastTone,
+  type ToastOptions,
+} from './components/toast'
+export {
+  StagedProgress,
+  useStagedProgress,
+  type ProgressStage,
+  type StagedProgressStatus,
+} from './components/staged-progress'
+export {
+  AppLoadingView,
+  BootMark,
+  type LoadingPreview,
+} from './components/app-loading-view'
+export { Disclosure } from './components/disclosure'
+export { AIActivity, type AIActivityToolCall } from './components/ai-activity'
+export {
+  MetricStrip,
+  type MetricStripItem,
+  type MetricStripDelta,
+} from './components/metric-strip'
+export {
+  SegmentedControl,
+  type SegmentedControlOption,
+} from './components/segmented-control'
+export { RankedList, type RankedListItem } from './components/ranked-list'

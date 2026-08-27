@@ -2,7 +2,11 @@ import * as React from 'react'
 import { Loader2Icon, MicIcon, SquareIcon } from 'lucide-react'
 import { useTranscribeVoice } from '@platform/api-client'
 import { Button } from '@platform/ui'
-import { speakText, stopSpeaking, isVoiceOutputSupported } from '@platform/voice'
+import {
+  speakText,
+  stopSpeaking,
+  isVoiceOutputSupported,
+} from '@platform/voice'
 
 export { speakText, stopSpeaking, isVoiceOutputSupported }
 
@@ -20,7 +24,10 @@ interface VoiceControlsProps {
 // (reading a reply aloud) is handled separately by speakText() below,
 // using the browser's own SpeechSynthesis API — Vizorion has no TTS
 // endpoint by design (see Vizorion/app/api/routes/voice.py).
-export function VoiceControls({ onTranscribed, disabled = false }: VoiceControlsProps) {
+export function VoiceControls({
+  onTranscribed,
+  disabled = false,
+}: VoiceControlsProps) {
   const [recording, setRecording] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const recorderRef = React.useRef<MediaRecorder | null>(null)
@@ -42,7 +49,10 @@ export function VoiceControls({ onTranscribed, disabled = false }: VoiceControls
         setRecording(false)
         if (blob.size === 0) return
         try {
-          const { text } = await transcribe.mutateAsync({ audio: blob, filename: 'recording.webm' })
+          const { text } = await transcribe.mutateAsync({
+            audio: blob,
+            filename: 'recording.webm',
+          })
           if (text) onTranscribed(text)
           else setError("Didn't catch any speech in that recording.")
         } catch (err) {

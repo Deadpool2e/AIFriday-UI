@@ -25,7 +25,10 @@ interface ApiFetchOptions extends Omit<RequestInit, 'body'> {
 // and normalized error handling live here once instead of being
 // copy-pasted into every *-service.ts file that gets a real
 // implementation.
-export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
+export async function apiFetch<T>(
+  path: string,
+  options: ApiFetchOptions = {},
+): Promise<T> {
   const { body, token, headers, ...rest } = options
 
   const response = await fetch(`${API_BASE_URL}${path}`, {

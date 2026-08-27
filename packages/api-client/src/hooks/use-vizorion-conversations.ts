@@ -24,7 +24,8 @@ export function useCreateVizorionConversation() {
 export function useDeleteVizorionConversation() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (conversationId: string) => vizorionConversationsService.delete(conversationId),
+    mutationFn: (conversationId: string) =>
+      vizorionConversationsService.delete(conversationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },

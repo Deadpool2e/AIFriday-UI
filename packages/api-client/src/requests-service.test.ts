@@ -38,7 +38,11 @@ describe('mockRequestsService', () => {
 describe('realRequestsService', () => {
   it('list() returns whatever the backend responds with', async () => {
     const fixture: Partial<Request>[] = [{ id: 'REQ-1' }, { id: 'REQ-2' }]
-    server.use(http.get(`${API_BASE_URL}/api/requests`, () => HttpResponse.json(fixture)))
+    server.use(
+      http.get(`${API_BASE_URL}/api/requests`, () =>
+        HttpResponse.json(fixture),
+      ),
+    )
 
     const requests = await realRequestsService.list()
     expect(requests).toEqual(fixture)
@@ -46,7 +50,11 @@ describe('realRequestsService', () => {
 
   it('getById() returns the request on a 200', async () => {
     const fixture: Partial<Request> = { id: 'REQ-1', title: 'Test request' }
-    server.use(http.get(`${API_BASE_URL}/api/requests/REQ-1`, () => HttpResponse.json(fixture)))
+    server.use(
+      http.get(`${API_BASE_URL}/api/requests/REQ-1`, () =>
+        HttpResponse.json(fixture),
+      ),
+    )
 
     const request = await realRequestsService.getById('REQ-1')
     expect(request).toEqual(fixture)
@@ -54,7 +62,10 @@ describe('realRequestsService', () => {
 
   it('getById() translates a 404 into null instead of throwing', async () => {
     server.use(
-      http.get(`${API_BASE_URL}/api/requests/missing`, () => new HttpResponse('not found', { status: 404 })),
+      http.get(
+        `${API_BASE_URL}/api/requests/missing`,
+        () => new HttpResponse('not found', { status: 404 }),
+      ),
     )
 
     const request = await realRequestsService.getById('missing')
@@ -63,9 +74,14 @@ describe('realRequestsService', () => {
 
   it('getById() still throws on a non-404 error', async () => {
     server.use(
-      http.get(`${API_BASE_URL}/api/requests/broken`, () => new HttpResponse('server error', { status: 500 })),
+      http.get(
+        `${API_BASE_URL}/api/requests/broken`,
+        () => new HttpResponse('server error', { status: 500 }),
+      ),
     )
 
-    await expect(realRequestsService.getById('broken')).rejects.toMatchObject({ status: 500 })
+    await expect(realRequestsService.getById('broken')).rejects.toMatchObject({
+      status: 500,
+    })
   })
 })

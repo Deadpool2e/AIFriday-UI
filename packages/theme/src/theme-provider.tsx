@@ -58,10 +58,7 @@ function resolveColorMode(mode: ColorMode): 'light' | 'dark' {
 
 function applyToDocument(settings: AccessibilitySettings) {
   const root = document.documentElement
-  root.classList.toggle(
-    'dark',
-    resolveColorMode(settings.colorMode) === 'dark',
-  )
+  root.classList.toggle('dark', resolveColorMode(settings.colorMode) === 'dark')
   root.dataset.contrast = settings.contrast
   root.dataset.textSize = settings.textSize
   root.dataset.motion = settings.motion
@@ -123,7 +120,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         update('contrast', contrast, `Contrast set to ${contrast}`),
       setTextSize: (size) =>
         update('textSize', size, `Text size set to ${size}`),
-      setMotion: (motion) => update('motion', motion, `Motion set to ${motion}`),
+      setMotion: (motion) =>
+        update('motion', motion, `Motion set to ${motion}`),
       setFocusStyle: (style) =>
         update('focusStyle', style, `Focus indicator set to ${style}`),
       setKeyboardNav: (mode) =>

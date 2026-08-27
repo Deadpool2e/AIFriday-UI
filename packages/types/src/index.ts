@@ -31,6 +31,7 @@ export type {
   AgentSuccessRatePoint,
   RecentExecution,
   ControlTowerMetrics,
+  ControlTowerTrendPoint,
 } from './agent'
 
 export type {
@@ -54,7 +55,12 @@ export type {
   GuardrailSummary,
 } from './guardrail'
 
-export type { RagDocument, RagQuery, RagRelevancePoint, RagSummary } from './rag'
+export type {
+  RagDocument,
+  RagQuery,
+  RagRelevancePoint,
+  RagSummary,
+} from './rag'
 
 export type {
   LlmModelCategory,

@@ -8,7 +8,11 @@ import type {
 } from '@platform/types'
 
 import { API_BASE_URL, resolveService } from './lib/env'
-import { createMockEventSource, createSSESource, type EventStreamSource } from './lib/event-stream'
+import {
+  createMockEventSource,
+  createSSESource,
+  type EventStreamSource,
+} from './lib/event-stream'
 import { apiFetch } from './lib/http-client'
 
 function delay(ms: number) {
@@ -40,7 +44,8 @@ const STAGE_TEMPLATES: AgentStageTemplate[] = [
   {
     agent: 'Orchestrator',
     inputSummary: 'Route request through the multi-agent review pipeline.',
-    outputSummary: 'Routed to RAG Agent, Risk Agent, Compliance Agent, and Decision Agent.',
+    outputSummary:
+      'Routed to RAG Agent, Risk Agent, Compliance Agent, and Decision Agent.',
     durationMs: 145,
     tokens: 210,
   },
@@ -54,7 +59,8 @@ const STAGE_TEMPLATES: AgentStageTemplate[] = [
   },
   {
     agent: 'Risk Agent',
-    inputSummary: 'Assess financial and operational risk using retrieved context.',
+    inputSummary:
+      'Assess financial and operational risk using retrieved context.',
     outputSummary:
       'Composite risk score 62/100 (Medium) based on transaction pattern and historical data.',
     durationMs: 890,
@@ -62,8 +68,10 @@ const STAGE_TEMPLATES: AgentStageTemplate[] = [
   },
   {
     agent: 'Compliance Agent',
-    inputSummary: 'Check request against policy documents and regulatory rules.',
-    outputSummary: 'No policy violations detected. Transaction within standard thresholds.',
+    inputSummary:
+      'Check request against policy documents and regulatory rules.',
+    outputSummary:
+      'No policy violations detected. Transaction within standard thresholds.',
     durationMs: 780,
     tokens: 590,
   },
@@ -111,7 +119,9 @@ export function deriveRequestId(executionId: string): string {
 // snapshot; createTraceEventSource() plays it back through real delays for
 // a live view. Event `timestamp` fields stay historically consistent
 // (based on cumulative durationMs) independent of the demo playback pacing.
-function buildTraceEventSchedule(executionId: string): { event: TraceEvent; delayMs: number }[] {
+function buildTraceEventSchedule(
+  executionId: string,
+): { event: TraceEvent; delayMs: number }[] {
   const hash = simpleHash(executionId)
   const requiresApproval = hash % 3 === 0
   const schedule: { event: TraceEvent; delayMs: number }[] = []
@@ -233,7 +243,11 @@ function buildTraceEventSchedule(executionId: string): { event: TraceEvent; dela
 
   cursor += 25
   schedule.push({
-    event: { type: 'guardrail.passed', executionId, timestamp: new Date(cursor).toISOString() },
+    event: {
+      type: 'guardrail.passed',
+      executionId,
+      timestamp: new Date(cursor).toISOString(),
+    },
     delayMs: 150,
   })
 
@@ -250,7 +264,11 @@ function buildTraceEventSchedule(executionId: string): { event: TraceEvent; dela
   } else {
     cursor += 50
     schedule.push({
-      event: { type: 'workflow.completed', executionId, timestamp: new Date(cursor).toISOString() },
+      event: {
+        type: 'workflow.completed',
+        executionId,
+        timestamp: new Date(cursor).toISOString(),
+      },
       delayMs: 95 + 50,
     })
   }
@@ -266,7 +284,10 @@ function buildTraceEventSchedule(executionId: string): { event: TraceEvent; dela
 // each new event lands) use the exact same reducer — a live view and a
 // "replay everything now" view are the same fold, just fed at different
 // speeds.
-export function foldTraceEvents(executionId: string, events: TraceEvent[]): TraceStep[] {
+export function foldTraceEvents(
+  executionId: string,
+  events: TraceEvent[],
+): TraceStep[] {
   const steps: TraceStep[] = []
   const indexByAgent = new Map<string, number>()
 
@@ -314,7 +335,8 @@ export function foldTraceEvents(executionId: string, events: TraceEvent[]): Trac
           agent: 'Guardrails',
           status: 'completed',
           timestamp: event.timestamp,
-          inputSummary: 'Scan final recommendation for policy and safety violations.',
+          inputSummary:
+            'Scan final recommendation for policy and safety violations.',
           outputSummary: 'No violations detected. Passed all checks.',
         })
         break
@@ -325,7 +347,8 @@ export function foldTraceEvents(executionId: string, events: TraceEvent[]): Trac
           agent: 'Guardrails',
           status: 'blocked',
           timestamp: event.timestamp,
-          inputSummary: 'Scan final recommendation for policy and safety violations.',
+          inputSummary:
+            'Scan final recommendation for policy and safety violations.',
           error: `Blocked by rule "${event.rule}" (${event.severity} severity).`,
         })
         break
@@ -346,7 +369,8 @@ export function foldTraceEvents(executionId: string, events: TraceEvent[]): Trac
           agent: 'Workflow',
           status: 'completed',
           timestamp: event.timestamp,
-          outputSummary: 'No human review required — recommendation applied automatically.',
+          outputSummary:
+            'No human review required — recommendation applied automatically.',
         })
         break
       }
@@ -360,7 +384,10 @@ export function foldTraceEvents(executionId: string, events: TraceEvent[]): Trac
 // into one ToolCall per invocation, same fold-as-events-arrive shape as
 // foldTraceEvents above so live streaming and snapshot replay build it
 // identically.
-export function foldToolCalls(executionId: string, events: TraceEvent[]): ToolCall[] {
+export function foldToolCalls(
+  executionId: string,
+  events: TraceEvent[],
+): ToolCall[] {
   const calls: ToolCall[] = []
   const indexByKey = new Map<string, number>()
 
@@ -377,7 +404,11 @@ export function foldToolCalls(executionId: string, events: TraceEvent[]): ToolCa
     } else if (event.type === 'tool.completed') {
       const index = indexByKey.get(`${event.agent}:${event.tool}`)
       if (index !== undefined) {
-        calls[index] = { ...calls[index], status: event.status, durationMs: event.durationMs }
+        calls[index] = {
+          ...calls[index],
+          status: event.status,
+          durationMs: event.durationMs,
+        }
       }
     }
   }
@@ -387,10 +418,14 @@ export function foldToolCalls(executionId: string, events: TraceEvent[]): ToolCa
 
 // The Agent Communication feed's data source — one entry per agent.message
 // event, in the order they occurred.
-export function foldAgentMessages(executionId: string, events: TraceEvent[]): AgentMessage[] {
+export function foldAgentMessages(
+  executionId: string,
+  events: TraceEvent[],
+): AgentMessage[] {
   return events
-    .filter((event): event is Extract<TraceEvent, { type: 'agent.message' }> =>
-      event.type === 'agent.message',
+    .filter(
+      (event): event is Extract<TraceEvent, { type: 'agent.message' }> =>
+        event.type === 'agent.message',
     )
     .map((event, index) => ({
       id: `${executionId}-message-${index}`,
@@ -401,18 +436,25 @@ export function foldAgentMessages(executionId: string, events: TraceEvent[]): Ag
     }))
 }
 
-export type TraceEventTone = 'default' | 'success' | 'danger' | 'warning' | 'info'
+export type TraceEventTone =
+  'default' | 'success' | 'danger' | 'warning' | 'info'
 
 // The Execution Timeline's data source — a human-readable label and a
 // color tone for any raw TraceEvent, so the timeline stays a thin renderer
 // over whatever the event vocabulary grows to instead of duplicating this
 // switch itself.
-export function describeTraceEvent(event: TraceEvent): { label: string; tone: TraceEventTone } {
+export function describeTraceEvent(event: TraceEvent): {
+  label: string
+  tone: TraceEventTone
+} {
   switch (event.type) {
     case 'agent.started':
       return { label: `${event.agent} started`, tone: 'info' }
     case 'agent.completed':
-      return { label: `${event.agent} completed (${event.durationMs}ms, ${event.tokens} tokens)`, tone: 'success' }
+      return {
+        label: `${event.agent} completed (${event.durationMs}ms, ${event.tokens} tokens)`,
+        tone: 'success',
+      }
     case 'agent.failed':
       return { label: `${event.agent} failed — ${event.error}`, tone: 'danger' }
     case 'tool.invoked':
@@ -423,13 +465,22 @@ export function describeTraceEvent(event: TraceEvent): { label: string; tone: Tr
         tone: event.status === 'success' ? 'success' : 'danger',
       }
     case 'agent.message':
-      return { label: `${event.sender} → ${event.receiver}: ${event.summary}`, tone: 'default' }
+      return {
+        label: `${event.sender} → ${event.receiver}: ${event.summary}`,
+        tone: 'default',
+      }
     case 'guardrail.blocked':
-      return { label: `Guardrails blocked — ${event.rule} (${event.severity} severity)`, tone: 'danger' }
+      return {
+        label: `Guardrails blocked — ${event.rule} (${event.severity} severity)`,
+        tone: 'danger',
+      }
     case 'guardrail.passed':
       return { label: 'Guardrails passed', tone: 'success' }
     case 'human.approval.required':
-      return { label: `Human approval required (${event.approvalId})`, tone: 'warning' }
+      return {
+        label: `Human approval required (${event.approvalId})`,
+        tone: 'warning',
+      }
     case 'workflow.completed':
       return { label: 'Workflow completed', tone: 'success' }
   }
@@ -455,22 +506,41 @@ export function buildAgentGraphTopology(): AgentGraph {
     edges: [
       { id: 'e-orchestrator-rag', source: 'Orchestrator', target: 'RAG Agent' },
       { id: 'e-rag-risk', source: 'RAG Agent', target: 'Risk Agent' },
-      { id: 'e-risk-compliance', source: 'Risk Agent', target: 'Compliance Agent' },
-      { id: 'e-compliance-decision', source: 'Compliance Agent', target: 'Decision Agent' },
-      { id: 'e-decision-guardrails', source: 'Decision Agent', target: 'Guardrails' },
+      {
+        id: 'e-risk-compliance',
+        source: 'Risk Agent',
+        target: 'Compliance Agent',
+      },
+      {
+        id: 'e-compliance-decision',
+        source: 'Compliance Agent',
+        target: 'Decision Agent',
+      },
+      {
+        id: 'e-decision-guardrails',
+        source: 'Decision Agent',
+        target: 'Guardrails',
+      },
       {
         id: 'e-guardrails-approval',
         source: 'Guardrails',
         target: 'Human Approval',
         conditional: true,
       },
-      { id: 'e-guardrails-workflow', source: 'Guardrails', target: 'Workflow', conditional: true },
+      {
+        id: 'e-guardrails-workflow',
+        source: 'Guardrails',
+        target: 'Workflow',
+        conditional: true,
+      },
     ],
   }
 }
 
 function buildTrace(executionId: string): AgentTrace {
-  const events = buildTraceEventSchedule(executionId).map((entry) => entry.event)
+  const events = buildTraceEventSchedule(executionId).map(
+    (entry) => entry.event,
+  )
   return {
     executionId,
     requestId: deriveRequestId(executionId),
@@ -510,7 +580,9 @@ export const realTraceService: TraceService = {
     return apiFetch<AgentTrace>(`/api/ai/executions/${executionId}`)
   },
   streamTrace(executionId) {
-    return createSSESource<TraceEvent>(`${API_BASE_URL}/api/ai/executions/${executionId}/stream`)
+    return createSSESource<TraceEvent>(
+      `${API_BASE_URL}/api/ai/executions/${executionId}/stream`,
+    )
   },
 }
 
@@ -519,4 +591,7 @@ export const realTraceService: TraceService = {
 // both the snapshot fetch and the live stream to the real backend
 // together — there's no way to mix one mock and one real per this
 // interface, which matches how a real deployment would actually work.
-export const traceService: TraceService = resolveService(mockTraceService, realTraceService)
+export const traceService: TraceService = resolveService(
+  mockTraceService,
+  realTraceService,
+)

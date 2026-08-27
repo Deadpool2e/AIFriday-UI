@@ -1,5 +1,10 @@
 import * as React from 'react'
-import { useEnrollSpeaker, useTranscribeVoice, useVerifySpeaker, type useVizorionChat } from '@platform/api-client'
+import {
+  useEnrollSpeaker,
+  useTranscribeVoice,
+  useVerifySpeaker,
+  type useVizorionChat,
+} from '@platform/api-client'
 import {
   hasEnrolledProfile,
   isAutowakeEnabled,
@@ -38,7 +43,9 @@ function sleep(ms: number): Promise<void> {
 // existing /v1/voice/transcribe endpoint, which already handles webm fine.
 // Resolves on whichever comes first: ~1.6s of silence, or an external
 // stopRecordingNow() call via recorderRef.
-function recordQuestion(recorderRef: React.MutableRefObject<MediaRecorder | null>): Promise<Blob | null> {
+function recordQuestion(
+  recorderRef: React.MutableRefObject<MediaRecorder | null>,
+): Promise<Blob | null> {
   return new Promise((resolve) => {
     navigator.mediaDevices
       .getUserMedia({ audio: true })
@@ -63,8 +70,12 @@ function recordQuestion(recorderRef: React.MutableRefObject<MediaRecorder | null
             sumSquares += v * v
           }
           const rms = Math.sqrt(sumSquares / data.length)
-          silenceMs = rms < SILENCE_RMS_THRESHOLD ? silenceMs + SILENCE_CHECK_INTERVAL_MS : 0
-          if (silenceMs >= SILENCE_STOP_MS && recorder.state !== 'inactive') recorder.stop()
+          silenceMs =
+            rms < SILENCE_RMS_THRESHOLD
+              ? silenceMs + SILENCE_CHECK_INTERVAL_MS
+              : 0
+          if (silenceMs >= SILENCE_STOP_MS && recorder.state !== 'inactive')
+            recorder.stop()
         }, SILENCE_CHECK_INTERVAL_MS)
 
         recorder.onstop = () => {
@@ -72,7 +83,9 @@ function recordQuestion(recorderRef: React.MutableRefObject<MediaRecorder | null
           void audioContext.close()
           stream.getTracks().forEach((track) => track.stop())
           recorderRef.current = null
-          resolve(chunks.length > 0 ? new Blob(chunks, { type: 'audio/webm' }) : null)
+          resolve(
+            chunks.length > 0 ? new Blob(chunks, { type: 'audio/webm' }) : null,
+          )
         }
 
         recorderRef.current = recorder
@@ -209,7 +222,9 @@ export function useAutowake({ chat, onWakeVerified }: UseAutowakeOptions) {
           pcm.stop()
           if (!isCurrent()) return
           if (err instanceof Error && err.message === '__cancelled__') return
-          setError(err instanceof Error ? err.message : 'Wake-word listening failed.')
+          setError(
+            err instanceof Error ? err.message : 'Wake-word listening failed.',
+          )
           setState('disabled')
           return
         }
@@ -223,7 +238,8 @@ export function useAutowake({ chat, onWakeVerified }: UseAutowakeOptions) {
         setState('verifying')
         // Falls back to a fresh snapshot in the unlikely case onSpeechEnd
         // never fired before onWake (e.g. a very short/clipped utterance).
-        const snapshot = speechEndSnapshot ?? pcm.snapshotWav(ROLLING_BUFFER_SECONDS)
+        const snapshot =
+          speechEndSnapshot ?? pcm.snapshotWav(ROLLING_BUFFER_SECONDS)
         pcm.stop()
 
         let verified: boolean
@@ -232,7 +248,9 @@ export function useAutowake({ chat, onWakeVerified }: UseAutowakeOptions) {
           verified = result.verified
         } catch (err) {
           if (!isCurrent()) return
-          setError(err instanceof Error ? err.message : 'Speaker verification failed.')
+          setError(
+            err instanceof Error ? err.message : 'Speaker verification failed.',
+          )
           continue
         }
         if (!isCurrent()) return
@@ -254,7 +272,10 @@ export function useAutowake({ chat, onWakeVerified }: UseAutowakeOptions) {
         setState('transcribing')
         let text = ''
         try {
-          const result = await transcribe.mutateAsync({ audio: blob, filename: 'question.webm' })
+          const result = await transcribe.mutateAsync({
+            audio: blob,
+            filename: 'question.webm',
+          })
           text = result.text
         } catch (err) {
           if (!isCurrent()) return
@@ -282,7 +303,10 @@ export function useAutowake({ chat, onWakeVerified }: UseAutowakeOptions) {
       generationRef.current += 1
       wakeCancelRef.current?.()
       wakeCancelRef.current = null
-      if (activeRecorderRef.current && activeRecorderRef.current.state !== 'inactive') {
+      if (
+        activeRecorderRef.current &&
+        activeRecorderRef.current.state !== 'inactive'
+      ) {
         activeRecorderRef.current.stop()
       }
       activeRecorderRef.current = null
@@ -308,7 +332,10 @@ export function useAutowake({ chat, onWakeVerified }: UseAutowakeOptions) {
   )
 
   const stopRecordingNow = React.useCallback(() => {
-    if (activeRecorderRef.current && activeRecorderRef.current.state !== 'inactive') {
+    if (
+      activeRecorderRef.current &&
+      activeRecorderRef.current.state !== 'inactive'
+    ) {
       activeRecorderRef.current.stop()
     }
   }, [])

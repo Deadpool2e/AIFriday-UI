@@ -62,10 +62,15 @@ interface UseVizorionChatOptions {
   onConversationCreated?: (conversation: VizorionConversation) => void
 }
 
-export function useVizorionChat({ conversationId, onConversationCreated }: UseVizorionChatOptions) {
+export function useVizorionChat({
+  conversationId,
+  onConversationCreated,
+}: UseVizorionChatOptions) {
   const [messages, setMessages] = React.useState<VizorionChatMessage[]>([])
   const [isStreaming, setIsStreaming] = React.useState(false)
-  const [liveToolCalls, setLiveToolCalls] = React.useState<VizorionLiveToolCall[]>([])
+  const [liveToolCalls, setLiveToolCalls] = React.useState<
+    VizorionLiveToolCall[]
+  >([])
   const [pendingApproval, setPendingApproval] = React.useState<{
     approval: VizorionPendingApproval
     assistantMessageId: string
@@ -121,7 +126,10 @@ export function useVizorionChat({ conversationId, onConversationCreated }: UseVi
       // turn's streaming to the newest assistant message after reconciling,
       // so the reasoning panel and token/cost pill don't vanish once the
       // server-confirmed content/citations/tool-calls come back.
-      latestAssistantExtras?: { reasoning?: string; usage?: VizorionChatMessage['usage'] },
+      latestAssistantExtras?: {
+        reasoning?: string
+        usage?: VizorionChatMessage['usage']
+      },
     ) => {
       // Mock mode has no server-persisted history to reconcile against —
       // the locally-built transcript from streamMessage's events is all
@@ -158,7 +166,12 @@ export function useVizorionChat({ conversationId, onConversationCreated }: UseVi
       setMessages((prev) => [
         ...prev,
         userMessage,
-        { id: assistantId, role: 'assistant', content: '', createdAt: new Date().toISOString() },
+        {
+          id: assistantId,
+          role: 'assistant',
+          content: '',
+          createdAt: new Date().toISOString(),
+        },
       ])
       setIsStreaming(true)
       setLiveToolCalls([])
@@ -189,21 +202,34 @@ export function useVizorionChat({ conversationId, onConversationCreated }: UseVi
               case 'reasoning_delta':
                 accumulatedReasoning += event.data.delta
                 setMessages((prev) =>
-                  prev.map((m) => (m.id === assistantId ? { ...m, reasoning: accumulatedReasoning } : m)),
+                  prev.map((m) =>
+                    m.id === assistantId
+                      ? { ...m, reasoning: accumulatedReasoning }
+                      : m,
+                  ),
                 )
                 break
               case 'message_delta':
                 accumulated += event.data.delta
-                setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content: accumulated } : m)))
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantId ? { ...m, content: accumulated } : m,
+                  ),
+                )
                 break
               case 'tool_started': {
                 const tool = event.data.tool ?? 'a tool'
-                setLiveToolCalls((prev) => [...prev, { id: nextId('tool'), tool, status: 'running' }])
+                setLiveToolCalls((prev) => [
+                  ...prev,
+                  { id: nextId('tool'), tool, status: 'running' },
+                ])
                 break
               }
               case 'tool_completed':
                 setLiveToolCalls((prev) => {
-                  const lastRunningIndex = [...prev].reverse().findIndex((t) => t.status === 'running')
+                  const lastRunningIndex = [...prev]
+                    .reverse()
+                    .findIndex((t) => t.status === 'running')
                   if (lastRunningIndex === -1) return prev
                   const index = prev.length - 1 - lastRunningIndex
                   const next = [...prev]
@@ -217,16 +243,25 @@ export function useVizorionChat({ conversationId, onConversationCreated }: UseVi
                 const outputTokens = Number(usage.output_tokens) || 0
                 const estimatedCostUsd = Number(usage.estimated_cost_usd) || 0
                 if (inputTokens || outputTokens) {
-                  capturedUsage = { inputTokens, outputTokens, estimatedCostUsd }
+                  capturedUsage = {
+                    inputTokens,
+                    outputTokens,
+                    estimatedCostUsd,
+                  }
                   setMessages((prev) =>
-                    prev.map((m) => (m.id === assistantId ? { ...m, usage: capturedUsage } : m)),
+                    prev.map((m) =>
+                      m.id === assistantId ? { ...m, usage: capturedUsage } : m,
+                    ),
                   )
                 }
                 break
               }
               case 'approval_required':
                 approvalReceived = event.data
-                setPendingApproval({ approval: event.data, assistantMessageId: assistantId })
+                setPendingApproval({
+                  approval: event.data,
+                  assistantMessageId: assistantId,
+                })
                 break
               case 'error':
                 setError(event.data.message)
@@ -239,13 +274,21 @@ export function useVizorionChat({ conversationId, onConversationCreated }: UseVi
         )
 
         if (!approvalReceived) {
-          await reconcile(cid, { reasoning: accumulatedReasoning || undefined, usage: capturedUsage })
+          await reconcile(cid, {
+            reasoning: accumulatedReasoning || undefined,
+            usage: capturedUsage,
+          })
         }
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Something went wrong.'
+        const message =
+          err instanceof Error ? err.message : 'Something went wrong.'
         setError(message)
         setMessages((prev) =>
-          prev.map((m) => (m.id === assistantId && !m.content ? { ...m, content: `Sorry — ${message}` } : m)),
+          prev.map((m) =>
+            m.id === assistantId && !m.content
+              ? { ...m, content: `Sorry — ${message}` }
+              : m,
+          ),
         )
       } finally {
         setIsStreaming(false)
@@ -256,22 +299,35 @@ export function useVizorionChat({ conversationId, onConversationCreated }: UseVi
   )
 
   const respondToApproval = React.useCallback(
-    async (resolution: VizorionApprovalResolution, data?: Record<string, unknown>) => {
+    async (
+      resolution: VizorionApprovalResolution,
+      data?: Record<string, unknown>,
+    ) => {
       if (!pendingApproval) return
       const { approval, assistantMessageId } = pendingApproval
       setIsStreaming(true)
       setError(null)
       try {
-        const response = await vizorionChatService.respondToApproval(approval.id, resolution, data)
+        const response = await vizorionChatService.respondToApproval(
+          approval.id,
+          resolution,
+          data,
+        )
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantMessageId
-              ? { ...m, content: response.content, citations: response.citations, toolCalls: response.tool_calls }
+              ? {
+                  ...m,
+                  content: response.content,
+                  citations: response.citations,
+                  toolCalls: response.tool_calls,
+                }
               : m,
           ),
         )
         setPendingApproval(null)
-        if (conversationIdRef.current) await reconcile(conversationIdRef.current)
+        if (conversationIdRef.current)
+          await reconcile(conversationIdRef.current)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Something went wrong.')
       } finally {
@@ -281,21 +337,45 @@ export function useVizorionChat({ conversationId, onConversationCreated }: UseVi
     [pendingApproval, reconcile],
   )
 
-  const regenerate = React.useCallback(async (messageId: string, style?: VizorionRegenerateStyle) => {
-    const result = await vizorionChatService.regenerate(messageId, style)
-    setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, content: result.content } : m)))
-  }, [])
+  const regenerate = React.useCallback(
+    async (messageId: string, style?: VizorionRegenerateStyle) => {
+      const result = await vizorionChatService.regenerate(messageId, style)
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId ? { ...m, content: result.content } : m,
+        ),
+      )
+    },
+    [],
+  )
 
-  const improve = React.useCallback(async (messageId: string, feedbackText?: string) => {
-    const result = await vizorionChatService.improve(messageId, feedbackText)
-    setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, content: result.content } : m)))
-  }, [])
+  const improve = React.useCallback(
+    async (messageId: string, feedbackText?: string) => {
+      const result = await vizorionChatService.improve(messageId, feedbackText)
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId ? { ...m, content: result.content } : m,
+        ),
+      )
+    },
+    [],
+  )
 
   const submitFeedback = React.useCallback(
-    async (messageId: string, rating: 'up' | 'down', reason?: string, comment?: string) => {
+    async (
+      messageId: string,
+      rating: 'up' | 'down',
+      reason?: string,
+      comment?: string,
+    ) => {
       const cid = conversationIdRef.current
       if (!cid) return
-      await vizorionChatService.submitFeedback(messageId, { conversationId: cid, rating, reason, comment })
+      await vizorionChatService.submitFeedback(messageId, {
+        conversationId: cid,
+        rating,
+        reason,
+        comment,
+      })
     },
     [],
   )

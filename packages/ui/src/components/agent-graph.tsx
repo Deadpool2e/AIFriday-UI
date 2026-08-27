@@ -2,7 +2,8 @@ import * as React from 'react'
 
 import { cn } from '../lib/cn'
 
-export type AgentGraphNodeStatus = 'completed' | 'running' | 'failed' | 'blocked' | 'pending'
+export type AgentGraphNodeStatus =
+  'completed' | 'running' | 'failed' | 'blocked' | 'pending'
 
 export interface AgentGraphDiagramNode {
   id: string
@@ -62,7 +63,10 @@ function computeColumns(
     if (guard.has(id)) return 0
     guard.add(id)
     const sources = incoming.get(id) ?? []
-    const layer = sources.length === 0 ? 0 : 1 + Math.max(...sources.map((s) => resolveLayer(s, guard)))
+    const layer =
+      sources.length === 0
+        ? 0
+        : 1 + Math.max(...sources.map((s) => resolveLayer(s, guard)))
     layerById.set(id, layer)
     return layer
   }
@@ -82,7 +86,9 @@ function computePositions(columns: Map<number, string[]>): {
   height: number
 } {
   const numColumns = Math.max(...columns.keys()) + 1
-  const maxRows = Math.max(...Array.from(columns.values()).map((ids) => ids.length))
+  const maxRows = Math.max(
+    ...Array.from(columns.values()).map((ids) => ids.length),
+  )
   const positions = new Map<string, Position>()
 
   columns.forEach((ids, column) => {
@@ -129,16 +135,26 @@ function AgentGraphDiagram({
   ...props
 }: AgentGraphDiagramProps) {
   const { positions, width, height } = React.useMemo(() => {
-    if (nodes.length === 0) return { positions: new Map<string, Position>(), width: 0, height: 0 }
+    if (nodes.length === 0)
+      return { positions: new Map<string, Position>(), width: 0, height: 0 }
     return computePositions(computeColumns(nodes, edges))
   }, [nodes, edges])
 
   if (nodes.length === 0) return null
 
   return (
-    <div data-slot="agent-graph" className={cn('overflow-x-auto', className)} {...props}>
+    <div
+      data-slot="agent-graph"
+      className={cn('overflow-x-auto', className)}
+      {...props}
+    >
       <div className="relative" style={{ width, height }}>
-        <svg className="absolute inset-0" width={width} height={height} aria-hidden="true">
+        <svg
+          className="absolute inset-0"
+          width={width}
+          height={height}
+          aria-hidden="true"
+        >
           <defs>
             <marker
               id="agent-graph-arrow"
@@ -193,7 +209,12 @@ function AgentGraphDiagram({
                 onSelectNode && 'cursor-pointer',
                 statusClassName[node.status],
               )}
-              style={{ left: position.x, top: position.y, width: NODE_WIDTH, height: NODE_HEIGHT }}
+              style={{
+                left: position.x,
+                top: position.y,
+                width: NODE_WIDTH,
+                height: NODE_HEIGHT,
+              }}
             >
               {node.label}
             </div>

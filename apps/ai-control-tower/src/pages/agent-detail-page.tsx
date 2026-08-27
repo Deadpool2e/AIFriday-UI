@@ -9,7 +9,11 @@ import {
 } from 'recharts'
 import { CheckCircle2Icon, CircleDashedIcon, XCircleIcon } from 'lucide-react'
 import { Link, useParams } from 'react-router'
-import { useAgent, useAgentExecutions, useAgentPerformanceTrend } from '@platform/api-client'
+import {
+  useAgent,
+  useAgentExecutions,
+  useAgentPerformanceTrend,
+} from '@platform/api-client'
 import {
   Badge,
   Card,
@@ -83,7 +87,9 @@ export function AgentDetailPage() {
     <div className="max-w-4xl space-y-6">
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight">{agent.name}</h1>
+          <h2 className="text-base font-semibold tracking-tight">
+            {agent.name}
+          </h2>
           <Badge variant="outline" className="capitalize">
             {agent.status}
           </Badge>
@@ -100,7 +106,10 @@ export function AgentDetailPage() {
           sparklineData={trend.data?.map((p) => p.successRate)}
         />
         <KPIWidget label="Avg Latency" value={`${agent.avgLatencyMs}ms`} />
-        <KPIWidget label="Tokens Used" value={agent.tokensUsed.toLocaleString('en-US')} />
+        <KPIWidget
+          label="Tokens Used"
+          value={agent.tokensUsed.toLocaleString('en-US')}
+        />
       </div>
 
       <Card>
@@ -114,9 +123,17 @@ export function AgentDetailPage() {
           ) : (
             <ResponsiveContainer width="100%" height={240}>
               <AreaChart data={trend.data} margin={{ left: 0, right: 8 }}>
-                <ChartAreaGradient id="agent-perf-trend" colorVar="var(--color-chart-info)" />
+                <ChartAreaGradient
+                  id="agent-perf-trend"
+                  colorVar="var(--color-chart-info)"
+                />
                 <CartesianGrid stroke={chartGridStroke} vertical={false} />
-                <XAxis dataKey="date" tick={chartAxisTick} axisLine={chartAxisLine} tickLine={false} />
+                <XAxis
+                  dataKey="date"
+                  tick={chartAxisTick}
+                  axisLine={chartAxisLine}
+                  tickLine={false}
+                />
                 <YAxis
                   tick={chartAxisTick}
                   axisLine={false}
@@ -125,7 +142,10 @@ export function AgentDetailPage() {
                   domain={[40, 100]}
                   tickFormatter={(v: number) => `${v}%`}
                 />
-                <Tooltip {...chartTooltipStyle} formatter={(value) => [`${value}%`, 'Success rate']} />
+                <Tooltip
+                  {...chartTooltipStyle}
+                  formatter={(value) => [`${value}%`, 'Success rate']}
+                />
                 <Area
                   type="monotone"
                   dataKey="successRate"
@@ -157,7 +177,9 @@ export function AgentDetailPage() {
               ))}
             </div>
           ) : !executions.data || executions.data.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No executions recorded yet.</p>
+            <p className="text-muted-foreground text-sm">
+              No executions recorded yet.
+            </p>
           ) : (
             <ul className="space-y-3">
               {executions.data.map((execution) => (
@@ -176,7 +198,9 @@ export function AgentDetailPage() {
                     </span>
                   </div>
                   {execution.error && (
-                    <p className="text-danger mt-0.5 pl-6 text-xs">{execution.error}</p>
+                    <p className="text-danger mt-0.5 pl-6 text-xs">
+                      {execution.error}
+                    </p>
                   )}
                 </li>
               ))}

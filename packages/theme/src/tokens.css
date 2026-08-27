@@ -59,7 +59,8 @@
 
   /* Typography */
   --font-sans:
-    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    sans-serif;
   --font-mono:
     'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
@@ -69,8 +70,10 @@
      a black shadow barely reads against an already-dark page otherwise. */
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
-  --shadow-md: 0 4px 10px -2px rgb(0 0 0 / 0.09), 0 2px 6px -2px rgb(0 0 0 / 0.07);
-  --shadow-lg: 0 12px 28px -6px rgb(0 0 0 / 0.14), 0 4px 10px -4px rgb(0 0 0 / 0.08);
+  --shadow-md:
+    0 4px 10px -2px rgb(0 0 0 / 0.09), 0 2px 6px -2px rgb(0 0 0 / 0.07);
+  --shadow-lg:
+    0 12px 28px -6px rgb(0 0 0 / 0.14), 0 4px 10px -4px rgb(0 0 0 / 0.08);
   --shadow-xl: 0 24px 52px -12px rgb(0 0 0 / 0.2);
 
   /* Ambient gradients — reserved for hero backgrounds and the AI-native
@@ -109,6 +112,11 @@
   --chart-info: oklch(0.52 0.17 250);
   --chart-success: oklch(0.52 0.15 145);
   --chart-warning: oklch(0.55 0.16 75);
+  /* Added for trend lines on a declining metric. --danger itself is tuned
+     for badge/alert legibility and, drawn as a 400px-wide line, reads as
+     an alarm rather than a data series; this sits in the same chart
+     lightness band as its three siblings above. */
+  --chart-danger: oklch(0.55 0.18 27);
 
   /* Aliases kept only for shadcn/Tailwind-utility naming compatibility —
      they must never be set to a literal color, only ever reference a
@@ -159,8 +167,10 @@
 
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.28);
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.36), 0 1px 2px -1px rgb(0 0 0 / 0.32);
-  --shadow-md: 0 4px 10px -2px rgb(0 0 0 / 0.4), 0 2px 6px -2px rgb(0 0 0 / 0.32);
-  --shadow-lg: 0 12px 28px -6px rgb(0 0 0 / 0.5), 0 4px 10px -4px rgb(0 0 0 / 0.36);
+  --shadow-md:
+    0 4px 10px -2px rgb(0 0 0 / 0.4), 0 2px 6px -2px rgb(0 0 0 / 0.32);
+  --shadow-lg:
+    0 12px 28px -6px rgb(0 0 0 / 0.5), 0 4px 10px -4px rgb(0 0 0 / 0.36);
   --shadow-xl: 0 24px 52px -12px rgb(0 0 0 / 0.6);
 
   /* Dark mode needs a lighter-based primary wash (black-based reads as
@@ -183,6 +193,7 @@
   --chart-info: oklch(0.6 0.15 250);
   --chart-success: oklch(0.6 0.16 145);
   --chart-warning: oklch(0.65 0.15 75);
+  --chart-danger: oklch(0.62 0.17 27);
 }
 
 /* -------------------------------------------------------------------------
@@ -260,6 +271,7 @@
   --color-chart-info: var(--chart-info);
   --color-chart-success: var(--chart-success);
   --color-chart-warning: var(--chart-warning);
+  --color-chart-danger: var(--chart-danger);
   --color-ai-accent: var(--ai-accent);
   --color-ai-accent-foreground: var(--ai-accent-foreground);
 
@@ -383,4 +395,109 @@ html[data-keyboard-nav='enhanced'] :focus {
 }
 .animate-card-in {
   animation: card-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* -------------------------------------------------------------------------
+   Motion vocabulary. Durations and easings were previously inlined per
+   component (duration-200 here, duration-150 there, whatever Tailwind's
+   default ease happened to be), which is why transitions across the app
+   never quite felt like one system. These are the only four durations and
+   three curves anything should use.
+
+   The curves are deliberately asymmetric-fast: `--ease-out` decelerates
+   hard so a panel appears to *arrive* rather than drift, and `--ease-snap`
+   is for state flips (pressed, checked, selected) that should read as
+   instantaneous but not jarring. No bounce/elastic curves anywhere — they
+   read as decorative, and this product is meant to read as fast.
+   ------------------------------------------------------------------------- */
+@theme {
+  /* --ease-out and --ease-in-out are Tailwind's own theme variables, so
+     redefining them here re-points the built-in `ease-out` /
+     `ease-in-out` utilities at these curves everywhere at once — which is
+     the point: one vocabulary, not "ours" competing with "theirs".
+     `ease-snap` is new. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-snap: cubic-bezier(0.3, 0, 0.1, 1);
+}
+
+:root {
+  /* Durations have no Tailwind theme namespace, so these are referenced
+     as arbitrary values — duration-(--duration-fast) — the same way the
+     z-index scale above already is. */
+  --duration-instant: 90ms;
+  --duration-fast: 140ms;
+  --duration-base: 220ms;
+  --duration-slow: 400ms;
+}
+
+/* -------------------------------------------------------------------------
+   Skeleton shimmer. A pulsing opacity block (the previous animate-pulse)
+   reads as "this element is disabled"; a directional sweep reads as "this
+   element is being filled in", which is the actual message. The gradient
+   is built from the theme's own surface tokens, so it inverts correctly in
+   dark mode and flattens to a plain block in high-contrast (where a
+   low-contrast sweep would be invisible anyway).
+   ------------------------------------------------------------------------- */
+@keyframes skeleton-sweep {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Indeterminate progress sweep — used by the staged loader's track while a
+   stage is running but has no measurable percentage of its own.
+   ------------------------------------------------------------------------- */
+@keyframes progress-indeterminate {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(400%);
+  }
+}
+
+/* Slow, wide breathing halo behind the boot mark and AI activity dots.
+   Distinct from `animate-ping`'s hard 1s pulse, which reads as an alarm. */
+@keyframes ambient-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.06);
+  }
+}
+.animate-ambient-pulse {
+  animation: ambient-pulse 2.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Toast entrance/exit. Enters from the edge it's anchored to, leaves by
+   collapsing rather than sliding, so a stack of toasts closes tidily
+   instead of scattering. */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(12px) scale(0.98);
+  }
 }

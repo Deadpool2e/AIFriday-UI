@@ -1,4 +1,9 @@
-import type { ApprovalAction, ApprovalState, Request, RequestStatus } from '@platform/types'
+import type {
+  ApprovalAction,
+  ApprovalState,
+  Request,
+  RequestStatus,
+} from '@platform/types'
 
 import { MOCK_REQUESTS } from './mock-data'
 

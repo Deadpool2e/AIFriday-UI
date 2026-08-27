@@ -1,4 +1,9 @@
-import type { RagDocument, RagQuery, RagRelevancePoint, RagSummary } from '@platform/types'
+import type {
+  RagDocument,
+  RagQuery,
+  RagRelevancePoint,
+  RagSummary,
+} from '@platform/types'
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -70,7 +75,8 @@ const MOCK_RAG_QUERIES: RagQuery[] = [
     executionId: 'EXEC-4102',
     requestId: 'REQ-92831',
     agent: 'RAG Agent',
-    query: 'Retrieve relevant policy and compliance context for a high-value transfer review.',
+    query:
+      'Retrieve relevant policy and compliance context for a high-value transfer review.',
     documentsRetrieved: 3,
     avgRelevance: 92,
     latencyMs: 320,
@@ -103,7 +109,8 @@ const MOCK_RAG_QUERIES: RagQuery[] = [
     executionId: 'EXEC-4099',
     requestId: 'REQ-92822',
     agent: 'RAG Agent',
-    query: 'Retrieve customer due diligence steps for a new commercial account.',
+    query:
+      'Retrieve customer due diligence steps for a new commercial account.',
     documentsRetrieved: 4,
     avgRelevance: 74,
     latencyMs: 512,
@@ -114,7 +121,8 @@ const MOCK_RAG_QUERIES: RagQuery[] = [
     executionId: 'EXEC-4098',
     requestId: 'REQ-92815',
     agent: 'RAG Agent',
-    query: 'Check data retention rules applicable to flagged transaction records.',
+    query:
+      'Check data retention rules applicable to flagged transaction records.',
     documentsRetrieved: 1,
     avgRelevance: 61,
     latencyMs: 268,
@@ -129,17 +137,25 @@ function generateRelevanceTrend(days: number): RagRelevancePoint[] {
     const date = new Date(base - i * 24 * 60 * 60 * 1000)
     const wobble = ((i * 4) % 9) - 4
     points.push({
-      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      date: date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      }),
       avgRelevance: Math.min(100, Math.max(60, 84 + wobble)),
     })
   }
   return points
 }
 
-function computeSummary(documents: RagDocument[], queries: RagQuery[]): RagSummary {
+function computeSummary(
+  documents: RagDocument[],
+  queries: RagQuery[],
+): RagSummary {
   const totalChunks = documents.reduce((sum, d) => sum + d.chunkCount, 0)
-  const avgLatency = queries.reduce((sum, q) => sum + q.latencyMs, 0) / queries.length
-  const avgRelevance = queries.reduce((sum, q) => sum + q.avgRelevance, 0) / queries.length
+  const avgLatency =
+    queries.reduce((sum, q) => sum + q.latencyMs, 0) / queries.length
+  const avgRelevance =
+    queries.reduce((sum, q) => sum + q.avgRelevance, 0) / queries.length
 
   return {
     totalDocuments: documents.length,

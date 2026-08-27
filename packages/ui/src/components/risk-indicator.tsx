@@ -14,12 +14,18 @@ interface RiskIndicatorProps extends React.ComponentProps<'span'> {
 // Text label carries the meaning, not color alone — "High" and "Critical"
 // read distinctly even in grayscale/print.
 const config: Record<RiskLevel, { label: string; className: string }> = {
-  low: { label: 'Low risk', className: 'bg-success/10 text-success border-success/20' },
+  low: {
+    label: 'Low risk',
+    className: 'bg-success/10 text-success border-success/20',
+  },
   medium: {
     label: 'Medium risk',
     className: 'bg-warning/10 text-warning border-warning/20',
   },
-  high: { label: 'High risk', className: 'bg-danger/10 text-danger border-danger/20' },
+  high: {
+    label: 'High risk',
+    className: 'bg-danger/10 text-danger border-danger/20',
+  },
   critical: {
     label: 'Critical risk',
     className: 'bg-danger/20 text-danger border-danger/40 font-semibold',

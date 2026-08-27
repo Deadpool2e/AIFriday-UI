@@ -1,4 +1,5 @@
-export type ExplainabilityDecision = 'approve' | 'reject' | 'escalate' | 'review'
+export type ExplainabilityDecision =
+  'approve' | 'reject' | 'escalate' | 'review'
 
 export interface DecisionFactor {
   name: string

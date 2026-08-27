@@ -22,7 +22,11 @@ interface ToolMonitorProps extends React.ComponentProps<'ol'> {
 
 const statusConfig: Record<
   ToolMonitorCallStatus,
-  { icon: React.ReactNode; variant: VariantProps<typeof badgeVariants>['variant']; label: string }
+  {
+    icon: React.ReactNode
+    variant: VariantProps<typeof badgeVariants>['variant']
+    label: string
+  }
 > = {
   running: {
     icon: <Loader2Icon className="size-3" aria-hidden="true" />,
@@ -57,7 +61,10 @@ function ToolMonitor({ calls, className, ...props }: ToolMonitorProps) {
       {ordered.map((call) => {
         const config = statusConfig[call.status]
         return (
-          <li key={call.id} className="flex items-center justify-between gap-3 text-sm">
+          <li
+            key={call.id}
+            className="flex items-center justify-between gap-3 text-sm"
+          >
             <span className="min-w-0 truncate">
               <span className="font-medium">{call.agent}</span>
               <span className="text-muted-foreground"> → </span>

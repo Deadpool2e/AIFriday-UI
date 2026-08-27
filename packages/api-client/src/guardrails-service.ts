@@ -1,4 +1,8 @@
-import type { GuardrailEvent, GuardrailRule, GuardrailSummary } from '@platform/types'
+import type {
+  GuardrailEvent,
+  GuardrailRule,
+  GuardrailSummary,
+} from '@platform/types'
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -9,7 +13,8 @@ const MOCK_GUARDRAIL_RULES: GuardrailRule[] = [
     id: 'gr-pii',
     name: 'PII Exposure Check',
     category: 'pii',
-    description: 'Blocks responses that would surface unredacted personal identifiers.',
+    description:
+      'Blocks responses that would surface unredacted personal identifiers.',
     severity: 'high',
     enabled: true,
     blockCount: 14,
@@ -19,7 +24,8 @@ const MOCK_GUARDRAIL_RULES: GuardrailRule[] = [
     id: 'gr-prompt-injection',
     name: 'Prompt Injection Filter',
     category: 'prompt_injection',
-    description: 'Detects instructions embedded in retrieved documents attempting to override the system prompt.',
+    description:
+      'Detects instructions embedded in retrieved documents attempting to override the system prompt.',
     severity: 'critical',
     enabled: true,
     blockCount: 6,
@@ -29,7 +35,8 @@ const MOCK_GUARDRAIL_RULES: GuardrailRule[] = [
     id: 'gr-jailbreak',
     name: 'Jailbreak Pattern Detector',
     category: 'jailbreak',
-    description: 'Flags known jailbreak phrasing patterns in user input before it reaches an agent.',
+    description:
+      'Flags known jailbreak phrasing patterns in user input before it reaches an agent.',
     severity: 'critical',
     enabled: true,
     blockCount: 3,
@@ -39,7 +46,8 @@ const MOCK_GUARDRAIL_RULES: GuardrailRule[] = [
     id: 'gr-toxicity',
     name: 'Toxic Language Filter',
     category: 'toxicity',
-    description: 'Screens generated output for hostile or abusive language before it reaches a user.',
+    description:
+      'Screens generated output for hostile or abusive language before it reaches a user.',
     severity: 'medium',
     enabled: true,
     blockCount: 2,
@@ -49,7 +57,8 @@ const MOCK_GUARDRAIL_RULES: GuardrailRule[] = [
     id: 'gr-data-leakage',
     name: 'Data Leakage Prevention',
     category: 'data_leakage',
-    description: 'Blocks responses that would leak internal system prompts, credentials, or config values.',
+    description:
+      'Blocks responses that would leak internal system prompts, credentials, or config values.',
     severity: 'high',
     enabled: true,
     blockCount: 5,
@@ -59,7 +68,8 @@ const MOCK_GUARDRAIL_RULES: GuardrailRule[] = [
     id: 'gr-policy',
     name: 'Policy Compliance Check',
     category: 'policy',
-    description: 'Cross-checks recommendations against active compliance and risk policy documents.',
+    description:
+      'Cross-checks recommendations against active compliance and risk policy documents.',
     severity: 'medium',
     enabled: true,
     blockCount: 9,
@@ -69,7 +79,8 @@ const MOCK_GUARDRAIL_RULES: GuardrailRule[] = [
     id: 'gr-legacy-profanity',
     name: 'Legacy Profanity Filter',
     category: 'toxicity',
-    description: 'Superseded by the Toxic Language Filter; kept for audit history, not actively enforced.',
+    description:
+      'Superseded by the Toxic Language Filter; kept for audit history, not actively enforced.',
     severity: 'low',
     enabled: false,
     blockCount: 0,
@@ -157,7 +168,10 @@ const MOCK_GUARDRAIL_EVENTS: GuardrailEvent[] = [
   },
 ]
 
-function computeSummary(rules: GuardrailRule[], events: GuardrailEvent[]): GuardrailSummary {
+function computeSummary(
+  rules: GuardrailRule[],
+  events: GuardrailEvent[],
+): GuardrailSummary {
   const activeRules = rules.filter((r) => r.enabled)
   const totalBlocks = rules.reduce((sum, r) => sum + r.blockCount, 0)
   const totalPasses = rules.reduce((sum, r) => sum + r.passCount, 0)
@@ -169,8 +183,13 @@ function computeSummary(rules: GuardrailRule[], events: GuardrailEvent[]): Guard
     totalRules: rules.length,
     activeRules: activeRules.length,
     blocksLast24h: events.filter((e) => e.action === 'blocked').length,
-    blockRate: totalBlocks + totalPasses === 0 ? 0 : Math.round((totalBlocks / (totalBlocks + totalPasses)) * 1000) / 10,
-    topRule: topRule ? { name: topRule.name, blockCount: topRule.blockCount } : null,
+    blockRate:
+      totalBlocks + totalPasses === 0
+        ? 0
+        : Math.round((totalBlocks / (totalBlocks + totalPasses)) * 1000) / 10,
+    topRule: topRule
+      ? { name: topRule.name, blockCount: topRule.blockCount }
+      : null,
   }
 }
 
@@ -185,7 +204,8 @@ let demoEventCounter = 0
 // event links to a real, working trace page.
 export function triggerDemoGuardrailBlock(): GuardrailEvent {
   demoEventCounter += 1
-  const rule = MOCK_GUARDRAIL_RULES[demoEventCounter % MOCK_GUARDRAIL_RULES.length]
+  const rule =
+    MOCK_GUARDRAIL_RULES[demoEventCounter % MOCK_GUARDRAIL_RULES.length]
   rule.blockCount += 1
 
   const event: GuardrailEvent = {

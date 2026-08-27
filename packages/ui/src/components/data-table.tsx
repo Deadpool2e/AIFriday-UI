@@ -78,18 +78,53 @@ function DataTable<T>({
   function toggleSort(column: DataTableColumn<T>) {
     if (!column.sortable) return
     setSort((prev) => {
-      if (prev?.columnId !== column.id) return { columnId: column.id, direction: 'asc' }
-      if (prev.direction === 'asc') return { columnId: column.id, direction: 'desc' }
+      if (prev?.columnId !== column.id)
+        return { columnId: column.id, direction: 'asc' }
+      if (prev.direction === 'asc')
+        return { columnId: column.id, direction: 'desc' }
       return null
     })
   }
 
+  // The loading state renders the *real* table — same header row, same
+  // column count, same row height — with skeleton cells in place of
+  // values. The previous stack of full-width grey bars in a box shared no
+  // geometry with the table that replaced it, so every load ended in a
+  // layout jump. This one just fills in.
   if (isLoading) {
     return (
-      <div className="space-y-2 rounded-md border p-4">
-        {Array.from({ length: loadingRowCount }).map((_, index) => (
-          <Skeleton key={index} className="h-8 w-full" />
-        ))}
+      <div className="space-y-4">
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableHead key={column.id} className={column.headerClassName}>
+                    {column.header}
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: loadingRowCount }).map((_, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  {columns.map((column, columnIndex) => (
+                    <TableCell key={column.id} className={column.cellClassName}>
+                      {/* Varied widths so the placeholder reads as data of
+                          different lengths rather than a uniform grid. */}
+                      <Skeleton
+                        className="h-3.5"
+                        style={{
+                          width: `${[70, 92, 58, 64, 76, 84][columnIndex % 6]}%`,
+                        }}
+                      />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     )
   }
@@ -124,7 +159,7 @@ function DataTable<T>({
                       <button
                         type="button"
                         onClick={() => toggleSort(column)}
-                        className="hover:text-foreground flex items-center gap-1"
+                        className="hover:text-foreground focus-visible:ring-ring/50 -mx-1 flex items-center gap-1 rounded px-1 py-0.5 transition-colors duration-(--duration-fast) focus-visible:ring-2 focus-visible:outline-none"
                       >
                         {column.header}
                         {isSorted ? (

@@ -97,7 +97,7 @@ export function LatencyPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Latency</h1>
+        <h2 className="text-base font-semibold tracking-tight">Latency</h2>
         <p className="text-muted-foreground text-sm">
           How fast every agent responds, end to end, and what's currently slow.
         </p>
@@ -105,7 +105,9 @@ export function LatencyPage() {
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {summary.isLoading ? (
-          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
+          Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))
         ) : summary.data ? (
           <>
             <KPIWidget
@@ -114,14 +116,22 @@ export function LatencyPage() {
               icon={<ZapIcon />}
               sparklineData={trend.data?.map((p) => p.avgLatencyMs)}
             />
-            <KPIWidget label="P50" value={`${summary.data.p50LatencyMs}ms`} icon={<GaugeIcon />} />
+            <KPIWidget
+              label="P50"
+              value={`${summary.data.p50LatencyMs}ms`}
+              icon={<GaugeIcon />}
+            />
             <KPIWidget
               label="P95"
               value={`${summary.data.p95LatencyMs}ms`}
               icon={<ClockIcon />}
               sparklineData={trend.data?.map((p) => p.p95LatencyMs)}
             />
-            <KPIWidget label="P99" value={`${summary.data.p99LatencyMs}ms`} icon={<TimerIcon />} />
+            <KPIWidget
+              label="P99"
+              value={`${summary.data.p99LatencyMs}ms`}
+              icon={<TimerIcon />}
+            />
           </>
         ) : null}
       </div>
@@ -129,16 +139,27 @@ export function LatencyPage() {
       <Card>
         <CardHeader>
           <CardTitle>Latency trend</CardTitle>
-          <CardDescription>Average vs. P95 latency across all agents, last 14 days</CardDescription>
+          <CardDescription>
+            Average vs. P95 latency across all agents, last 14 days
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {trend.isLoading || !trend.data ? (
             <Skeleton className="h-64 w-full" />
           ) : (
             <ResponsiveContainer width="100%" height={260}>
-              <AreaChart data={trend.data} margin={{ left: 0, right: 8, top: 8 }}>
-                <ChartAreaGradient id="latency-avg" colorVar="var(--color-chart-success)" />
-                <ChartAreaGradient id="latency-p95" colorVar="var(--color-chart-warning)" />
+              <AreaChart
+                data={trend.data}
+                margin={{ left: 0, right: 8, top: 8 }}
+              >
+                <ChartAreaGradient
+                  id="latency-avg"
+                  colorVar="var(--color-chart-success)"
+                />
+                <ChartAreaGradient
+                  id="latency-p95"
+                  colorVar="var(--color-chart-warning)"
+                />
                 <CartesianGrid stroke={chartGridStroke} vertical={false} />
                 <XAxis
                   dataKey="date"
@@ -153,7 +174,10 @@ export function LatencyPage() {
                   width={56}
                   tickFormatter={(v: number) => `${v}ms`}
                 />
-                <Tooltip {...chartTooltipStyle} formatter={(value, name) => [`${value}ms`, name]} />
+                <Tooltip
+                  {...chartTooltipStyle}
+                  formatter={(value, name) => [`${value}ms`, name]}
+                />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Area
                   type="monotone"
@@ -182,7 +206,9 @@ export function LatencyPage() {
       <Card>
         <CardHeader>
           <CardTitle>Latency by agent</CardTitle>
-          <CardDescription>Average and tail latency percentiles for each agent.</CardDescription>
+          <CardDescription>
+            Average and tail latency percentiles for each agent.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <DataTable
@@ -193,7 +219,12 @@ export function LatencyPage() {
             pageSize={20}
             onPageChange={setPage}
             isLoading={breakdown.isLoading}
-            emptyState={<EmptyState title="No latency data" description="Agent latency will show up here." />}
+            emptyState={
+              <EmptyState
+                title="No latency data"
+                description="Agent latency will show up here."
+              />
+            }
           />
         </CardContent>
       </Card>
@@ -201,7 +232,9 @@ export function LatencyPage() {
       <Card>
         <CardHeader>
           <CardTitle>Slowest recent executions</CardTitle>
-          <CardDescription>The highest-duration executions across all agents right now.</CardDescription>
+          <CardDescription>
+            The highest-duration executions across all agents right now.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {slow.isLoading || !slow.data ? (
@@ -213,7 +246,10 @@ export function LatencyPage() {
           ) : (
             <ul className="space-y-3">
               {slow.data.map((execution) => (
-                <li key={execution.id} className="flex items-center justify-between gap-3 text-sm">
+                <li
+                  key={execution.id}
+                  className="flex items-center justify-between gap-3 text-sm"
+                >
                   <span className="flex items-center gap-2">
                     <Link
                       to={`/control-tower/executions/${execution.executionId}`}
@@ -221,10 +257,14 @@ export function LatencyPage() {
                     >
                       {execution.requestId}
                     </Link>
-                    <span className="text-muted-foreground">{execution.agent}</span>
+                    <span className="text-muted-foreground">
+                      {execution.agent}
+                    </span>
                   </span>
                   <span className="text-muted-foreground flex items-center gap-3 font-mono text-xs tabular-nums">
-                    <span className="text-warning font-medium">{execution.durationMs}ms</span>
+                    <span className="text-warning font-medium">
+                      {execution.durationMs}ms
+                    </span>
                     <span>{execution.timestamp}</span>
                   </span>
                 </li>

@@ -49,7 +49,9 @@ describe('AgentTrace', () => {
 
   it('surfaces a failed/blocked step error message', () => {
     render(<AgentTrace steps={steps} />)
-    expect(screen.getByText('Blocked by rule "PII Exposure Check".')).toBeInTheDocument()
+    expect(
+      screen.getByText('Blocked by rule "PII Exposure Check".'),
+    ).toBeInTheDocument()
   })
 
   it('renders duration and token count only when present on the step', () => {

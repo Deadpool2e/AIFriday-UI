@@ -1,30 +1,10 @@
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
-import {
-  BotIcon,
-  CheckCircle2Icon,
-  CircleDashedIcon,
-  ClockIcon,
-  DollarSignIcon,
-  FileTextIcon,
-  ShieldAlertIcon,
-  TrendingUpIcon,
-  UserCheckIcon,
-  XCircleIcon,
-  ZapIcon,
-} from 'lucide-react'
+import { CheckCircle2Icon, CircleDashedIcon, XCircleIcon } from 'lucide-react'
+import * as React from 'react'
 import { Link } from 'react-router'
 import {
   useAgents,
-  useAgentSuccessRateTrend,
   useControlTowerMetrics,
+  useControlTowerMetricsTrend,
   useRecentExecutions,
   useSystemHealth,
 } from '@platform/api-client'
@@ -37,33 +17,88 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  KPIWidget,
   LiveIndicator,
+  MetricStrip,
+  type MetricStripItem,
+  RankedList,
+  type RankedListItem,
   Skeleton,
   SystemHealth,
   useDocumentTitle,
 } from '@platform/ui'
 
 import {
-  ChartAreaGradient,
-  chartAxisLine,
-  chartAxisTick,
-  chartGridStroke,
-  chartTooltipStyle,
-} from '../lib/chart-theme'
+  AnalyticsPanel,
+  type TrendPoint,
+  type TrendSeries,
+} from '../lib/analytics-panel'
 
-const AGENT_STATUS_ORDER: AgentStatus[] = ['running', 'idle', 'degraded', 'failed']
+// The four operational metrics with real history behind them. Every series
+// ends on the value the KPI strip and the page hero already report, so the
+// chart and the numbers above it can never tell different stories.
+const TREND_SERIES: TrendSeries[] = [
+  {
+    id: 'successRate',
+    href: '/control-tower/agents',
+    label: 'Success Rate',
+    color: 'var(--color-chart-success)',
+    aggregate: 'last',
+    toneForIncrease: 'positive',
+    format: (value) => `${Math.round(value)}%`,
+  },
+  {
+    id: 'avgLatencyMs',
+    href: '/control-tower/latency',
+    label: 'Avg Latency',
+    color: 'var(--color-chart-info)',
+    aggregate: 'last',
+    // Slower is worse, so a rise here is bad news even though the arrow
+    // points the same way as a rise in success rate.
+    toneForIncrease: 'negative',
+    format: (value) => `${Math.round(value)}ms`,
+  },
+  {
+    id: 'tokensUsed',
+    href: '/control-tower/llm-usage',
+    label: 'Tokens Used',
+    color: 'var(--color-ai-accent)',
+    aggregate: 'last',
+    toneForIncrease: 'neutral',
+    format: (value) => Math.round(value).toLocaleString('en-US'),
+  },
+  {
+    id: 'guardrailBlocks',
+    href: '/control-tower/guardrails',
+    label: 'Guardrail Blocks',
+    color: 'var(--color-chart-warning)',
+    aggregate: 'last',
+    // Deliberately neutral: a block is the guardrail working, so more of
+    // them is not straightforwardly worse — it's worth looking at.
+    toneForIncrease: 'neutral',
+    format: (value) => Math.round(value).toLocaleString('en-US'),
+  },
+]
+
+const AGENT_STATUS_ORDER: AgentStatus[] = [
+  'running',
+  'idle',
+  'degraded',
+  'failed',
+]
 const AGENT_STATUS_LABEL: Record<AgentStatus, string> = {
   running: 'Running',
   idle: 'Idle',
   degraded: 'Degraded',
   failed: 'Failed',
 }
-const AGENT_STATUS_TONE: Record<AgentStatus, string> = {
-  running: 'bg-success',
-  idle: 'bg-muted-foreground',
-  degraded: 'bg-warning',
-  failed: 'bg-danger',
+// RankedList tones rather than raw bar classes — the component owns how a
+// tone is painted, so status colour is declared once here and stays
+// consistent with every other ranked breakdown in the product.
+const AGENT_STATUS_RANK_TONE: Record<AgentStatus, RankedListItem['tone']> = {
+  running: 'success',
+  idle: 'neutral',
+  degraded: 'warning',
+  failed: 'danger',
 }
 const EXECUTION_STATUS_ICON = {
   completed: <CheckCircle2Icon className="text-success size-4" />,
@@ -76,160 +111,155 @@ export function OverviewPage() {
   const metrics = useControlTowerMetrics()
   const agents = useAgents()
   const health = useSystemHealth()
-  const trend = useAgentSuccessRateTrend()
+  const trend = useControlTowerMetricsTrend()
   const executions = useRecentExecutions()
 
   const statusCounts = AGENT_STATUS_ORDER.map((status) => ({
     status,
     count: agents.data?.filter((a) => a.status === status).length ?? 0,
   }))
-  const maxStatusCount = Math.max(1, ...statusCounts.map((s) => s.count))
 
-  const successRateSeries = trend.data?.map((point) => point.successRate)
+  // The service already returns one row per day with every metric on it,
+  // so it drops straight into the panel — no zipping of separate series.
+  const trendData: TrendPoint[] | undefined = trend.data?.map((point) => ({
+    date: point.date,
+    successRate: point.successRate,
+    avgLatencyMs: point.avgLatencyMs,
+    tokensUsed: point.tokensUsed,
+    guardrailBlocks: point.guardrailBlocks,
+  }))
+
+  const stateItems: MetricStripItem[] = metrics.data
+    ? [
+        {
+          id: 'agents',
+          href: '/control-tower/agents',
+          label: 'Active Agents',
+          value: metrics.data.activeAgents,
+        },
+        // No arrow: there is no execution index page to send anyone
+        // to, and a link landing somewhere only loosely related is worse
+        // than no link at all.
+        {
+          id: 'requests',
+          label: 'Executions',
+          value: metrics.data.totalRequests,
+        },
+        {
+          id: 'p95',
+          href: '/control-tower/latency',
+          label: 'P95 Latency',
+          value: `${metrics.data.p95LatencyMs.toLocaleString('en-US')}`,
+          unit: 'ms',
+        },
+        {
+          id: 'cost',
+          href: '/control-tower/llm-usage',
+          label: 'Estimated Cost',
+          value: `$${metrics.data.estimatedCostUsd.toFixed(2)}`,
+        },
+        {
+          id: 'escalations',
+          href: '/approvals',
+          label: 'Human Escalations',
+          value: metrics.data.humanEscalations,
+        },
+      ]
+    : []
+
+  // Busiest agents first — on an operations overview the question is
+  // "where is the load", and insertion order answers nothing.
+  const agentLoadItems: RankedListItem[] = [...(agents.data ?? [])]
+    .sort((a, b) => b.requestsHandled - a.requestsHandled)
+    .map((agent) => ({
+      id: agent.id,
+      label: agent.name,
+      value: agent.requestsHandled,
+      // Two related figures, two columns — not one string welded together
+      // with a middot. The throughput is what the row is ranked by, so it
+      // owns the value column; the success rate rides beside it, muted.
+      meta: `${agent.successRate}% success`,
+      // A failed or degraded agent colours its own row, so the exception
+      // is visible while scanning rather than only on the status page.
+      tone:
+        agent.status === 'failed'
+          ? 'danger'
+          : agent.status === 'degraded'
+            ? 'warning'
+            : agent.status === 'running'
+              ? 'info'
+              : 'neutral',
+    }))
+
+  const agentStatusItems: RankedListItem[] = statusCounts.map(
+    ({ status, count }) => ({
+      id: status,
+      label: AGENT_STATUS_LABEL[status],
+      value: count,
+      tone: AGENT_STATUS_RANK_TONE[status],
+    }),
+  )
+
+  // MetricStrip and AnalyticsPanel deliberately import no router, so the
+  // page supplies the Link and navigation stays the app's concern.
+  const renderMetricLink = (href: string, children: React.ReactNode) => (
+    <Link to={href} className="block">
+      {children}
+    </Link>
+  )
 
   return (
     <div className="space-y-6">
-      {/* KPI row — Active Agents and Success Rate lead as featured bento
-          cards; the rest carry a semantic tone instead of uniform white. */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-        {metrics.isLoading ? (
-          Array.from({ length: 9 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
-        ) : metrics.data ? (
-          <>
-            <KPIWidget
-              className="animate-card-in col-span-2 sm:col-span-3 lg:col-span-2"
-              style={{ animationDelay: '0ms' }}
-              size="featured"
-              tone="ai"
-              label="Active Agents"
-              value={metrics.data.activeAgents}
-              icon={<BotIcon />}
-            />
-            <KPIWidget
-              className="animate-card-in"
-              style={{ animationDelay: '40ms' }}
-              label="Requests"
-              value={metrics.data.totalRequests}
-              icon={<FileTextIcon />}
-            />
-            <KPIWidget
-              className="animate-card-in col-span-2 sm:col-span-3 lg:col-span-2"
-              style={{ animationDelay: '80ms' }}
-              size="featured"
-              tone="success"
-              label="Success Rate"
-              value={`${metrics.data.successRate}%`}
-              icon={<CheckCircle2Icon />}
-              sparklineData={successRateSeries}
-              delta={
-                successRateSeries && successRateSeries.length > 1
-                  ? {
-                      value: `${Math.abs(successRateSeries[successRateSeries.length - 1] - successRateSeries[0]).toFixed(1)}pt`,
-                      tone: successRateSeries[successRateSeries.length - 1] >= successRateSeries[0] ? 'positive' : 'negative',
-                      direction: successRateSeries[successRateSeries.length - 1] >= successRateSeries[0] ? 'up' : 'down',
-                    }
-                  : undefined
-              }
-              comparisonLabel="over 14 days"
-            />
-            <KPIWidget
-              className="animate-card-in"
-              style={{ animationDelay: '120ms' }}
-              label="Avg Latency"
-              value={`${metrics.data.avgLatencyMs}ms`}
-              icon={<ClockIcon />}
-            />
-            <KPIWidget
-              className="animate-card-in"
-              style={{ animationDelay: '160ms' }}
-              label="P95 Latency"
-              value={`${metrics.data.p95LatencyMs}ms`}
-              icon={<TrendingUpIcon />}
-            />
-            <KPIWidget
-              className="animate-card-in"
-              style={{ animationDelay: '200ms' }}
-              tone="info"
-              label="Tokens Used"
-              value={metrics.data.tokensUsed.toLocaleString('en-US')}
-              icon={<ZapIcon />}
-            />
-            <KPIWidget
-              className="animate-card-in"
-              style={{ animationDelay: '240ms' }}
-              label="Estimated Cost"
-              value={`$${metrics.data.estimatedCostUsd.toFixed(2)}`}
-              icon={<DollarSignIcon />}
-            />
-            <KPIWidget
-              className="animate-card-in"
-              style={{ animationDelay: '280ms' }}
-              tone="warning"
-              label="Guardrail Blocks"
-              value={metrics.data.guardrailBlocks}
-              icon={<ShieldAlertIcon />}
-            />
-            <KPIWidget
-              className="animate-card-in"
-              style={{ animationDelay: '320ms' }}
-              tone="warning"
-              label="Human Escalations"
-              value={metrics.data.humanEscalations}
-              icon={<UserCheckIcon />}
-            />
-          </>
-        ) : null}
-      </div>
+      {/* Pick an operational metric, see its 14-day shape. Replaces a
+          nine-tile KPI grid sitting above a single fixed chart — eight of
+          those tiles had no history to show, and the one chart was locked
+          to the ninth. */}
+      <AnalyticsPanel
+        title="Platform operations"
+        series={TREND_SERIES}
+        data={trendData}
+        isLoading={trend.isLoading}
+        renderLink={renderMetricLink}
+      />
 
-      {/* Chart + system health */}
+      {/* Point-in-time counts. Separated from the panel above because
+          these are levels, not rates over a window. */}
+      <MetricStrip
+        label="Current platform state"
+        items={stateItems}
+        isLoading={metrics.isLoading}
+        renderLink={renderMetricLink}
+      />
+
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Agent success rate</CardTitle>
-            <CardDescription>Rolling average across all agents, last 14 days</CardDescription>
+            <CardTitle>Agents by throughput</CardTitle>
+            <CardDescription>
+              Executions handled, across {agents.data?.length ?? 0} registered
+              agents
+            </CardDescription>
+            <CardAction>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/control-tower/agents">View all agents</Link>
+              </Button>
+            </CardAction>
           </CardHeader>
           <CardContent>
-            {trend.isLoading || !trend.data ? (
-              <Skeleton className="h-64 w-full" />
-            ) : (
-              <ResponsiveContainer width="100%" height={260}>
-                <AreaChart data={trend.data} margin={{ left: 0, right: 8 }}>
-                  <ChartAreaGradient id="agent-success-rate" colorVar="var(--color-chart-success)" />
-                  <CartesianGrid stroke={chartGridStroke} vertical={false} />
-                  <XAxis
-                    dataKey="date"
-                    tick={chartAxisTick}
-                    axisLine={chartAxisLine}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={chartAxisTick}
-                    axisLine={false}
-                    tickLine={false}
-                    width={48}
-                    domain={[70, 100]}
-                    tickFormatter={(v: number) => `${v}%`}
-                  />
-                  <Tooltip
-                    {...chartTooltipStyle}
-                    formatter={(value) => [`${value}%`, 'Success rate']}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="successRate"
-                    stroke="var(--color-chart-success)"
-                    strokeWidth={2}
-                    fill="url(#agent-success-rate)"
-                    dot={{
-                      r: 4,
-                      fill: 'var(--color-chart-success)',
-                      stroke: 'var(--color-surface)',
-                      strokeWidth: 2,
-                    }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
+            {/* Each row's bar is its own background, so the ranking is
+                readable without looking at a single number — and a row
+                stays a link to that agent's detail page. */}
+            <RankedList
+              items={agentLoadItems}
+              isLoading={agents.isLoading}
+              loadingRows={5}
+              emptyLabel="No agents registered."
+              renderLink={(item, children) => (
+                <Link to={`/control-tower/agents/${item.id}`} className="block">
+                  {children}
+                </Link>
+              )}
+            />
           </CardContent>
         </Card>
 
@@ -251,41 +281,20 @@ export function OverviewPage() {
         </Card>
       </div>
 
-      {/* Agent activity + recent executions */}
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Agent activity</CardTitle>
-            <CardDescription>{agents.data?.length ?? 0} agents registered</CardDescription>
-            <CardAction>
-              <Button asChild variant="outline" size="sm">
-                <Link to="/control-tower/agents">View all agents</Link>
-              </Button>
-            </CardAction>
+            <CardTitle>Agent status</CardTitle>
+            <CardDescription>
+              How the fleet is currently distributed
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {agents.isLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-6 w-full" />
-                ))}
-              </div>
-            ) : (
-              statusCounts.map(({ status, count }) => (
-                <div key={status} className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span>{AGENT_STATUS_LABEL[status]}</span>
-                    <span className="font-medium tabular-nums">{count}</span>
-                  </div>
-                  <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
-                    <div
-                      className={`h-full rounded-full ${AGENT_STATUS_TONE[status]}`}
-                      style={{ width: `${(count / maxStatusCount) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))
-            )}
+          <CardContent>
+            <RankedList
+              items={agentStatusItems}
+              isLoading={agents.isLoading}
+              loadingRows={4}
+            />
           </CardContent>
         </Card>
 
@@ -322,7 +331,9 @@ export function OverviewPage() {
                       )}
                     </div>
                     {execution.error && (
-                      <p className="text-danger mt-0.5 pl-6 text-xs">{execution.error}</p>
+                      <p className="text-danger mt-0.5 pl-6 text-xs">
+                        {execution.error}
+                      </p>
                     )}
                   </li>
                 ))}

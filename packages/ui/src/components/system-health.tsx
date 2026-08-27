@@ -42,14 +42,26 @@ const statusConfig: Record<
 
 function SystemHealth({ items, className, ...props }: SystemHealthProps) {
   return (
-    <ul data-slot="system-health" className={cn('space-y-3', className)} {...props}>
+    <ul
+      data-slot="system-health"
+      className={cn('space-y-3', className)}
+      {...props}
+    >
       {items.map((item) => {
         const config = statusConfig[item.status]
         return (
-          <li key={item.id} className="flex items-start justify-between gap-3 text-sm">
+          <li
+            key={item.id}
+            className="flex items-start justify-between gap-3 text-sm"
+          >
             <span className="flex-1">{item.name}</span>
             <span className="flex flex-col items-end gap-0.5">
-              <span className={cn('inline-flex items-center gap-1.5 font-medium', config.className)}>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1.5 font-medium',
+                  config.className,
+                )}
+              >
                 {config.icon}
                 {config.label}
               </span>

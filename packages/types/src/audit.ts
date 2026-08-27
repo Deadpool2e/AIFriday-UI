@@ -1,4 +1,5 @@
-export type AuditCategory = 'execution' | 'guardrail' | 'approval' | 'access' | 'system'
+export type AuditCategory =
+  'execution' | 'guardrail' | 'approval' | 'access' | 'system'
 
 export interface AuditActor {
   type: 'user' | 'agent' | 'system'

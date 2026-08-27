@@ -11,7 +11,10 @@ interface ConversationSidebarProps {
   onSelect: (conversationId: string | null) => void
 }
 
-export function ConversationSidebar({ activeConversationId, onSelect }: ConversationSidebarProps) {
+export function ConversationSidebar({
+  activeConversationId,
+  onSelect,
+}: ConversationSidebarProps) {
   const { data: conversations = [], isLoading } = useVizorionConversations()
   const createConversation = useCreateVizorionConversation()
   const deleteConversation = useDeleteVizorionConversation()

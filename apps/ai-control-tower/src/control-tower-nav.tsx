@@ -13,15 +13,28 @@ import { cn } from '@platform/ui'
 // route in control-tower-routes.tsx — same rule the top-level Sidebar
 // follows for navItems.ts, so a tab is never shown for a page the user
 // would immediately get bounced from.
-const sections: { label: string; to: string; end?: boolean; permission?: Permission }[] = [
+const sections: {
+  label: string
+  to: string
+  end?: boolean
+  permission?: Permission
+}[] = [
   { label: 'Overview', to: '/control-tower', end: true },
   { label: 'Agents', to: '/control-tower/agents', permission: 'AGENT_VIEW' },
-  { label: 'Guardrails', to: '/control-tower/guardrails', permission: 'GUARDRAIL_VIEW' },
+  {
+    label: 'Guardrails',
+    to: '/control-tower/guardrails',
+    permission: 'GUARDRAIL_VIEW',
+  },
   { label: 'RAG Monitoring', to: '/control-tower/rag' },
   { label: 'LLM Usage', to: '/control-tower/llm-usage' },
   { label: 'Latency', to: '/control-tower/latency' },
   { label: 'System Health', to: '/control-tower/system-health' },
-  { label: 'Audit Logs', to: '/control-tower/audit-logs', permission: 'AUDIT_VIEW' },
+  {
+    label: 'Audit Logs',
+    to: '/control-tower/audit-logs',
+    permission: 'AUDIT_VIEW',
+  },
   { label: 'Explainability', to: '/control-tower/explainability' },
 ]
 
@@ -32,7 +45,10 @@ export function ControlTowerNav() {
   )
 
   return (
-    <nav aria-label="Control Tower sections" className="border-b">
+    // No border of its own: it renders flush against PageHeader's bottom
+    // border, so the active tab's indicator sits on the page frame's own
+    // edge rather than on a second line 1px above it.
+    <nav aria-label="Control Tower sections">
       <ul className="-mb-px flex gap-4 overflow-x-auto">
         {visibleSections.map((section) => (
           <li key={section.to}>
@@ -41,10 +57,11 @@ export function ControlTowerNav() {
               end={section.end}
               className={({ isActive }) =>
                 cn(
-                  'inline-flex items-center border-b-2 px-1 py-3 text-sm font-medium whitespace-nowrap transition-colors',
+                  'inline-flex items-center border-b-2 px-1 py-2.5 text-sm font-medium whitespace-nowrap',
+                  'transition-colors duration-(--duration-fast) focus-visible:ring-ring/50 rounded-t-sm focus-visible:ring-2 focus-visible:outline-none',
                   isActive
                     ? 'border-primary text-foreground'
-                    : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground',
+                    : 'border-transparent text-muted-foreground hover:border-border-strong hover:text-foreground',
                 )
               }
             >

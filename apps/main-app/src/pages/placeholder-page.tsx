@@ -1,21 +1,27 @@
-import { EmptyState, NotBuiltIllustration, useDocumentTitle } from '@platform/ui'
+import {
+  EmptyState,
+  NotBuiltIllustration,
+  PageHeader,
+  useDocumentTitle,
+} from '@platform/ui'
 
 export function PlaceholderPage({
   title,
   phase,
+  eyebrow = 'Workspace',
 }: {
   title: string
   phase: string
+  eyebrow?: string
 }) {
   useDocumentTitle(`${title} — Enterprise AI Platform`)
   return (
-    <div className="space-y-2">
-      <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+    <div className="space-y-6">
+      <PageHeader eyebrow={eyebrow} title={title} />
       <EmptyState
         icon={<NotBuiltIllustration />}
         title={`${title} isn't built yet`}
         description={`This screen arrives in ${phase}. The navigation, routing, and layout around it are already real.`}
-        className="mt-6"
       />
     </div>
   )

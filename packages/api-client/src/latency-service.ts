@@ -25,11 +25,16 @@ function buildAgentBreakdown(): AgentLatencyBreakdown[] {
 }
 
 function computeSummary(breakdown: AgentLatencyBreakdown[]): LatencySummary {
-  const totalRequests = MOCK_AGENTS.reduce((sum, a) => sum + a.requestsHandled, 0)
+  const totalRequests = MOCK_AGENTS.reduce(
+    (sum, a) => sum + a.requestsHandled,
+    0,
+  )
   const weighted = (pick: (b: AgentLatencyBreakdown) => number) =>
     Math.round(
-      breakdown.reduce((sum, b, i) => sum + pick(b) * MOCK_AGENTS[i].requestsHandled, 0) /
-        totalRequests,
+      breakdown.reduce(
+        (sum, b, i) => sum + pick(b) * MOCK_AGENTS[i].requestsHandled,
+        0,
+      ) / totalRequests,
     )
 
   return {
@@ -40,14 +45,20 @@ function computeSummary(breakdown: AgentLatencyBreakdown[]): LatencySummary {
   }
 }
 
-function generateLatencyTrend(days: number, summary: LatencySummary): LatencyTrendPoint[] {
+function generateLatencyTrend(
+  days: number,
+  summary: LatencySummary,
+): LatencyTrendPoint[] {
   const base = Date.parse('2026-08-20T00:00:00Z')
   const points: LatencyTrendPoint[] = []
   for (let i = days - 1; i >= 0; i--) {
     const date = new Date(base - i * 24 * 60 * 60 * 1000)
     const wobble = 1 + (((i * 6) % 13) - 6) / 100
     points.push({
-      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      date: date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      }),
       avgLatencyMs: Math.round(summary.avgLatencyMs * wobble),
       p95LatencyMs: Math.round(summary.p95LatencyMs * wobble),
     })

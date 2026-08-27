@@ -39,19 +39,29 @@ function Tabs({ value, onValueChange, children, className }: TabsProps) {
   )
 }
 
-function TabsList({ children, className }: { children: React.ReactNode; className?: string }) {
+function TabsList({
+  children,
+  className,
+}: {
+  children: React.ReactNode
+  className?: string
+}) {
   const listRef = React.useRef<HTMLDivElement>(null)
 
   function handleKeyDown(event: React.KeyboardEvent) {
     if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return
     const triggers = Array.from(
-      listRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]') ?? [],
+      listRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]') ??
+        [],
     )
-    const currentIndex = triggers.findIndex((el) => el === document.activeElement)
+    const currentIndex = triggers.findIndex(
+      (el) => el === document.activeElement,
+    )
     if (currentIndex === -1) return
     event.preventDefault()
     const delta = event.key === 'ArrowRight' ? 1 : -1
-    const next = triggers[(currentIndex + delta + triggers.length) % triggers.length]
+    const next =
+      triggers[(currentIndex + delta + triggers.length) % triggers.length]
     next?.focus()
     next?.click()
   }
@@ -68,7 +78,13 @@ function TabsList({ children, className }: { children: React.ReactNode; classNam
   )
 }
 
-function TabsTrigger({ value, children }: { value: string; children: React.ReactNode }) {
+function TabsTrigger({
+  value,
+  children,
+}: {
+  value: string
+  children: React.ReactNode
+}) {
   const { value: active, setValue, idBase } = useTabsContext('TabsTrigger')
   const isActive = active === value
 
@@ -93,12 +109,23 @@ function TabsTrigger({ value, children }: { value: string; children: React.React
   )
 }
 
-function TabsContent({ value, children }: { value: string; children: React.ReactNode }) {
+function TabsContent({
+  value,
+  children,
+}: {
+  value: string
+  children: React.ReactNode
+}) {
   const { value: active, idBase } = useTabsContext('TabsContent')
   if (active !== value) return null
 
   return (
-    <div role="tabpanel" id={`${idBase}-panel-${value}`} aria-labelledby={`${idBase}-tab-${value}`} tabIndex={0}>
+    <div
+      role="tabpanel"
+      id={`${idBase}-panel-${value}`}
+      aria-labelledby={`${idBase}-tab-${value}`}
+      tabIndex={0}
+    >
       {children}
     </div>
   )
