@@ -1,4 +1,12 @@
-import { CheckCircle2Icon, CircleDashedIcon, XCircleIcon } from 'lucide-react'
+import {
+  ActivityIcon,
+  BotIcon,
+  CheckCircle2Icon,
+  CircleDashedIcon,
+  HistoryIcon,
+  LayersIcon,
+  XCircleIcon,
+} from 'lucide-react'
 import * as React from 'react'
 import { Link } from 'react-router'
 import {
@@ -17,6 +25,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  DistributionBar,
+  type DistributionSegment,
   LiveIndicator,
   MetricStrip,
   type MetricStripItem,
@@ -24,6 +34,7 @@ import {
   type RankedListItem,
   Skeleton,
   SystemHealth,
+  type Tone,
   useDocumentTitle,
 } from '@platform/ui'
 
@@ -91,10 +102,10 @@ const AGENT_STATUS_LABEL: Record<AgentStatus, string> = {
   degraded: 'Degraded',
   failed: 'Failed',
 }
-// RankedList tones rather than raw bar classes — the component owns how a
+// Semantic tones rather than raw colour classes — the component owns how a
 // tone is painted, so status colour is declared once here and stays
-// consistent with every other ranked breakdown in the product.
-const AGENT_STATUS_RANK_TONE: Record<AgentStatus, RankedListItem['tone']> = {
+// consistent with every other breakdown in the product.
+const AGENT_STATUS_TONE: Record<AgentStatus, Tone> = {
   running: 'success',
   idle: 'neutral',
   degraded: 'warning',
@@ -191,14 +202,18 @@ export function OverviewPage() {
               : 'neutral',
     }))
 
-  const agentStatusItems: RankedListItem[] = statusCounts.map(
+  // Four states of one fleet, so this is a composition, not a ranking:
+  // the reader wants "how is the fleet split", and four bars each scaled
+  // against the biggest one makes them do that arithmetic themselves.
+  const agentStatusSegments: DistributionSegment[] = statusCounts.map(
     ({ status, count }) => ({
       id: status,
       label: AGENT_STATUS_LABEL[status],
       value: count,
-      tone: AGENT_STATUS_RANK_TONE[status],
+      tone: AGENT_STATUS_TONE[status],
     }),
   )
+  const agentCount = agents.data?.length ?? 0
 
   // MetricStrip and AnalyticsPanel deliberately import no router, so the
   // page supplies the Link and navigation stays the app's concern.
@@ -231,13 +246,14 @@ export function OverviewPage() {
         renderLink={renderMetricLink}
       />
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-5 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Agents by throughput</CardTitle>
+            <CardTitle icon={<BotIcon />} tone="info">
+              Agents by throughput
+            </CardTitle>
             <CardDescription>
-              Executions handled, across {agents.data?.length ?? 0} registered
-              agents
+              Executions handled, across {agentCount} registered agents
             </CardDescription>
             <CardAction>
               <Button asChild variant="outline" size="sm">
@@ -246,11 +262,11 @@ export function OverviewPage() {
             </CardAction>
           </CardHeader>
           <CardContent>
-            {/* Each row's bar is its own background, so the ranking is
-                readable without looking at a single number — and a row
-                stays a link to that agent's detail page. */}
+            {/* Numbered, because the order *is* the finding here — and
+                each row stays a link to that agent's detail page. */}
             <RankedList
               items={agentLoadItems}
+              numbered
               isLoading={agents.isLoading}
               loadingRows={5}
               emptyLabel="No agents registered."
@@ -265,7 +281,10 @@ export function OverviewPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>System health</CardTitle>
+            <CardTitle icon={<ActivityIcon />} tone="success">
+              System health
+            </CardTitle>
+            <CardDescription>Platform services, right now</CardDescription>
           </CardHeader>
           <CardContent>
             {health.isLoading || !health.data ? (
@@ -281,26 +300,32 @@ export function OverviewPage() {
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Agent status</CardTitle>
+            <CardTitle icon={<LayersIcon />} tone="ai">
+              Agent status
+            </CardTitle>
             <CardDescription>
               How the fleet is currently distributed
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <RankedList
-              items={agentStatusItems}
+            <DistributionBar
+              segments={agentStatusSegments}
+              totalLabel={`${agentCount} registered agent${agentCount === 1 ? '' : 's'}`}
               isLoading={agents.isLoading}
-              loadingRows={4}
+              emptyLabel="No agents registered."
             />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent executions</CardTitle>
+            <CardTitle icon={<HistoryIcon />} tone="neutral">
+              Recent executions
+            </CardTitle>
+            <CardDescription>Latest runs across the fleet</CardDescription>
           </CardHeader>
           <CardContent>
             {executions.isLoading || !executions.data ? (
@@ -310,9 +335,12 @@ export function OverviewPage() {
                 ))}
               </div>
             ) : (
-              <ul className="space-y-3">
+              // Ruled rows, matching the service list opposite: an
+              // execution is looked up one line at a time, and the rule
+              // ties an id on the left to its duration on the right.
+              <ul className="divide-border/60 -my-2 divide-y">
                 {executions.data.map((execution) => (
-                  <li key={execution.id} className="text-sm">
+                  <li key={execution.id} className="py-2 text-sm">
                     <div className="flex items-center justify-between gap-3">
                       <Link
                         to={`/control-tower/executions/${execution.id}`}

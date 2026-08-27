@@ -8,7 +8,10 @@ export const chartTooltipStyle = {
     backgroundColor: 'var(--color-surface-elevated)',
     border: '1px solid var(--color-border)',
     borderRadius: '10px',
-    fontSize: '12px',
+    // rem, not px — SVG/inline-style font-size accepts either, and rem is
+    // what scales with the Accessibility Center's text-size axis the way
+    // every Tailwind text-* utility around this chart already does.
+    fontSize: '0.75rem',
     padding: '10px 12px',
     boxShadow: 'var(--shadow-lg)',
     backdropFilter: 'blur(12px)',
@@ -28,7 +31,7 @@ export const chartTooltipStyle = {
 // anything new.
 export const chartAxisTick = {
   fill: 'var(--color-muted-foreground)',
-  fontSize: 11,
+  fontSize: '0.6875rem',
 }
 export const chartAxisLine = { stroke: 'var(--color-border)' }
 export const chartGridStroke = 'var(--color-border)'

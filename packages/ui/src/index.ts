@@ -195,4 +195,10 @@ export {
   DistributionBar,
   type DistributionSegment,
 } from './components/distribution-bar'
-export { type Tone } from './lib/tone'
+export {
+  type Tone,
+  toneMarkClass,
+  toneChipClass,
+  toneDotClass,
+  toneTextClass,
+} from './lib/tone'

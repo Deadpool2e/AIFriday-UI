@@ -23,15 +23,21 @@ import {
   EmptyState,
   KPIWidget,
   Skeleton,
+  toneMarkClass,
   useDocumentTitle,
 } from '@platform/ui'
 
 import { chartTooltipStyle } from '../lib/chart-theme'
 
+// A meter fill is lib/tone.ts's Mark role, so it draws from the chart-tuned
+// scale (toneMarkClass) rather than the badge-tuned one — a 400px-wide bar
+// painted in badge colors reads more "alarm-saturated" than the rest of
+// this page's charts, which is exactly the failure tokens.css's own
+// Mark/badge split exists to prevent.
 const CONFIDENCE_BAND_TONE: Record<string, string> = {
-  high: 'bg-success',
-  medium: 'bg-warning',
-  low: 'bg-danger',
+  high: toneMarkClass.success,
+  medium: toneMarkClass.warning,
+  low: toneMarkClass.danger,
 }
 
 const DECISION_LABEL: Record<ExplainabilityDecision, string> = {
@@ -41,16 +47,21 @@ const DECISION_LABEL: Record<ExplainabilityDecision, string> = {
   reject: 'Reject',
 }
 const DECISION_TONE: Record<ExplainabilityDecision, string> = {
-  approve: 'bg-success',
-  review: 'bg-warning',
-  escalate: 'bg-danger',
-  reject: 'bg-danger',
+  approve: toneMarkClass.success,
+  review: toneMarkClass.warning,
+  escalate: toneMarkClass.danger,
+  reject: toneMarkClass.danger,
 }
+// Recharts <Cell fill> needs a raw CSS color, not a Tailwind class, so this
+// stays a local var() map — but all four now come from the same chart-*
+// scale (escalate/reject previously used --color-danger, the badge-tuned
+// var, while approve/review used --color-chart-*, so two slices of one pie
+// drew their color from two different scales).
 const DECISION_COLOR_VAR: Record<ExplainabilityDecision, string> = {
   approve: 'var(--color-chart-success)',
   review: 'var(--color-chart-warning)',
-  escalate: 'var(--color-danger)',
-  reject: 'var(--color-danger)',
+  escalate: 'var(--color-chart-danger)',
+  reject: 'var(--color-chart-danger)',
 }
 
 // Small local primitive — a labeled proportional bar, reused three times
@@ -283,7 +294,7 @@ export function ExplainabilityPage() {
                   label={factor.name}
                   value={factor.weightPercent}
                   max={maxFactorWeight}
-                  toneClassName="bg-info"
+                  toneClassName={toneMarkClass.info}
                   valueLabel={`${factor.weightPercent}%`}
                 />
                 <p className="text-muted-foreground text-xs">

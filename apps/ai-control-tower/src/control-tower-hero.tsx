@@ -3,7 +3,7 @@ import {
   useControlTowerMetrics,
   useSystemHealth,
 } from '@platform/api-client'
-import { LiveIndicator, PageHeader, Skeleton } from '@platform/ui'
+import { LiveDot, LiveIndicator, PageHeader, Skeleton } from '@platform/ui'
 
 import { ControlTowerNav } from './control-tower-nav'
 
@@ -54,18 +54,10 @@ export function ControlTowerHero() {
       eyebrow="AI Operations"
       title={
         <span className="flex items-center gap-2.5">
-          <span className="relative flex size-2 shrink-0" aria-hidden="true">
-            <span
-              className={`absolute inline-flex size-full animate-ping rounded-full opacity-50 ${
-                isDegraded ? 'bg-warning' : 'bg-success'
-              }`}
-            />
-            <span
-              className={`relative inline-flex size-2 rounded-full ${
-                isDegraded ? 'bg-warning' : 'bg-success'
-              }`}
-            />
-          </span>
+          <LiveDot
+            dotClassName={isDegraded ? 'bg-warning' : 'bg-success'}
+            size="md"
+          />
           {isDegraded ? 'Degraded performance' : 'System operational'}
         </span>
       }

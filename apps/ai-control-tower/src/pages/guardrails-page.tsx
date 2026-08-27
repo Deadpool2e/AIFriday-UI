@@ -25,6 +25,7 @@ import {
   KPIWidget,
   ShieldClearIllustration,
   Skeleton,
+  toneChipClass,
   useDocumentTitle,
 } from '@platform/ui'
 
@@ -35,23 +36,25 @@ const SEVERITY_RANK: Record<GuardrailSeverity, number> = {
   low: 3,
 }
 
-// Same tone system as RiskIndicator (packages/ui), reapplied here with
-// severity-specific labels instead of "risk" wording — a guardrail rule's
-// severity describes the violation, not the request's risk level, so the
-// two shouldn't share a label even though they share a color vocabulary.
+// lib/tone.ts's Chip role, reapplied here with severity-specific labels
+// instead of "risk" wording — a guardrail rule's severity describes the
+// violation, not the request's risk level, so the two shouldn't share a
+// label even though they share a color vocabulary. 'critical' gets the
+// same info/warning/danger scale as 'high' plus a semibold weight, since
+// the shared Tone type has no fifth "worse than danger" tone.
 const SEVERITY_TONE: Record<GuardrailSeverity, string> = {
-  low: 'bg-info/10 text-info border-info/20',
-  medium: 'bg-warning/10 text-warning border-warning/20',
-  high: 'bg-danger/10 text-danger border-danger/20',
-  critical: 'bg-danger/20 text-danger border-danger/40 font-semibold',
+  low: toneChipClass.info,
+  medium: toneChipClass.warning,
+  high: toneChipClass.danger,
+  critical: `${toneChipClass.danger} font-semibold`,
 }
 
 function SeverityBadge({ severity }: { severity: GuardrailSeverity }) {
   return (
-    <Badge
-      variant="outline"
-      className={`capitalize ${SEVERITY_TONE[severity]}`}
-    >
+    // toneChipClass is a borderless soft-fill chip (border-transparent from
+    // Badge's default variant lets it paint clean, unlike "outline" which
+    // would show a neutral border the tone doesn't tint).
+    <Badge className={`capitalize ${SEVERITY_TONE[severity]}`}>
       {severity}
     </Badge>
   )

@@ -777,3 +777,42 @@ widget, `topbar.tsx`), 5/23 (Control Tower's `guardrails-page.tsx`/
 `conversation-sidebar.tsx`/`file-panel.tsx`/`memory-panel.tsx`), and the
 `agent-trace.tsx` design-judgment call noted under Finding 5 above (not
 deferred — a deliberate decision not to force-fit it).
+
+---
+
+## Phase 3 fixes applied — surface 2: AI Control Tower
+
+Verification gate passes clean: 0 typecheck errors, 0 lint errors (same
+pre-existing warning set as surface 1, nothing new), 73/73 tests, all three
+apps build.
+
+**Finding 5 (Control Tower portion).** `guardrails-page.tsx`'s
+`SEVERITY_TONE` now imports `toneChipClass` from `@platform/ui` (added to
+`packages/ui`'s public exports — previously only the `Tone` type was
+exported, not the four maps themselves) instead of hand-picking its own
+`/10`/`/20` alphas; the badge switched from `variant="outline"` to the
+default variant since `toneChipClass` is a borderless soft-fill chip and
+`outline` would have shown a neutral, untinted border around it.
+`explainability-page.tsx`'s `CONFIDENCE_BAND_TONE` and `DECISION_TONE`
+(both meter-fill "Mark" roles) now use `toneMarkClass`, including the
+factor-weights bar that wasn't explicitly named in the finding but shared
+the identical badge-vs-chart-scale problem. `DECISION_COLOR_VAR` (the
+Recharts `<Cell fill>` map, which needs a raw CSS `var()` string and so
+can't route through a Tailwind class) had its `escalate`/`reject` entries
+corrected from `--color-danger` to `--color-chart-danger`, fixing the
+internal inconsistency where two slices of one pie chart drew red from two
+different scales.
+
+**Finding 23.** `control-tower-nav.tsx`: execution-trace pages
+(`/control-tower/executions/:id`) now light up the "Agents" tab via an
+explicit `isSectionActive` check, since that route lives outside
+`/control-tower/agents`'s own prefix and NavLink's built-in matching
+couldn't reach it. (Agent detail pages didn't need this fix — NavLink's
+default `end: false` prefix match already covers `/control-tower/agents/:id`
+correctly.) `chart-theme.tsx`'s `chartAxisTick.fontSize` (`11`) and
+`chartTooltipStyle.contentStyle.fontSize` (`'12px'`) are now `'0.6875rem'`/
+`'0.75rem'` — rem, not px, so chart tick/tooltip text scales with the
+Accessibility Center's text-size axis the same way every Tailwind text-*
+utility around the chart already does. (`apps/main-app`'s near-identical
+`chart-theme.tsx` copy wasn't touched — no finding named it, and this pass
+doesn't scope-creep into files the audit didn't flag.)

@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router'
+import { NavLink, useLocation } from 'react-router'
 import { useAuth, type Permission } from '@platform/auth'
 import { cn } from '@platform/ui'
 
@@ -38,8 +38,27 @@ const sections: {
   { label: 'Explainability', to: '/control-tower/explainability' },
 ]
 
+// Execution traces (/control-tower/executions/:id) are an Agents drill-down
+// that lives at a sibling top-level route rather than nested under
+// /control-tower/agents, so NavLink's own prefix match can't reach it —
+// without this, landing on an execution trace left every tab unlit with no
+// "where am I" cue. Agent detail pages (/control-tower/agents/:id) don't
+// need this: they already fall under the Agents tab's own prefix.
+function isSectionActive(
+  section: { to: string; end?: boolean },
+  pathname: string,
+) {
+  if (section.end) return pathname === section.to
+  if (pathname.startsWith(section.to)) return true
+  return (
+    section.to === '/control-tower/agents' &&
+    pathname.startsWith('/control-tower/executions')
+  )
+}
+
 export function ControlTowerNav() {
   const { hasAnyPermission } = useAuth()
+  const { pathname } = useLocation()
   const visibleSections = sections.filter(
     (section) => !section.permission || hasAnyPermission([section.permission]),
   )
@@ -50,25 +69,26 @@ export function ControlTowerNav() {
     // edge rather than on a second line 1px above it.
     <nav aria-label="Control Tower sections">
       <ul className="-mb-px flex gap-4 overflow-x-auto">
-        {visibleSections.map((section) => (
-          <li key={section.to}>
-            <NavLink
-              to={section.to}
-              end={section.end}
-              className={({ isActive }) =>
-                cn(
+        {visibleSections.map((section) => {
+          const isActive = isSectionActive(section, pathname)
+          return (
+            <li key={section.to}>
+              <NavLink
+                to={section.to}
+                end={section.end}
+                className={cn(
                   'inline-flex items-center border-b-2 px-1 py-2.5 text-sm font-medium whitespace-nowrap',
                   'transition-colors duration-(--duration-fast) focus-visible:ring-ring/50 rounded-t-sm focus-visible:ring-2 focus-visible:outline-none',
                   isActive
                     ? 'border-primary text-foreground'
                     : 'border-transparent text-muted-foreground hover:border-border-strong hover:text-foreground',
-                )
-              }
-            >
-              {section.label}
-            </NavLink>
-          </li>
-        ))}
+                )}
+              >
+                {section.label}
+              </NavLink>
+            </li>
+          )
+        })}
       </ul>
     </nav>
   )
