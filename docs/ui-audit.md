@@ -893,3 +893,22 @@ All findings from the judgment-based audit are now applied. Phase 3.4
 (Main App workflow pages) had no findings of its own from this audit — the
 Vizorion pages living under `apps/main-app/src/pages/vizorion/` were
 addressed above as part of this surface, per the plan's own grouping.
+
+---
+
+## Phase 3 fixes applied — surface 4: Main App workflow pages
+
+No new judgment-based findings targeted `apps/main-app`'s non-Vizorion
+pages — the four audit passes' Main App-relevant findings were all inside
+`pages/vizorion/`, folded into surface 3 above. The only outstanding change
+here is `dashboard-page.tsx`, a Dashboard risk-summary/layout rework left
+uncommitted from the prior session's mechanical pass (Risk summary moved
+from `RankedList` to `DistributionBar` — a composition of one queue reads
+better as one divided bar than four ranked rows — plus a card re-layout and
+`gap-4`→`gap-5`). Verification gate passes clean (0 typecheck errors, 0
+lint errors, 73/73 tests, all three apps build) — confirmed across every
+gate run in this phase, since this file was present in the tree throughout.
+
+This closes out Phase 3. All four surfaces — `packages/ui` primitives, AI
+Control Tower, Vizorion/Autowake, Main App — are committed, each gated by
+`pnpm typecheck && pnpm lint && pnpm test && pnpm build`.

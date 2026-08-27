@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { HistoryIcon, ShieldAlertIcon, SparklesIcon } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import {
   USE_MOCK_API,
@@ -20,6 +21,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  DistributionBar,
+  type DistributionSegment,
   LiveIndicator,
   MetricStrip,
   type MetricStripItem,
@@ -74,13 +77,11 @@ const TREND_SERIES: TrendSeries[] = [
 ]
 
 const RISK_ORDER: RiskLevel[] = ['low', 'medium', 'high', 'critical']
-// RankedList tones rather than raw bar classes — the component owns how a
-// tone is painted, so this declares meaning, not colour.
-// The row's own bar already carries risk as colour, so the label is plain
-// text rather than a <RiskIndicator> pill — a bordered, tinted badge
-// sitting on a tinted bar states the same fact twice and reads as
-// decoration. The wording still names the level, so meaning never rests
-// on colour alone.
+// The segment's own colour already carries risk, so the legend label is
+// plain text rather than a <RiskIndicator> pill — a bordered, tinted badge
+// beside a tinted dot states the same fact twice and reads as decoration.
+// The wording still names the level, so meaning never rests on colour
+// alone.
 const RISK_LABEL: Record<RiskLevel, string> = {
   low: 'Low risk',
   medium: 'Medium risk',
@@ -88,14 +89,7 @@ const RISK_LABEL: Record<RiskLevel, string> = {
   critical: 'Critical risk',
 }
 
-const RISK_DOT: Record<RiskLevel, string> = {
-  low: 'bg-success',
-  medium: 'bg-warning',
-  high: 'bg-danger',
-  critical: 'bg-danger',
-}
-
-const RISK_RANK_TONE: Record<RiskLevel, RankedListItem['tone']> = {
+const RISK_TONE: Record<RiskLevel, DistributionSegment['tone']> = {
   low: 'success',
   medium: 'warning',
   high: 'danger',
@@ -184,18 +178,21 @@ export function DashboardPage() {
     }))
   }, [volume.data, aiActivity.data])
 
-  const riskItems: RankedListItem[] = riskCounts.map(({ level, count }) => ({
-    id: level,
-    label: RISK_LABEL[level],
-    icon: (
-      <span
-        className={`block size-2 rounded-full ${RISK_DOT[level]}`}
-        aria-hidden="true"
-      />
-    ),
-    value: count,
-    tone: RISK_RANK_TONE[level],
-  }))
+  // Four bands of one queue — a composition, not a ranking. Drawn as a
+  // single divided bar so "how risky is the backlog" is one glance rather
+  // than four numbers to add up.
+  const riskSegments: DistributionSegment[] = riskCounts.map(
+    ({ level, count }) => ({
+      id: level,
+      label: RISK_LABEL[level],
+      value: count,
+      tone: RISK_TONE[level],
+      // Critical shares Danger's red on purpose; the hatch is what keeps
+      // it from merging into the High slice beside it.
+      pattern: level === 'critical',
+    }),
+  )
+  const openRequestCount = riskCounts.reduce((sum, r) => sum + r.count, 0)
 
   const decisionItems: RankedListItem[] = decisionCounts
     .map(([decision, count]) => ({
@@ -278,7 +275,7 @@ export function DashboardPage() {
       />
 
       {/* What needs attention + AI insight */}
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-5 lg:grid-cols-3">
         <AttentionRequired
           className="lg:col-span-2"
           items={attentionItems}
@@ -308,11 +305,21 @@ export function DashboardPage() {
         )}
       </div>
 
-      {/* Activity, risk, recommendations */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card>
+      {/* Activity, risk, recommendations.
+          The feed is the tall one, so the two breakdowns stack beside it
+          in a rail rather than sitting alongside as equal thirds — as
+          three columns of one row they were stretched to the feed's
+          height and left with a card's worth of empty space under four
+          rows of content. */}
+      <div className="grid gap-5 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Recent activity</CardTitle>
+            <CardTitle icon={<HistoryIcon />} tone="neutral">
+              Recent activity
+            </CardTitle>
+            <CardDescription>
+              The latest movement across your requests
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {activity.isLoading || !activity.data ? (
@@ -327,40 +334,49 @@ export function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Risk summary</CardTitle>
-            <CardDescription>Open requests by assessed risk</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {/* Was a label/count row stacked on its own progress bar, per
-                level — two rows of furniture per data point. One ranked
-                row carries the same three facts in half the space. */}
-            <RankedList
-              items={riskItems}
-              isLoading={requests.isLoading}
-              loadingRows={4}
-            />
-          </CardContent>
-        </Card>
+        <div className="space-y-5">
+          <Card>
+            <CardHeader>
+              <CardTitle icon={<ShieldAlertIcon />} tone="warning">
+                Risk summary
+              </CardTitle>
+              <CardDescription>Open requests by assessed risk</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DistributionBar
+                segments={riskSegments}
+                totalLabel={`${openRequestCount} open request${openRequestCount === 1 ? '' : 's'}`}
+                isLoading={requests.isLoading}
+                emptyLabel="No open requests."
+              />
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>AI recommendations</CardTitle>
-            <CardDescription>Decisions made by the AI pipeline</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {/* The 2x2 grid of big numbers gave four decisions equal
-                visual weight and no sense of proportion between them,
-                which is the only thing this breakdown is for. */}
-            <RankedList
-              items={decisionItems}
-              isLoading={requests.isLoading}
-              loadingRows={4}
-              emptyLabel="No AI decisions yet."
-            />
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle icon={<SparklesIcon />} tone="ai">
+                AI recommendations
+              </CardTitle>
+              <CardDescription>
+                Decisions made by the AI pipeline
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Ranked bars rather than a second divided bar: the risk
+                  card above already splits the same queue, and printing
+                  that shape twice on one page teaches nothing the second
+                  time. Here the share rides beside each figure instead. */}
+              <RankedList
+                items={decisionItems}
+                scale="total"
+                showShare
+                isLoading={requests.isLoading}
+                loadingRows={3}
+                emptyLabel="No AI decisions yet."
+              />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )
