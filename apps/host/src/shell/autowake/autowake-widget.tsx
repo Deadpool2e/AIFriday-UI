@@ -13,6 +13,7 @@ import { Button, cn } from '@platform/ui'
 import { AutowakeEnrollmentDialog } from './autowake-enrollment-dialog'
 import { AUTOWAKE_STATE_LABEL } from './autowake-labels'
 import type { useAutowake, AutowakeState } from './use-autowake'
+import { useFloatingPanel } from '../use-floating-panel'
 
 // Renders directly rather than returning a component reference to assign
 // to a local variable — picking a component by state and stashing it in a
@@ -66,6 +67,12 @@ interface AutowakeWidgetProps {
   // Lifted to app-shell.tsx and shared with VizorionLauncher, which also
   // renders a listening/recording indicator driven by this same instance.
   autowake: ReturnType<typeof useAutowake>
+  // Also lifted to app-shell.tsx (rather than owned locally) so it can be
+  // made mutually exclusive with VizorionLauncher's panel — the two are
+  // fixed to overlapping corners of the screen, so both open at once used
+  // to stack one glass panel on top of the other.
+  panelOpen: boolean
+  onPanelOpenChange: (open: boolean) => void
 }
 
 // Global "Hey Athena" wake-word widget — mounted in app-shell.tsx next to
@@ -74,11 +81,16 @@ interface AutowakeWidgetProps {
 // status/controls (state indicator, enroll, enable toggle, stop button) —
 // the actual conversation is shown in VizorionLauncher's panel, which a
 // verified wake opens automatically via onWakeVerified.
-export function AutowakeWidget({ autowake }: AutowakeWidgetProps) {
+export function AutowakeWidget({
+  autowake,
+  panelOpen,
+  onPanelOpenChange,
+}: AutowakeWidgetProps) {
   const { hasAnyPermission } = useAuth()
   const canUseVizorion = hasAnyPermission(['VIZORION_ASSISTANT'])
-  const [panelOpen, setPanelOpen] = React.useState(false)
   const [enrollOpen, setEnrollOpen] = React.useState(false)
+
+  useFloatingPanel(panelOpen, () => onPanelOpenChange(false))
 
   if (!canUseVizorion) return null
 
@@ -89,9 +101,9 @@ export function AutowakeWidget({ autowake }: AutowakeWidgetProps) {
     <>
       {panelOpen && (
         <div
-          role="dialog"
+          role="region"
           aria-label="Autowake"
-          className="bg-surface-elevated/85 ring-ai-accent/20 animate-in fade-in-0 zoom-in-95 fixed right-36 bottom-20 z-(--z-floating-action) w-72 max-w-[calc(100vw-2rem)] space-y-3 rounded-xl border p-4 shadow-xl ring-1 backdrop-blur-xl duration-150"
+          className="bg-surface-elevated/85 ring-ai-accent/20 animate-in fade-in-0 zoom-in-95 origin-bottom-right fixed right-36 bottom-20 z-(--z-floating-action) w-72 max-w-[calc(100vw-2rem)] space-y-3 rounded-xl border p-4 shadow-xl ring-1 backdrop-blur-xl duration-(--duration-fast)"
         >
           <div className="flex items-center justify-between gap-2">
             <p className="text-sm font-semibold">Autowake</p>
@@ -99,7 +111,7 @@ export function AutowakeWidget({ autowake }: AutowakeWidgetProps) {
               variant="ghost"
               size="icon"
               className="size-7"
-              onClick={() => setPanelOpen(false)}
+              onClick={() => onPanelOpenChange(false)}
               aria-label="Close Autowake panel"
             >
               <XIcon className="size-4" />
@@ -117,7 +129,9 @@ export function AutowakeWidget({ autowake }: AutowakeWidgetProps) {
           </p>
 
           {autowake.error && (
-            <p className="text-danger text-xs">{autowake.error}</p>
+            <p role="alert" className="text-danger text-xs">
+              {autowake.error}
+            </p>
           )}
 
           {autowake.state === 'recording' && (
@@ -161,13 +175,13 @@ export function AutowakeWidget({ autowake }: AutowakeWidgetProps) {
         type="button"
         size="icon"
         variant="outline"
-        onClick={() => setPanelOpen((prev) => !prev)}
+        onClick={() => onPanelOpenChange(!panelOpen)}
         aria-label="Autowake"
         title={AUTOWAKE_STATE_LABEL[autowake.state]}
         className={cn(
-          'fixed right-36 bottom-4 z-(--z-floating-action) size-12 rounded-full shadow-md transition-transform hover:scale-105',
+          'fixed right-36 bottom-4 z-(--z-floating-action) size-12 rounded-full shadow-md',
           panelOpen && 'ring-ai-accent/50 ring-2 ring-offset-2',
-          isPulsing && 'animate-pulse',
+          isPulsing && 'animate-ambient-pulse',
         )}
       >
         {renderStateIcon(

@@ -816,3 +816,80 @@ Accessibility Center's text-size axis the same way every Tailwind text-*
 utility around the chart already does. (`apps/main-app`'s near-identical
 `chart-theme.tsx` copy wasn't touched — no finding named it, and this pass
 doesn't scope-creep into files the audit didn't flag.)
+
+---
+
+## Phase 3 fixes applied — surface 3: Vizorion chat + Autowake
+
+Verification gate passes clean: 0 typecheck errors, 0 lint errors (same
+pre-existing warning set), 73/73 tests, all three apps build.
+
+**Finding 21 (P1 — overlapping panels).** `app-shell.tsx` now owns both
+`vizorionOpenState` and `autowakePanelOpenState`, with `setVizorionOpen`/
+`setAutowakePanelOpen` wrapper functions that close the other panel when one
+opens. `AutowakeWidget` no longer owns its panel-open state locally — it
+takes `panelOpen`/`onPanelOpenChange` props from `app-shell.tsx`, the same
+lifted-state pattern the `autowake` chat instance itself already used.
+
+**Finding 20 (non-modal panels).** Both `vizorion-launcher.tsx`'s and
+`autowake-widget.tsx`'s floating panels changed `role="dialog"` to
+`role="region"` (they're non-modal — the rest of the page stays interactive
+behind them, so `dialog` overpromised) and gained Escape-to-close plus
+focus-restore-to-trigger via a new shared
+`apps/host/src/shell/use-floating-panel.ts` hook.
+
+**Finding 11 (transform-origin, ungated hover scale).** Both panels now
+carry `origin-bottom-right` so they visibly grow out of their FAB instead
+of zooming from center. Both FABs dropped their untokened
+`transition-transform hover:scale-105` — `Button`'s own
+`hover:bg-primary/90`/`active:scale-[0.99]` already supplies hover/press
+feedback, so the removal isn't a regression, just one fewer competing
+transform transition (the earlier finding noted these could fight each
+other on press-while-hovering).
+
+**Findings 6 &amp; 8 (untokened transitions).** Added
+`duration-(--duration-fast)` to `vizorion-launcher.tsx`'s suggested-prompt
+buttons and `chat-surface.tsx`'s suggested-prompt buttons, reasoning-toggle
+button, and its chevron rotation. `topbar.tsx`'s theme-toggle icon crossfade
+swapped `transition-all` for `transition-[transform,opacity]` (the only two
+properties actually changing).
+
+**Finding 17 (destructive actions, remaining four).**
+`conversation-sidebar.tsx` (delete conversation), `file-panel.tsx` (delete
+document — Archive/Publish/Unpublish are reversible and stayed as direct
+actions), and `memory-panel.tsx` (delete one memory, and Clear all) now
+route through a confirm `Dialog` before firing, matching
+`HumanApprovalPanel`'s existing pattern. Four near-identical local dialogs
+rather than a new shared component — consistent with how the codebase
+already had this exact duplication twice before this pass touched it, not a
+new abstraction being introduced.
+
+**Finding 18 (truncated content).** `conversation-sidebar.tsx`'s
+conversation-title button and `file-panel.tsx`'s document-source line both
+gained a native `title=` attribute.
+
+**Finding 19 (async errors, remaining four).** `voice-controls.tsx`,
+`autowake-enrollment-dialog.tsx`, `autowake-widget.tsx`, and
+`chat-surface.tsx`'s error text all now render inside `role="alert"`,
+matching `login-form.tsx`'s existing pattern (`chat-panel.tsx`'s
+`role="log"` fix already landed in surface 1).
+
+**Finding 22 (Vizorion chat craft gaps).** `chat-surface.tsx`'s emoji token-
+usage row (📊⬅️➡️💵) is now `lucide-react` icons (`BarChart3Icon`,
+`ArrowDownIcon`, `ArrowUpIcon`, `DollarSignIcon`) colored
+`text-muted-foreground` to match the row's text. The four regenerate
+variants ("Shorter", "More detail", "Add citations", "Improve") collapsed
+into a single "Regenerate ▾" `DropdownMenu`, leaving read-aloud + thumbs
+up/down as the only always-visible per-message actions. `conversation-
+sidebar.tsx`'s hover-only delete button gained
+`group-focus-within:opacity-100 focus-visible:opacity-100` so it's visible
+to keyboard users, not just a mouse hovering the row.
+
+**Finding 24 (remaining item).** `autowake-enrollment-dialog.tsx`'s
+completed-sample `CheckIcon` gained `aria-hidden="true"`, matching its
+sibling icons in the same file.
+
+All findings from the judgment-based audit are now applied. Phase 3.4
+(Main App workflow pages) had no findings of its own from this audit — the
+Vizorion pages living under `apps/main-app/src/pages/vizorion/` were
+addressed above as part of this surface, per the plan's own grouping.

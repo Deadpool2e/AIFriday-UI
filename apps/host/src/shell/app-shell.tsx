@@ -33,11 +33,25 @@ function RouteLoadingFallback() {
 
 export function AppShell() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
-  const [vizorionOpen, setVizorionOpen] = useState(false)
+  const [vizorionOpenState, setVizorionOpenState] = useState(false)
+  const [autowakePanelOpenState, setAutowakePanelOpenState] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const location = useLocation()
   const { resolvedColorMode, setColorMode } = useTheme()
+
+  // The Vizorion panel and the Autowake panel are both fixed to the same
+  // bottom-right corner and their footprints overlap substantially when
+  // both are open, so opening one closes the other rather than letting
+  // two translucent glass panels stack on top of each other.
+  function setVizorionOpen(next: boolean) {
+    setVizorionOpenState(next)
+    if (next) setAutowakePanelOpenState(false)
+  }
+  function setAutowakePanelOpen(next: boolean) {
+    setAutowakePanelOpenState(next)
+    if (next) setVizorionOpenState(false)
+  }
 
   // Lifted here (rather than each owning its own) so a verified "Hey
   // Athena" wake streams into the same conversation VizorionLauncher's
@@ -126,7 +140,7 @@ export function AppShell() {
       <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
       {!onFullChatPage && (
         <VizorionLauncher
-          open={vizorionOpen}
+          open={vizorionOpenState}
           onOpenChange={setVizorionOpen}
           chat={vizorionChat}
           autowake={autowake}
@@ -138,7 +152,11 @@ export function AppShell() {
           collide with that page's own controls. On /vizorion,
           onWakeVerified's setVizorionOpen(true) is a harmless no-op since
           VizorionLauncher isn't rendered there. */}
-      <AutowakeWidget autowake={autowake} />
+      <AutowakeWidget
+        autowake={autowake}
+        panelOpen={autowakePanelOpenState}
+        onPanelOpenChange={setAutowakePanelOpen}
+      />
     </div>
   )
 }

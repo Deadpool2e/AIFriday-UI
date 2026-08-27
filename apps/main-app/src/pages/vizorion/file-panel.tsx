@@ -8,7 +8,18 @@ import {
   useUploadVizorionFile,
   useVizorionFiles,
 } from '@platform/api-client'
-import { Badge, Button, EmptyState } from '@platform/ui'
+import {
+  Badge,
+  Button,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  EmptyState,
+} from '@platform/ui'
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
   published: 'default',
@@ -24,6 +35,9 @@ export function FilePanel() {
   const archive = useArchiveVizorionFile()
   const deleteFile = useDeleteVizorionFile()
   const fileInputRef = React.useRef<HTMLInputElement>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = React.useState<string | null>(
+    null,
+  )
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -74,7 +88,10 @@ export function FilePanel() {
             className="bg-surface flex items-center justify-between gap-3 rounded-lg border p-3"
           >
             <div className="min-w-0 space-y-0.5">
-              <p className="truncate text-sm font-medium">
+              <p
+                className="truncate text-sm font-medium"
+                title={document.source ?? document.id}
+              >
                 {document.source ?? document.id}
               </p>
               <Badge
@@ -117,7 +134,7 @@ export function FilePanel() {
                 size="icon"
                 className="size-8"
                 aria-label="Delete document"
-                onClick={() => deleteFile.mutate(document.id)}
+                onClick={() => setConfirmDeleteId(document.id)}
               >
                 <Trash2Icon className="size-4" />
               </Button>
@@ -125,6 +142,37 @@ export function FilePanel() {
           </li>
         ))}
       </ul>
+
+      <Dialog
+        open={confirmDeleteId !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmDeleteId(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete this document?</DialogTitle>
+            <DialogDescription>
+              This permanently removes it from the document store. This
+              cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (confirmDeleteId) deleteFile.mutate(confirmDeleteId)
+                setConfirmDeleteId(null)
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

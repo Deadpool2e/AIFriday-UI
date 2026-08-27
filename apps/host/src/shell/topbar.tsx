@@ -85,14 +85,14 @@ export function Topbar({ onOpenSidebar, onOpenPalette }: TopbarProps) {
                 instead of two unrelated repaints. */}
             <span className="relative flex size-4 items-center justify-center">
               <SunIcon
-                className={`absolute transition-all duration-(--duration-base) ease-out ${
+                className={`absolute transition-[transform,opacity] duration-(--duration-base) ease-out ${
                   isDark
                     ? 'scale-100 rotate-0 opacity-100'
                     : 'scale-75 -rotate-90 opacity-0'
                 }`}
               />
               <MoonIcon
-                className={`absolute transition-all duration-(--duration-base) ease-out ${
+                className={`absolute transition-[transform,opacity] duration-(--duration-base) ease-out ${
                   isDark
                     ? 'scale-75 rotate-90 opacity-0'
                     : 'scale-100 rotate-0 opacity-100'

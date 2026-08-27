@@ -26,6 +26,7 @@ import {
   AUTOWAKE_STATE_LABEL,
 } from './autowake/autowake-labels'
 import type { useAutowake } from './autowake/use-autowake'
+import { useFloatingPanel } from './use-floating-panel'
 
 const SUGGESTED_PROMPTS = [
   'What can you help me with?',
@@ -124,6 +125,8 @@ export function VizorionLauncher({
     respondToApproval,
   } = chat
 
+  useFloatingPanel(open, () => onOpenChange(false))
+
   if (!canUseVizorion) return null
 
   const showAutowakeBanner = AUTOWAKE_PANEL_STATES.includes(autowake.state)
@@ -141,9 +144,9 @@ export function VizorionLauncher({
     <>
       {open && (
         <div
-          role="dialog"
+          role="region"
           aria-label="Vizorion"
-          className="bg-surface-elevated/85 ring-ai-accent/20 animate-in fade-in-0 zoom-in-95 fixed right-20 bottom-20 z-(--z-floating-action) flex h-128 w-92 max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border shadow-xl ring-1 backdrop-blur-xl duration-150"
+          className="bg-surface-elevated/85 ring-ai-accent/20 animate-in fade-in-0 zoom-in-95 origin-bottom-right fixed right-20 bottom-20 z-(--z-floating-action) flex h-128 w-92 max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border shadow-xl ring-1 backdrop-blur-xl duration-(--duration-fast)"
         >
           <div
             className="relative flex items-center justify-between gap-2 border-b px-4 py-3"
@@ -196,7 +199,7 @@ export function VizorionLauncher({
                 <MicIcon
                   className={cn(
                     'size-3.5',
-                    autowake.state === 'recording' && 'animate-pulse',
+                    autowake.state === 'recording' && 'animate-ambient-pulse',
                   )}
                 />
                 {AUTOWAKE_STATE_LABEL[autowake.state]}
@@ -223,7 +226,7 @@ export function VizorionLauncher({
                   key={prompt}
                   type="button"
                   onClick={() => sendMessage(prompt)}
-                  className="bg-muted hover:bg-accent rounded-full px-2.5 py-1 text-xs transition-colors"
+                  className="bg-muted hover:bg-accent rounded-full px-2.5 py-1 text-xs transition-colors duration-(--duration-fast)"
                 >
                   {prompt}
                 </button>
@@ -282,7 +285,7 @@ export function VizorionLauncher({
         aria-label={open ? 'Close Vizorion' : 'Open Vizorion'}
         title="Vizorion"
         className={cn(
-          'fixed right-20 bottom-4 z-(--z-floating-action) size-12 rounded-full shadow-[0_4px_20px_-4px_var(--color-ai-accent)] transition-transform hover:scale-105',
+          'fixed right-20 bottom-4 z-(--z-floating-action) size-12 rounded-full shadow-[0_4px_20px_-4px_var(--color-ai-accent)]',
           open && 'ring-ai-accent/50 ring-2 ring-offset-2',
         )}
       >

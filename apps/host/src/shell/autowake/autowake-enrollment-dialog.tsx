@@ -110,7 +110,7 @@ export function AutowakeEnrollmentDialog({
                 )}
               >
                 {index < clips.length ? (
-                  <CheckIcon className="size-4" />
+                  <CheckIcon className="size-4" aria-hidden="true" />
                 ) : (
                   index + 1
                 )}
@@ -140,7 +140,11 @@ export function AutowakeEnrollmentDialog({
             </p>
           )}
 
-          {error && <p className="text-danger text-xs">{error}</p>}
+          {error && (
+            <p role="alert" className="text-danger text-xs">
+              {error}
+            </p>
+          )}
         </div>
 
         <DialogFooter>

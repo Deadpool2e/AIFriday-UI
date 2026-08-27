@@ -90,7 +90,11 @@ export function VoiceControls({
           <MicIcon className="size-4" />
         )}
       </Button>
-      {error && <span className="text-danger text-xs">{error}</span>}
+      {error && (
+        <span role="alert" className="text-danger text-xs">
+          {error}
+        </span>
+      )}
     </div>
   )
 }

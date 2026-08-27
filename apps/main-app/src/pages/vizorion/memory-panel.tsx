@@ -6,7 +6,19 @@ import {
   useDeleteVizorionMemory,
   useVizorionMemory,
 } from '@platform/api-client'
-import { Button, EmptyState, Input, Skeleton } from '@platform/ui'
+import {
+  Button,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  EmptyState,
+  Input,
+  Skeleton,
+} from '@platform/ui'
 
 export function MemoryPanel() {
   const { data: memories = [], isLoading } = useVizorionMemory()
@@ -14,6 +26,10 @@ export function MemoryPanel() {
   const deleteMemory = useDeleteVizorionMemory()
   const deleteAll = useDeleteAllVizorionMemory()
   const [content, setContent] = React.useState('')
+  const [confirmDeleteId, setConfirmDeleteId] = React.useState<string | null>(
+    null,
+  )
+  const [confirmClearAll, setConfirmClearAll] = React.useState(false)
 
   function handleAdd(event: React.FormEvent) {
     event.preventDefault()
@@ -37,7 +53,7 @@ export function MemoryPanel() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => deleteAll.mutate()}
+            onClick={() => setConfirmClearAll(true)}
             disabled={deleteAll.isPending}
           >
             Clear all
@@ -93,13 +109,69 @@ export function MemoryPanel() {
               size="icon"
               className="size-7 shrink-0"
               aria-label="Delete memory"
-              onClick={() => deleteMemory.mutate(memory.id)}
+              onClick={() => setConfirmDeleteId(memory.id)}
             >
               <Trash2Icon className="size-3.5" />
             </Button>
           </li>
         ))}
       </ul>
+
+      <Dialog
+        open={confirmDeleteId !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmDeleteId(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete this memory?</DialogTitle>
+            <DialogDescription>
+              Vizorion will no longer remember this. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (confirmDeleteId) deleteMemory.mutate(confirmDeleteId)
+                setConfirmDeleteId(null)
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={confirmClearAll} onOpenChange={setConfirmClearAll}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Clear all memories?</DialogTitle>
+            <DialogDescription>
+              Vizorion will forget everything it remembers about you across
+              every conversation. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                deleteAll.mutate()
+                setConfirmClearAll(false)
+              }}
+            >
+              Clear all
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

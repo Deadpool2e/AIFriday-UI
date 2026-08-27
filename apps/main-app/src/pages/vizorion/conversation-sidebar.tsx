@@ -1,10 +1,22 @@
+import * as React from 'react'
 import { MessageSquarePlusIcon, Trash2Icon } from 'lucide-react'
 import {
   useCreateVizorionConversation,
   useDeleteVizorionConversation,
   useVizorionConversations,
 } from '@platform/api-client'
-import { Button, cn, Skeleton } from '@platform/ui'
+import {
+  Button,
+  cn,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Skeleton,
+} from '@platform/ui'
 
 interface ConversationSidebarProps {
   activeConversationId: string | null
@@ -18,6 +30,9 @@ export function ConversationSidebar({
   const { data: conversations = [], isLoading } = useVizorionConversations()
   const createConversation = useCreateVizorionConversation()
   const deleteConversation = useDeleteVizorionConversation()
+  const [confirmDeleteId, setConfirmDeleteId] = React.useState<string | null>(
+    null,
+  )
 
   async function handleNewConversation() {
     const conversation = await createConversation.mutateAsync()
@@ -71,6 +86,7 @@ export function ConversationSidebar({
             <button
               type="button"
               onClick={() => onSelect(conversation.id)}
+              title={conversation.title ?? 'Untitled conversation'}
               className="min-w-0 flex-1 truncate px-2 py-1.5 text-left text-sm"
             >
               {conversation.title ?? 'Untitled conversation'}
@@ -78,15 +94,46 @@ export function ConversationSidebar({
             <Button
               variant="ghost"
               size="icon"
-              className="size-7 shrink-0 opacity-0 group-hover:opacity-100"
+              className="size-7 shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
               aria-label="Delete conversation"
-              onClick={() => handleDelete(conversation.id)}
+              onClick={() => setConfirmDeleteId(conversation.id)}
             >
               <Trash2Icon className="size-3.5" />
             </Button>
           </div>
         ))}
       </div>
+
+      <Dialog
+        open={confirmDeleteId !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmDeleteId(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete this conversation?</DialogTitle>
+            <DialogDescription>
+              This permanently removes the conversation and its messages. This
+              cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (confirmDeleteId) handleDelete(confirmDeleteId)
+                setConfirmDeleteId(null)
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -10,6 +10,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   Kbd,
+  LiveDot,
   Tooltip,
 } from '@platform/ui'
 import { ChevronsLeftIcon, ChevronsRightIcon } from 'lucide-react'
@@ -133,38 +134,14 @@ function AISystemStatus({ collapsed }: { collapsed?: boolean }) {
   if (collapsed) {
     return (
       <div className="flex justify-center py-3" title={label}>
-        <span className="relative flex size-2">
-          {pulse && (
-            <span
-              className={cn(
-                'absolute inline-flex size-full animate-ping rounded-full opacity-60',
-                dotClass,
-              )}
-            />
-          )}
-          <span
-            className={cn('relative inline-flex size-2 rounded-full', dotClass)}
-          />
-        </span>
+        <LiveDot dotClassName={dotClass} size="md" pulse={pulse} />
       </div>
     )
   }
 
   return (
     <div className="flex items-center gap-2 px-3 py-3 text-xs">
-      <span className="relative flex size-1.5 shrink-0">
-        {pulse && (
-          <span
-            className={cn(
-              'absolute inline-flex size-full animate-ping rounded-full opacity-60',
-              dotClass,
-            )}
-          />
-        )}
-        <span
-          className={cn('relative inline-flex size-1.5 rounded-full', dotClass)}
-        />
-      </span>
+      <LiveDot dotClassName={dotClass} pulse={pulse} />
       <span className="text-muted-foreground truncate">{label}</span>
     </div>
   )
@@ -290,7 +267,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'hidden shrink-0 flex-col border-r transition-[width] duration-200 lg:flex',
+        'hidden shrink-0 flex-col border-r transition-[width] duration-(--duration-base) ease-out lg:flex',
         collapsed ? 'lg:w-[4.5rem]' : 'lg:w-64',
       )}
       aria-label="Sidebar"

@@ -1,6 +1,10 @@
 import * as React from 'react'
 import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  BarChart3Icon,
   ChevronDownIcon,
+  DollarSignIcon,
   RotateCcwIcon,
   SparklesIcon,
   ThumbsDownIcon,
@@ -18,6 +22,10 @@ import {
   Button,
   ChatPanel,
   type ChatPanelMessage,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   EmptyState,
   Markdown,
   SourceCitation,
@@ -151,7 +159,10 @@ export function ChatSurface({
       </div>
 
       {error && (
-        <div className="bg-danger/10 text-danger rounded-md border border-danger/20 px-3 py-2 text-sm">
+        <div
+          role="alert"
+          className="bg-danger/10 text-danger rounded-md border border-danger/20 px-3 py-2 text-sm"
+        >
           {error}
         </div>
       )}
@@ -163,7 +174,7 @@ export function ChatSurface({
               key={prompt}
               type="button"
               onClick={() => sendMessage(prompt)}
-              className="bg-surface hover:bg-accent rounded-full border px-3 py-1.5 text-xs font-medium transition-colors"
+              className="bg-surface hover:bg-accent rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-(--duration-fast)"
             >
               {prompt}
             </button>
@@ -208,10 +219,10 @@ export function ChatSurface({
                   <button
                     type="button"
                     onClick={() => toggleReasoning(original.id)}
-                    className="text-muted-foreground hover:text-foreground flex w-full items-center gap-1.5 rounded-md border px-2 py-1.5 text-left text-xs font-medium transition-colors"
+                    className="text-muted-foreground hover:text-foreground flex w-full items-center gap-1.5 rounded-md border px-2 py-1.5 text-left text-xs font-medium transition-colors duration-(--duration-fast)"
                   >
                     <ChevronDownIcon
-                      className="size-3.5 transition-transform"
+                      className="size-3.5 transition-transform duration-(--duration-fast)"
                       style={{
                         transform: showReasoning
                           ? 'rotate(0deg)'
@@ -270,16 +281,25 @@ export function ChatSurface({
 
                 {original.usage && isAssistant && (
                   <div className="text-muted-foreground flex flex-wrap items-center gap-3 rounded-md bg-muted/50 px-2.5 py-1.5 text-xs font-medium">
-                    <span>📊 Tokens:</span>
-                    <span>
-                      ⬅️ {original.usage.inputTokens.toLocaleString()}
+                    <span className="flex items-center gap-1">
+                      <BarChart3Icon className="size-3.5" aria-hidden="true" />
+                      Tokens:
                     </span>
-                    <span>
-                      ➡️ {original.usage.outputTokens.toLocaleString()}
+                    <span className="flex items-center gap-1">
+                      <ArrowDownIcon className="size-3.5" aria-hidden="true" />
+                      {original.usage.inputTokens.toLocaleString()}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <ArrowUpIcon className="size-3.5" aria-hidden="true" />
+                      {original.usage.outputTokens.toLocaleString()}
                     </span>
                     {original.usage.estimatedCostUsd > 0 && (
-                      <span>
-                        💵 ${original.usage.estimatedCostUsd.toFixed(4)}
+                      <span className="flex items-center gap-1">
+                        <DollarSignIcon
+                          className="size-3.5"
+                          aria-hidden="true"
+                        />
+                        {original.usage.estimatedCostUsd.toFixed(4)}
                       </span>
                     )}
                   </div>
@@ -328,45 +348,51 @@ export function ChatSurface({
                         <ThumbsDownIcon className="size-3.5" />
                       </Button>
                       <div className="h-5 w-px bg-border" />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 gap-1 text-xs"
-                        onClick={() => handleRegenerate(original, 'shorter')}
-                      >
-                        <RotateCcwIcon className="size-3" />
-                        Shorter
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 text-xs"
-                        onClick={() => handleRegenerate(original, 'detailed')}
-                      >
-                        More detail
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 text-xs"
-                        onClick={() =>
-                          handleRegenerate(original, 'with_citations')
-                        }
-                      >
-                        Add citations
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 text-xs"
-                        onClick={() =>
-                          setImprovingMessageId((prev) =>
-                            prev === original.id ? null : original.id,
-                          )
-                        }
-                      >
-                        Improve
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 gap-1 text-xs"
+                          >
+                            <RotateCcwIcon className="size-3" />
+                            Regenerate
+                            <ChevronDownIcon className="size-3" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleRegenerate(original, 'shorter')
+                            }
+                          >
+                            Shorter
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleRegenerate(original, 'detailed')
+                            }
+                          >
+                            More detail
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleRegenerate(original, 'with_citations')
+                            }
+                          >
+                            Add citations
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              setImprovingMessageId((prev) =>
+                                prev === original.id ? null : original.id,
+                              )
+                            }
+                          >
+                            Improve…
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   )}
 
