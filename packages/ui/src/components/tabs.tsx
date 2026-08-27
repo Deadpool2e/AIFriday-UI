@@ -98,7 +98,7 @@ function TabsTrigger({
       tabIndex={isActive ? 0 : -1}
       onClick={() => setValue(value)}
       className={cn(
-        'relative -mb-px border-b-2 px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors',
+        'focus-visible:ring-ring/50 relative -mb-px rounded-t-sm border-b-2 px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-(--duration-fast) focus-visible:ring-2 focus-visible:outline-none',
         isActive
           ? 'border-primary text-foreground'
           : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border',

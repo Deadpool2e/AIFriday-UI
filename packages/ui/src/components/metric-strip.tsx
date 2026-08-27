@@ -2,7 +2,9 @@ import * as React from 'react'
 import { ArrowDownIcon, ArrowUpIcon, ArrowUpRightIcon } from 'lucide-react'
 
 import { cn } from '../lib/cn'
+import { toneTextClass } from '../lib/tone'
 import { AnimatedNumber } from './animated-number'
+import { LiveDot } from './live-indicator'
 import { Skeleton } from './skeleton'
 
 export interface MetricStripDelta {
@@ -37,9 +39,9 @@ export interface MetricStripItem {
 }
 
 const deltaToneClass: Record<MetricStripDelta['tone'], string> = {
-  positive: 'text-success',
-  negative: 'text-danger',
-  neutral: 'text-muted-foreground',
+  positive: toneTextClass.success,
+  negative: toneTextClass.danger,
+  neutral: toneTextClass.neutral,
 }
 
 // `onSelect` and `label` both collide with native <div> attributes, so
@@ -137,15 +139,7 @@ function MetricStrip({
                     )}
                   >
                     <span className="truncate">{item.label}</span>
-                    {item.live && (
-                      <span
-                        className="relative flex size-1.5 shrink-0"
-                        aria-hidden="true"
-                      >
-                        <span className="bg-info absolute inline-flex size-full animate-ping rounded-full opacity-60" />
-                        <span className="bg-info relative inline-flex size-1.5 rounded-full" />
-                      </span>
-                    )}
+                    {item.live && <LiveDot dotClassName="bg-info" />}
                     {/* On a plain tile the whole thing is the link, so the
                         arrow sits inline right after the label — exactly
                         where the eye already is. */}
@@ -225,7 +219,7 @@ function MetricStrip({
                       <span
                         aria-hidden="true"
                         className={cn(
-                          'absolute inset-x-0 -bottom-px h-0.5 transition-all duration-(--duration-base) ease-out',
+                          'absolute inset-x-0 -bottom-px h-0.5 transition-[background-color,opacity] duration-(--duration-base) ease-out',
                           selected
                             ? 'bg-primary opacity-100'
                             : 'bg-border-strong opacity-0 group-hover:opacity-100',

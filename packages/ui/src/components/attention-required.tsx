@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 
 import { cn } from '../lib/cn'
+import { toneTextClass } from '../lib/tone'
 import { Button } from './button'
 
 export interface AttentionItem {
@@ -26,9 +27,9 @@ interface AttentionRequiredProps extends Omit<
 }
 
 const severityClass: Record<NonNullable<AttentionItem['severity']>, string> = {
-  high: 'text-danger',
-  medium: 'text-warning',
-  low: 'text-muted-foreground',
+  high: toneTextClass.danger,
+  medium: toneTextClass.warning,
+  low: toneTextClass.neutral,
 }
 
 // The dashboard's single most consequential widget — "what needs a human
@@ -89,7 +90,7 @@ function AttentionRequired({
               <button
                 type="button"
                 onClick={() => onItemClick?.(item)}
-                className="hover:bg-surface-raised group flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-sm transition-colors"
+                className="hover:bg-surface-raised group flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-sm transition-colors duration-(--duration-fast)"
               >
                 <span className="flex items-center gap-2.5">
                   <AlertTriangleIcon
@@ -101,7 +102,7 @@ function AttentionRequired({
                   />
                   {item.label}
                 </span>
-                <ArrowRightIcon className="text-muted-foreground size-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
+                <ArrowRightIcon className="text-muted-foreground size-3.5 shrink-0 opacity-0 transition-opacity duration-(--duration-fast) group-hover:opacity-100" />
               </button>
             </li>
           ))}

@@ -40,7 +40,7 @@ function Pagination({
       {...props}
     >
       <p className="text-muted-foreground text-sm tabular-nums">{rangeLabel}</p>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-3">
         <Button
           variant="outline"
           size="icon"

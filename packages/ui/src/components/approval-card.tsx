@@ -47,7 +47,9 @@ function ApprovalCard({
             </Badge>
           )}
         </div>
-        <p className="text-muted-foreground truncate text-sm">{title}</p>
+        <p className="text-muted-foreground truncate text-sm" title={title}>
+          {title}
+        </p>
         <p className="text-muted-foreground text-xs">Owner: {owner}</p>
       </div>
       <div className="flex shrink-0 items-center gap-3">

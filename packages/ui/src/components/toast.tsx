@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 
 import { cn } from '../lib/cn'
+import { toneMarkClass, toneTextClass } from '../lib/tone'
 
 export type ToastTone =
   'default' | 'success' | 'warning' | 'danger' | 'info' | 'ai' | 'pending'
@@ -42,7 +43,7 @@ interface ToastContextValue {
 const ToastContext = React.createContext<ToastContextValue | null>(null)
 
 const DEFAULT_DURATION_MS = 4500
-const EXIT_DURATION_MS = 180
+const EXIT_DURATION_MS = 140
 // A stack taller than this stops being feedback and starts being a wall.
 const MAX_VISIBLE = 4
 
@@ -57,30 +58,45 @@ const toneConfig: Record<
   },
   success: {
     icon: <CheckCircle2Icon />,
-    iconClass: 'text-success',
-    accentClass: 'bg-success',
+    iconClass: toneTextClass.success,
+    accentClass: toneMarkClass.success,
   },
   warning: {
     icon: <AlertTriangleIcon />,
-    iconClass: 'text-warning',
-    accentClass: 'bg-warning',
+    iconClass: toneTextClass.warning,
+    accentClass: toneMarkClass.warning,
   },
   danger: {
     icon: <XCircleIcon />,
-    iconClass: 'text-danger',
-    accentClass: 'bg-danger',
+    iconClass: toneTextClass.danger,
+    accentClass: toneMarkClass.danger,
   },
-  info: { icon: <InfoIcon />, iconClass: 'text-info', accentClass: 'bg-info' },
+  info: {
+    icon: <InfoIcon />,
+    iconClass: toneTextClass.info,
+    accentClass: toneMarkClass.info,
+  },
   ai: {
     icon: <SparklesIcon />,
-    iconClass: 'text-ai-accent',
-    accentClass: 'bg-ai-accent',
+    iconClass: toneTextClass.ai,
+    accentClass: toneMarkClass.ai,
   },
   pending: {
     icon: <Loader2Icon className="animate-spin" />,
-    iconClass: 'text-info',
-    accentClass: 'bg-info',
+    iconClass: toneTextClass.info,
+    accentClass: toneMarkClass.info,
   },
+}
+
+// A danger toast or one carrying an action is the user's one chance to see
+// or act on it — it must not vanish on a timer. Pending is already
+// persistent (it resolves when the async work does, not on a clock).
+function isPersistent(options: Pick<ToastOptions, 'tone' | 'action'>) {
+  return (
+    options.tone === 'pending' ||
+    options.tone === 'danger' ||
+    Boolean(options.action)
+  )
 }
 
 function ToastProvider({ children }: { children: React.ReactNode }) {
@@ -130,8 +146,7 @@ function ToastProvider({ children }: { children: React.ReactNode }) {
     (options: ToastOptions) => {
       const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
       const duration =
-        options.durationMs ??
-        (options.tone === 'pending' ? 0 : DEFAULT_DURATION_MS)
+        options.durationMs ?? (isPersistent(options) ? 0 : DEFAULT_DURATION_MS)
       setToasts((prev) => [...prev, { ...options, id }].slice(-MAX_VISIBLE))
       schedule(id, duration)
       return id
@@ -141,16 +156,21 @@ function ToastProvider({ children }: { children: React.ReactNode }) {
 
   const update = React.useCallback(
     (id: string, options: Partial<ToastOptions>) => {
+      // Captured from the merge itself so persistence is judged on the
+      // resulting toast (existing tone/action plus this update), not just
+      // whatever this particular call happened to pass.
+      let merged: ToastRecord | undefined
       setToasts((prev) =>
-        prev.map((entry) =>
-          entry.id === id ? { ...entry, ...options, leaving: false } : entry,
-        ),
+        prev.map((entry) => {
+          if (entry.id !== id) return entry
+          merged = { ...entry, ...options, leaving: false }
+          return merged
+        }),
       )
-      const nextTone = options.tone
+      if (!merged) return
       schedule(
         id,
-        options.durationMs ??
-          (nextTone === 'pending' ? 0 : DEFAULT_DURATION_MS),
+        options.durationMs ?? (isPersistent(merged) ? 0 : DEFAULT_DURATION_MS),
       )
     },
     [schedule],
@@ -215,14 +235,24 @@ function ToastItem({
   onDismiss: (id: string) => void
 }) {
   const config = toneConfig[toast.tone ?? 'default']
+  // A CSS transition, not a keyframe animation, so a toast that starts
+  // leaving mid-entrance (or gets promoted back via update()) retargets
+  // smoothly from wherever it currently is instead of restarting from zero.
+  const [entered, setEntered] = React.useState(false)
+
+  React.useEffect(() => {
+    const frame = requestAnimationFrame(() => setEntered(true))
+    return () => cancelAnimationFrame(frame)
+  }, [])
+
+  const visible = entered && !toast.leaving
 
   return (
     <div
       className={cn(
-        'bg-surface-elevated pointer-events-auto relative flex gap-3 overflow-hidden rounded-lg border py-3 pr-3 pl-4 shadow-lg',
-        toast.leaving
-          ? 'animate-[toast-out_180ms_ease-in_forwards]'
-          : 'animate-[toast-in_220ms_var(--ease-out)]',
+        'bg-surface-elevated pointer-events-auto relative flex gap-3 overflow-hidden rounded-lg border py-3 pr-3 pl-4 shadow-lg transition-[transform,opacity] duration-(--duration-fast)',
+        toast.leaving ? 'ease-snap' : 'ease-out',
+        visible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0',
       )}
     >
       {/* A 2px tone rail instead of tinting the whole surface — the status

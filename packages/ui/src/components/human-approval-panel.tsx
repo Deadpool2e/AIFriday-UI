@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 import { cn } from '../lib/cn'
+import { toneTextClass } from '../lib/tone'
 import { AIRecommendationCard, type AIDecision } from './ai-recommendation-card'
 import { Button } from './button'
 import {
@@ -54,9 +55,9 @@ const guardrailStatusClassName: Record<
   HumanApprovalPanelGuardrailCheck['status'],
   string
 > = {
-  passed: 'text-success',
-  flagged: 'text-warning',
-  blocked: 'text-danger',
+  passed: toneTextClass.success,
+  flagged: toneTextClass.warning,
+  blocked: toneTextClass.danger,
 }
 
 // The centerpiece of Phase 8 — everything a human reviewer needs to make a
@@ -221,7 +222,7 @@ function HumanApprovalPanel({
           Reject is the destructive counterweight; send-back and
           request-info are real but secondary, so they sit apart at ghost
           weight instead of competing for the same visual slot. */}
-      <div className="flex flex-wrap items-center gap-2 border-t pt-4">
+      <div className="flex flex-wrap items-center gap-3 border-t pt-4">
         <Button
           onClick={() => handleAction('approve')}
           disabled={isSubmitting}

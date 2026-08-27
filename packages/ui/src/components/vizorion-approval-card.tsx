@@ -4,20 +4,22 @@ import { ShieldAlertIcon } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { Badge } from './badge'
 import { Button } from './button'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './dialog'
+import { riskLevelClassName, type RiskLevel } from './risk-indicator'
 import { Textarea } from './textarea'
 
-// Defined locally rather than imported from @platform/types — packages/ui
-// stays domain-agnostic (same rationale as RiskIndicator's local
-// RiskLevel). Vizorion's risk_level is a free-form string from its
-// classifier; only the values below get a tuned color, anything else
-// falls back to a neutral badge.
-type KnownRiskLevel = 'low' | 'medium' | 'high' | 'critical'
-const riskLevelClassName: Record<KnownRiskLevel, string> = {
-  low: 'bg-success/10 text-success border-success/20',
-  medium: 'bg-warning/10 text-warning border-warning/20',
-  high: 'bg-danger/10 text-danger border-danger/20',
-  critical: 'bg-danger/20 text-danger border-danger/40 font-semibold',
-}
+// Vizorion's risk_level is a free-form string from its classifier; only
+// RiskLevel's four values get a tuned color (reusing RiskIndicator's map so
+// the two components never drift), anything else falls back to neutral.
+type KnownRiskLevel = RiskLevel
 
 export type VizorionApprovalResolution = 'approved' | 'edited' | 'rejected'
 
@@ -51,6 +53,7 @@ function VizorionApprovalCard({
   ...props
 }: VizorionApprovalCardProps) {
   const [editing, setEditing] = React.useState(false)
+  const [confirmRejectOpen, setConfirmRejectOpen] = React.useState(false)
   const [editedJson, setEditedJson] = React.useState(() =>
     JSON.stringify(toolArguments, null, 2),
   )
@@ -110,7 +113,7 @@ function VizorionApprovalCard({
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-3">
         {editing ? (
           <>
             <Button size="sm" onClick={submitEdited} disabled={isSubmitting}>
@@ -145,7 +148,7 @@ function VizorionApprovalCard({
             <Button
               size="sm"
               variant="destructive"
-              onClick={() => onRespond('rejected')}
+              onClick={() => setConfirmRejectOpen(true)}
               disabled={isSubmitting}
             >
               Reject
@@ -153,6 +156,33 @@ function VizorionApprovalCard({
           </>
         )}
       </div>
+
+      <Dialog open={confirmRejectOpen} onOpenChange={setConfirmRejectOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject this tool call?</DialogTitle>
+            <DialogDescription>
+              <span className="font-mono">{toolName}</span> will not run.
+              This cannot be undone from here.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                setConfirmRejectOpen(false)
+                onRespond('rejected')
+              }}
+              disabled={isSubmitting}
+            >
+              Confirm reject
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

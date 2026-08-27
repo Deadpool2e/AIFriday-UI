@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 import { cn } from '../lib/cn'
+import { LiveDot } from './live-indicator'
 
 export type AgentGraphNodeStatus =
   'completed' | 'running' | 'failed' | 'blocked' | 'pending'
@@ -32,7 +33,11 @@ const ROW_GAP = 28
 
 const statusClassName: Record<AgentGraphNodeStatus, string> = {
   completed: 'border-success bg-success/10 text-success',
-  running: 'border-info bg-info/10 text-info animate-pulse',
+  // The box itself stays static — a running node is exactly the one a
+  // viewer is watching during a live execution, and pulsing its whole
+  // label halves its contrast every cycle. The small dot below carries
+  // "active" instead.
+  running: 'border-info bg-info/10 text-info',
   failed: 'border-danger bg-danger/10 text-danger',
   blocked: 'border-danger bg-danger/10 text-danger',
   pending: 'border-border bg-muted text-muted-foreground',
@@ -205,7 +210,7 @@ function AgentGraphDiagram({
                   : undefined
               }
               className={cn(
-                'absolute flex items-center justify-center rounded-lg border-2 px-3 text-center text-sm font-medium shadow-sm transition-colors',
+                'absolute flex items-center justify-center gap-1.5 rounded-lg border-2 px-3 text-center text-sm font-medium shadow-sm transition-colors duration-(--duration-fast)',
                 onSelectNode && 'cursor-pointer',
                 statusClassName[node.status],
               )}
@@ -216,6 +221,7 @@ function AgentGraphDiagram({
                 height: NODE_HEIGHT,
               }}
             >
+              {node.status === 'running' && <LiveDot dotClassName="bg-info" />}
               {node.label}
             </div>
           )

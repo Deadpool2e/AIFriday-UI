@@ -144,7 +144,7 @@ export {
   NotBuiltIllustration,
   ShieldClearIllustration,
 } from './components/illustrations'
-export { LiveIndicator } from './components/live-indicator'
+export { LiveIndicator, LiveDot } from './components/live-indicator'
 export {
   AttentionRequired,
   type AttentionItem,
@@ -191,3 +191,8 @@ export {
   type SegmentedControlOption,
 } from './components/segmented-control'
 export { RankedList, type RankedListItem } from './components/ranked-list'
+export {
+  DistributionBar,
+  type DistributionSegment,
+} from './components/distribution-bar'
+export { type Tone } from './lib/tone'

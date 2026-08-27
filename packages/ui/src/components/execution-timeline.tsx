@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 import { cn } from '../lib/cn'
+import { toneTextClass } from '../lib/tone'
 
 export type ExecutionTimelineEventTone =
   'default' | 'success' | 'danger' | 'warning' | 'info'
@@ -16,12 +17,14 @@ interface ExecutionTimelineProps extends React.ComponentProps<'ol'> {
   events: ExecutionTimelineEvent[]
 }
 
+// 'default' isn't a shared Tone (it means "no tone", not "neutral"), so it
+// stays local; the four real tones route through lib/tone.ts.
 const toneClassName: Record<ExecutionTimelineEventTone, string> = {
   default: 'text-foreground',
-  success: 'text-success',
-  danger: 'text-danger',
-  warning: 'text-warning',
-  info: 'text-info',
+  success: toneTextClass.success,
+  danger: toneTextClass.danger,
+  warning: toneTextClass.warning,
+  info: toneTextClass.info,
 }
 
 // The raw, unaggregated sibling of AgentTrace — one row per underlying

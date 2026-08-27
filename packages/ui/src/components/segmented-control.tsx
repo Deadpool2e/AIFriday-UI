@@ -74,7 +74,7 @@ function SegmentedControl<T extends string>({
             onKeyDown={(event) => onKeyDown(event, index)}
             className={cn(
               'focus-visible:ring-ring/50 rounded-md font-medium transition-colors duration-(--duration-fast) focus-visible:ring-2 focus-visible:outline-none',
-              size === 'sm' ? 'px-2.5 py-1 text-[11px]' : 'px-3 py-1.5 text-xs',
+              size === 'sm' ? 'px-2.5 py-1.5 text-[11px]' : 'px-3 py-1.5 text-xs',
               selected
                 ? 'bg-surface text-foreground shadow-xs'
                 : 'text-muted-foreground hover:text-foreground',

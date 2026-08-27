@@ -23,12 +23,12 @@ describe('ConfidenceScore', () => {
   // danger vocabulary) — if these thresholds ever drift, that assumption
   // breaks silently elsewhere, so it's worth pinning down here.
   it.each([
-    [95, 'bg-success'],
-    [80, 'bg-success'],
-    [79, 'bg-warning'],
-    [50, 'bg-warning'],
-    [49, 'bg-danger'],
-    [0, 'bg-danger'],
+    [95, 'bg-chart-success'],
+    [80, 'bg-chart-success'],
+    [79, 'bg-chart-warning'],
+    [50, 'bg-chart-warning'],
+    [49, 'bg-chart-danger'],
+    [0, 'bg-chart-danger'],
   ])('uses tone %s -> %s at the correct threshold', (value, expectedClass) => {
     const { container } = render(<ConfidenceScore value={value} />)
     const bar = container.querySelector('[role="progressbar"] > div')

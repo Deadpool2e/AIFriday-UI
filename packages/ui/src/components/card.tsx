@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 import { cn } from '../lib/cn'
+import { toneChipClass, type Tone } from '../lib/tone'
 
 interface CardProps extends React.ComponentProps<'div'> {
   // Opt in to hover affordance. Previously every Card lifted and gained a
@@ -28,7 +29,7 @@ function Card({ className, interactive, ...props }: CardProps) {
       className={cn(
         'bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-xs',
         interactive &&
-          'hover:border-border-strong focus-within:border-border-strong cursor-pointer transition-[border-color,box-shadow,transform] duration-(--duration-fast) ease-out hover:-translate-y-px hover:shadow-md',
+          'border-border-strong/50 hover:border-border-strong focus-within:border-border-strong cursor-pointer transition-[border-color,box-shadow,transform] duration-(--duration-fast) ease-out hover:-translate-y-px hover:shadow-md',
         className,
       )}
       {...props}
@@ -49,13 +50,48 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
+interface CardTitleProps extends React.ComponentProps<'div'> {
+  // A small tinted glyph before the title. Its job is identity, not
+  // decoration: a column of cards that are all "heading + list" is
+  // navigable by shape only if each one has a mark the eye can come back
+  // to. Kept to a 24px chip so the heading stays the loudest thing in the
+  // header.
+  icon?: React.ReactNode
+  // Categorises the panel — the subject matter, not a status. A card
+  // about risk is 'warning' whether or not anything is currently wrong.
+  tone?: Tone
+}
+
+function CardTitle({
+  className,
+  icon,
+  tone = 'neutral',
+  children,
+  ...props
+}: CardTitleProps) {
   return (
     <div
       data-slot="card-title"
-      className={cn('leading-none font-semibold', className)}
+      className={cn(
+        'font-semibold',
+        icon ? 'flex items-center gap-2' : 'leading-none',
+        className,
+      )}
       {...props}
-    />
+    >
+      {icon && (
+        <span
+          aria-hidden="true"
+          className={cn(
+            'flex size-6 shrink-0 items-center justify-center rounded-md [&_svg]:size-3.5',
+            toneChipClass[tone],
+          )}
+        >
+          {icon}
+        </span>
+      )}
+      {children}
+    </div>
   )
 }
 

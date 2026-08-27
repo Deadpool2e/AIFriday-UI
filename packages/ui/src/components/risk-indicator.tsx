@@ -11,24 +11,25 @@ interface RiskIndicatorProps extends React.ComponentProps<'span'> {
   level: RiskLevel
 }
 
+// The one place a RiskLevel becomes paint — VizorionApprovalCard imports
+// riskLevelClassName below rather than hand-rolling its own copy, so a risk
+// badge comes out the same color wherever it appears.
+export const riskLevelClassName: Record<RiskLevel, string> = {
+  low: 'bg-success/10 text-success border-success/20',
+  medium: 'bg-warning/10 text-warning border-warning/20',
+  high: 'bg-danger/10 text-danger border-danger/20',
+  critical: 'bg-danger/20 text-danger border-danger/40 font-semibold',
+}
+
 // Text label carries the meaning, not color alone — "High" and "Critical"
 // read distinctly even in grayscale/print.
 const config: Record<RiskLevel, { label: string; className: string }> = {
-  low: {
-    label: 'Low risk',
-    className: 'bg-success/10 text-success border-success/20',
-  },
-  medium: {
-    label: 'Medium risk',
-    className: 'bg-warning/10 text-warning border-warning/20',
-  },
-  high: {
-    label: 'High risk',
-    className: 'bg-danger/10 text-danger border-danger/20',
-  },
+  low: { label: 'Low risk', className: riskLevelClassName.low },
+  medium: { label: 'Medium risk', className: riskLevelClassName.medium },
+  high: { label: 'High risk', className: riskLevelClassName.high },
   critical: {
     label: 'Critical risk',
-    className: 'bg-danger/20 text-danger border-danger/40 font-semibold',
+    className: riskLevelClassName.critical,
   },
 }
 

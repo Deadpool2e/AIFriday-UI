@@ -146,7 +146,7 @@ export function LoginForm() {
                   className={cn(
                     'text-muted-foreground size-4 shrink-0 transition-transform duration-(--duration-fast)',
                     'group-hover:translate-x-0.5',
-                    pending && 'animate-pulse',
+                    pending && 'animate-ambient-pulse',
                   )}
                 />
               </button>

@@ -85,7 +85,13 @@ function ChatPanel({
       data-slot="chat-panel"
       className={cn('flex h-full flex-col', className)}
     >
-      <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-4">
+      <div
+        ref={scrollRef}
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions"
+        className="flex-1 space-y-4 overflow-y-auto p-4"
+      >
         {messages.length === 0 && emptyState && !streamingIndicator ? (
           <div className="flex h-full items-center justify-center">
             {emptyState}

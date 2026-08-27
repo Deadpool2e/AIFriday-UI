@@ -2,6 +2,7 @@ import * as React from 'react'
 import { CheckIcon } from 'lucide-react'
 
 import { cn } from '../lib/cn'
+import { toneDotClass, toneMarkClass } from '../lib/tone'
 
 export interface ProgressStage {
   id: string
@@ -67,9 +68,9 @@ function StagedProgress({
   const isFailed = status === 'failed'
 
   const barToneClass = isFailed
-    ? 'bg-danger'
+    ? toneMarkClass.danger
     : isComplete
-      ? 'bg-success'
+      ? toneMarkClass.success
       : 'bg-primary'
 
   return (
@@ -93,10 +94,10 @@ function StagedProgress({
       <div className="bg-surface-muted relative h-1 w-full overflow-hidden rounded-full">
         <div
           className={cn(
-            'h-full rounded-full transition-[width] duration-(--duration-slow) ease-out',
+            'h-full w-full origin-left rounded-full transition-transform duration-(--duration-slow) ease-out',
             barToneClass,
           )}
-          style={{ width: `${progress * 100}%` }}
+          style={{ transform: `scaleX(${progress})` }}
         />
         {/* An indeterminate sweep rides on top of the determinate fill
             while work is genuinely in flight, so the bar never looks
@@ -132,7 +133,7 @@ function StagedProgress({
               <li
                 key={stage.id}
                 className={cn(
-                  'flex items-start gap-2.5 rounded-md px-2 py-1.5 transition-colors duration-(--duration-base)',
+                  'flex items-start gap-2.5 rounded-md px-2 py-1.5 transition-colors duration-(--duration-instant) ease-snap',
                   running && 'bg-surface-muted/60',
                 )}
               >
@@ -152,9 +153,9 @@ function StagedProgress({
                     <span
                       aria-hidden="true"
                       className={cn(
-                        'relative size-1.5 rounded-full transition-colors duration-(--duration-base)',
+                        'relative size-1.5 rounded-full transition-colors duration-(--duration-instant) ease-snap',
                         failed
-                          ? 'bg-danger'
+                          ? toneDotClass.danger
                           : running
                             ? 'bg-primary'
                             : 'bg-border-strong',
@@ -165,7 +166,7 @@ function StagedProgress({
                 <span className="min-w-0 flex-1">
                   <span
                     className={cn(
-                      'block text-sm transition-colors duration-(--duration-base)',
+                      'block text-sm transition-colors duration-(--duration-instant) ease-snap',
                       running && 'text-foreground font-medium',
                       done && 'text-muted-foreground',
                       !running && !done && 'text-muted-foreground/55',

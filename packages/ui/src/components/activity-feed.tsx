@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 import { cn } from '../lib/cn'
+import { toneDotClass } from '../lib/tone'
 
 // Defined locally rather than importing ActivityItem from @platform/types.
 // Layering rule for this whole design system: packages/ui never depends on
@@ -19,13 +20,6 @@ interface ActivityFeedProps extends React.ComponentProps<'ul'> {
   items: ActivityFeedItem[]
 }
 
-const severityDot: Record<ActivityFeedItem['severity'], string> = {
-  info: 'bg-info',
-  success: 'bg-success',
-  warning: 'bg-warning',
-  danger: 'bg-danger',
-}
-
 function ActivityFeed({ items, className, ...props }: ActivityFeedProps) {
   return (
     <ul
@@ -38,7 +32,7 @@ function ActivityFeed({ items, className, ...props }: ActivityFeedProps) {
           <span
             className={cn(
               'mt-1.5 size-1.5 shrink-0 rounded-full',
-              severityDot[item.severity],
+              toneDotClass[item.severity],
             )}
             aria-hidden="true"
           />

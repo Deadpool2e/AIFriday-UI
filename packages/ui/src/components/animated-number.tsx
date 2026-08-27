@@ -55,7 +55,7 @@ function AnimatedNumber({
 
     const from = fromRef.current
     const delta = value - from
-    const duration = 500
+    const duration = 400 // --duration-slow
     const start = performance.now()
 
     function tick(now: number) {

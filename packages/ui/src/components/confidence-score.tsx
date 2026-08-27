@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 import { cn } from '../lib/cn'
+import { toneMarkClass } from '../lib/tone'
 
 interface ConfidenceScoreProps extends React.ComponentProps<'div'> {
   value: number // 0-100
@@ -15,7 +16,11 @@ function ConfidenceScore({
 }: ConfidenceScoreProps) {
   const clamped = Math.min(100, Math.max(0, Math.round(value)))
   const tone =
-    clamped >= 80 ? 'bg-success' : clamped >= 50 ? 'bg-warning' : 'bg-danger'
+    clamped >= 80
+      ? toneMarkClass.success
+      : clamped >= 50
+        ? toneMarkClass.warning
+        : toneMarkClass.danger
 
   return (
     <div
@@ -36,7 +41,10 @@ function ConfidenceScore({
         className="bg-muted h-1.5 w-full overflow-hidden rounded-full"
       >
         <div
-          className={cn('h-full rounded-full transition-[width]', tone)}
+          className={cn(
+            'h-full rounded-full transition-[width] duration-(--duration-slow) ease-out',
+            tone,
+          )}
           style={{ width: `${clamped}%` }}
         />
       </div>

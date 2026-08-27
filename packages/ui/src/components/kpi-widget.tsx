@@ -2,6 +2,7 @@ import * as React from 'react'
 import { ArrowDownIcon, ArrowUpIcon, ArrowUpRightIcon } from 'lucide-react'
 
 import { cn } from '../lib/cn'
+import { toneChipClass, toneTextClass, type Tone } from '../lib/tone'
 import { AnimatedNumber } from './animated-number'
 import { Sparkline } from './sparkline'
 
@@ -11,8 +12,7 @@ interface KPIWidgetDelta {
   direction?: 'up' | 'down'
 }
 
-export type KPIWidgetTone =
-  'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'ai'
+export type KPIWidgetTone = Tone
 
 interface KPIWidgetProps extends React.ComponentProps<'div'> {
   label: string
@@ -37,9 +37,9 @@ interface KPIWidgetProps extends React.ComponentProps<'div'> {
 }
 
 const deltaToneClass: Record<KPIWidgetDelta['tone'], string> = {
-  positive: 'text-success',
-  negative: 'text-danger',
-  neutral: 'text-muted-foreground',
+  positive: toneTextClass.success,
+  negative: toneTextClass.danger,
+  neutral: toneTextClass.neutral,
 }
 
 const sparklineTone: Record<
@@ -58,15 +58,6 @@ const sparklineTone: Record<
 // metric at a glance, small enough that the numbers stay the loudest thing
 // on the row.
 const CARD_SURFACE = 'bg-surface'
-
-const toneIconClass: Record<KPIWidgetTone, string> = {
-  neutral: 'bg-muted text-muted-foreground',
-  success: 'bg-success/15 text-success',
-  warning: 'bg-warning/15 text-warning',
-  danger: 'bg-danger/15 text-danger',
-  info: 'bg-info/15 text-info',
-  ai: 'bg-ai-accent/15 text-ai-accent',
-}
 
 function KPIWidget({
   label,
@@ -126,16 +117,19 @@ function KPIWidget({
               click target. */}
           {interactive && (
             <ArrowUpRightIcon
-              className="size-3 opacity-0 transition-opacity duration-(--duration-fast) group-hover:opacity-70 group-focus-visible:opacity-70"
+              className="size-3 opacity-45 transition-opacity duration-(--duration-fast) group-hover:opacity-100 group-focus-visible:opacity-100"
               aria-hidden="true"
             />
           )}
         </p>
         {icon && (
           <div
+            // Painted from the shared tone map, so a KPI tile's chip and a
+            // card heading's chip of the same tone come out the same
+            // colour rather than two hand-tuned near-misses.
             className={cn(
               'flex size-7 items-center justify-center rounded-md [&_svg]:size-3.5',
-              toneIconClass[tone],
+              toneChipClass[tone],
             )}
           >
             {icon}

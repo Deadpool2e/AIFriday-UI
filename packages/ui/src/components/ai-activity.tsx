@@ -28,12 +28,8 @@ function ThinkingDots() {
       {[0, 1, 2].map((index) => (
         <span
           key={index}
-          className="bg-ai-accent size-1.5 rounded-full"
-          style={{
-            animation:
-              'ambient-pulse 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite',
-            animationDelay: `${index * 160}ms`,
-          }}
+          className="bg-ai-accent animate-ambient-pulse size-1.5 rounded-full"
+          style={{ animationDelay: `${index * 160}ms` }}
         />
       ))}
     </span>
