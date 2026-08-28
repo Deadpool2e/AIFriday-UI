@@ -1,1 +1,1 @@
-import{n as e,t}from"./assets/virtual_mf-REMOTE_ENTRY_ID___mfe_internal__main_app__remoteEntry_js-CHqVWQdV.js";export{t as get,e as init};
+import{n as e,t}from"./assets/virtual_mf-REMOTE_ENTRY_ID___mfe_internal__main_app__remoteEntry_js-ClssL2_s.js";export{t as get,e as init};
